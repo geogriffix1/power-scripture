@@ -1,0 +1,20 @@
+.workbench-edit {
+    background-color: black;
+    color:white;
+}
+.workbench-edit .header {
+    margin-left: 36px;
+    font-weight: bold;
+}
+
+.workbench-edit div.theme {
+    display: inline;
+    overflow-x: auto;
+    overflow-y: none;
+    color:gold;
+    font-weight:500;
+}
+.workbench-edit div.selected.missing {
+    color: red;
+    background-color: black;
+}

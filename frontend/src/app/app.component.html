@@ -1,0 +1,20 @@
+
+<header><h1 class="main">Power Scripture</h1></header>
+<nav id="mainNav"></nav>
+<section class="main" style="position:absolute;top:{{top}}px;left:{{left}}px;width:{{width}}px;height:{{height}}px;">
+  <as-split direction="horizontal">
+    <as-split-area [size]="40">
+      <header class="bible-theme-tree">
+        <h2 class="bible-theme-tree">Bible Theme Tree</h2>
+      </header>
+      <section class="bible-theme-tree">
+        <div>
+         <app-bible-theme-tree></app-bible-theme-tree>
+        </div>          
+      </section>
+    </as-split-area>
+    <as-split-area class="workbench" [size]="60" style="overflow-x: unset; overflow-y: unset;">
+      <app-workbench></app-workbench>
+    </as-split-area>
+  </as-split>
+</section>

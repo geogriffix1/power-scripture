@@ -1,0 +1,52 @@
+<nav class="command-line">
+    <div class="workbench-settings">
+        <i class="search-icon" (click)=runSearch($event)></i>
+    </div>
+    <input class="command-line" type="text" id="search-scripture-command" placeholder="Enter search string" (input)=onChange($event) (keyup.enter)=runSearch($event)>
+    <div class="command-message"></div>
+    <app-search-context-menu class="modal-context hidden" [callbacks]=callbacks [selectedEntry]=selectedEntry></app-search-context-menu>
+@if (context.showSearchScriptureReport) {
+    <app-search-scripture-report [SearchCommand]=searchCommand [Context]=context></app-search-scripture-report>
+}
+</nav>
+<section class="scrollable-content">
+    <div id="command-wordlist" class="modal">
+        <div class="modal-content">
+            <ul class="command-suggestions">
+            @for (suggestion of suggestions; track suggestion) {
+                <li (click)=onClickSuggestion(suggestion) (mouseenter)=onHoverLi($event) (mouseleave)=onNormalLi($event)>{{suggestion}}</li>
+            }
+            </ul>
+        </div>
+    </div>
+    <div class="search-results">
+        <table class="row-clickable">
+            <thead>
+                <tr>
+                    <th class="citation-label"><div class="await"></div>Verse Citation</th>
+                    <th class="scripture-label">Scripture</th>        
+                </tr>
+            </thead>
+            <tbody>
+                @for(result of searchResults; track result) {
+                <tr [accessKey]=result.id [ariaChecked]="false"
+                    (click)=onSelectItemClick(result.id)
+                    (contextmenu)=showModalContextMenu($event)>
+
+                    <th class="citation">{{result.book}} {{result.chapter}}:{{result.verse}}</th>
+                    <td class="scripture">
+                        @for(substring of result.substrings; track substring) {
+                            @if (substring.match) {
+                        <span class="search-match">{{substring.text}}</span>
+                            }
+                            @else {
+                        <span class="search-text">{{substring.text}}</span>
+                            }
+                        }
+                    </td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

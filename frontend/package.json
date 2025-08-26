@@ -1,0 +1,53 @@
+{
+  "name": "power-scripture",
+  "version": "0.0.0",
+  "scripts": {
+    "ng": "ng",
+    "start": "ng serve",
+    "build": "ng build",
+    "watch": "ng build --watch --configuration development",
+    "test": "ng test"
+  },
+  "private": true,
+  "dependencies": {
+    "@angular/animations": "^18.2.4",
+    "@angular/cdk": "^18.2.0",
+    "@angular/common": "^18.2.4",
+    "@angular/compiler": "^18.2.4",
+    "@angular/core": "^18.2.4",
+    "@angular/forms": "^18.2.4",
+    "@angular/material": "^17.3.4",
+    "@angular/platform-browser": "^18.2.4",
+    "@angular/platform-browser-dynamic": "^18.2.4",
+    "@angular/router": "^18.2.4",
+    "angular-expressions": "^1.2.1",
+    "angular-split": "^17.2.0",
+    "clipboardy": "^4.0.0",
+    "docx": "^8.5.0",
+    "docxtemplater": "^3.47.1",
+    "file-saver": "^2.0.5",
+    "jquery": "^3.7.1",
+    "jstree": "^3.3.17",
+    "ng-js-tree": "^0.0.7",
+    "pizzip": "^3.1.7",
+    "rxjs": "~7.8.0",
+    "tslib": "^2.3.0",
+    "zone.js": "~0.14.10"
+  },
+  "devDependencies": {
+    "@angular-devkit/build-angular": "^18.2.4",
+    "@angular/cli": "^18.2.4",
+    "@angular/compiler-cli": "^18.2.4",
+    "@types/file-saver": "^2.0.7",
+    "@types/jasmine": "~5.1.0",
+    "@types/jquery": "^3.5.29",
+    "@types/jstree": "^3.3.46",
+    "jasmine-core": "~5.1.0",
+    "karma": "~6.4.0",
+    "karma-chrome-launcher": "~3.2.0",
+    "karma-coverage": "~2.2.0",
+    "karma-jasmine": "~5.1.0",
+    "karma-jasmine-html-reporter": "~2.1.0",
+    "typescript": "~5.5.4"
+  }
+}

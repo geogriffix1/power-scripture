@@ -1,0 +1,37 @@
+<div class="header">Citation Description</div>
+<div class="input">
+    <input
+        id="description"
+        #description
+        type="text"
+        title="Enter citation description"
+        placeholder="Type description here"
+    >
+</div>
+<section class="scrollable-content">
+    <!-- <app-create-citation-context-menu class="modal-context hidden" [callbacks]=callbacks [selectedEntry]=selectedEntry [scriptureRanges]=scriptureRanges [router]=router></app-create-citation-context-menu>
+    @if (context.showCiteScriptureReport) {
+    <app-cite-scripture-report [Context]=context></app-cite-scripture-report>
+    } -->
+    <div class="search-results">
+        <table class="row-clickable">
+            <thead>
+                <tr>
+                    <th class="label" colspan="2">{{citationLabel}}</th>
+                </tr>
+                <tr>
+                    <th class="citation">Citation</th>
+                    <th class="verses">Scripture</th>
+                </tr>
+            </thead>
+            <tbody>
+                @for(range of scriptureRanges; track range; let index = $index) {
+                <tr aria-checked="false" id="range_{{index}}" >    
+                    <th class="citation">{{range.citation}}</th>
+                    <td class="verses">{{range.verses}}</td>
+                </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</section>

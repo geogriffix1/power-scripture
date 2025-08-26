@@ -1,0 +1,35 @@
+<header></header>
+<nav class="workbench-edit">
+    @if (activeType > 0) {
+    <div class="workbench-settings">
+        <a class="settings" title="Settings" (click)=onClickSettings()>
+            <i class="settings active"></i>
+        </a>
+    </div>
+    }
+    <div class="workbench-title">
+        {{editType}}
+        <div class="settings">
+            <h3>Edit Element Type:</h3>
+            <div class="settings-selector" *ngFor="let item of editTypes; index as i">
+                @if (i > 0) {
+                <a class="menu-radio-{{i === activeType ? 'checked' : 'unchecked'}}" (click)=onRadioClickSettings(i)>
+                    <i class="radio-icon"></i>
+                    <span>{{item}}</span>
+                </a>
+                }
+            </div>
+        </div>
+    </div>
+</nav>
+<section>
+    @if(activeType == 0) {
+    <div></div>
+    }
+    @else if(activeType == 1) {
+    <app-edit-theme></app-edit-theme>
+    }
+    @else if(activeType == 2) {
+    <app-edit-citation ></app-edit-citation>
+    }
+</section>

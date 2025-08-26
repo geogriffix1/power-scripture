@@ -1,0 +1,46 @@
+<header></header>
+<nav class="workbench-create">
+    @if (activeType > 0) {
+    <div class="workbench-settings">
+        <a class="settings" title="Settings" (click)=onClickSettings()>
+            <i class="settings active"></i>
+        </a>
+    </div>
+    }
+    <div class="workbench-title">
+        {{createType}}
+        <div class="settings">
+            <h3>Create Saved Element Type:</h3>
+            <div class="settings-selector" *ngFor="let item of createTypes; index as i">
+                @if (i > 0) {
+                <a class="menu-radio-{{i === activeType ? 'checked' : 'unchecked'}}" (click)=onRadioClickSettings(i)>
+                    <i class="radio-icon"></i>
+                    <span>{{item}}</span>
+                </a>
+                }
+            </div>
+        </div>
+    </div>
+</nav>
+<section>
+    <div class="workbench-parent-theme">
+        <div class="header">Parent Theme</div>
+        <div class="theme theme-icon"><img src="/assets/images/Folder.png" title="Navigate by Theme Tree to the parent folder"></div>
+        <div class="theme selected-theme">
+            @if (activeTheme) {
+                {{activeTheme.path}}
+            } @else {
+                Please select the active <b>Theme</b> from the <b>Bible Theme Tree</b>
+            }
+        </div>
+    </div>
+    @if(activeType == 0) {
+    <div></div>
+    }
+    @else if(activeType == 1) {
+    <app-create-theme></app-create-theme>
+    }
+    @else if(activeType == 2) {
+    <app-cite-scripture ></app-cite-scripture>
+    }
+</section>

@@ -1,0 +1,174 @@
+
+.command.icon {
+    height:24px;
+    width: 24px;
+    float: left;
+}
+div.command {
+    float: left;
+}
+
+.command-labels {
+    background-color: black;
+    text-align: center;
+}
+.command-fields {
+    background-color: black;
+    float: left;
+    padding: 0;
+}
+div.command-label {
+    color: white;
+    font-weight: bold;
+    font-family:Verdana,sans-serif;font-size:12pt;
+    padding: 0;
+    float: left;
+    background-color: black;
+}
+
+.command input[type=text] {
+    width: 100%;
+    color: black;
+}
+
+section.scrollable-content {
+    height:calc(100vh);
+    width:100%;
+}
+div.search-results { width:100%; overflow-y: scroll; }
+.search-results table {
+    width: 100%;
+}
+
+thead { background: rgb(1, 1, 110) }
+th {
+    background:rgb(1, 1, 110); border-top: 1px solid white;
+    color:white;
+    font-weight: bold;
+    font-family:Verdana,sans-serif;font-size:12pt;
+    padding: 0;
+    display:table-cell;
+}
+tbody input[type=text] {
+    cursor: auto;
+    display: table-cell;
+    width: 100%
+}
+
+tbody a { cursor: pointer; }
+
+.modal {
+    display: none;
+    position: relative;
+    z-index: 1;
+    left: 2px;
+    top: 2px;
+    width: 200px;
+    height: 200px;
+    overflow-y: auto;
+    background-color: lightgray;
+    color: darkslategray;
+    font-weight: normal;
+}
+
+.modal-content {
+    background-color: #fefefe;
+    margin: 5% auto;
+    padding: 5px;
+    border: 1px solid #888;
+    width: 80%;
+}
+
+ul.command-suggestions, ul.command-numbers {
+    list-style-type: none;
+    cursor: pointer;
+    padding-left: 10px;
+}
+
+.command-suggestions li.hover {
+    border-left: 1px solid white;
+    border-top: 1px solid white;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.command-numbers li.hover {
+    border-left: 1px solid white;
+    border-top: 1px solid white;
+    border-right: 1px solid black;
+    border-bottom: 1px solid black;
+}
+
+.command-numbers li {
+    text-align: center;
+}
+
+.illegal {
+    color: rgb(172, 0, 0);
+    font-weight: bold;
+}
+
+.legal {
+    color: rgb(0, 0, 172);
+    font-weight: bold;
+}
+
+.command.icon img.hover {
+    cursor: pointer;
+    border-left: 1px solid white;
+    border-top: 1px solid white;
+}
+
+div.search-results { width:100%; overflow-y: scroll; }
+.search-results table {
+    width: 100%;
+}
+
+.search-results thead th  {
+    background:rgb(1, 1, 110); border-top: 1px solid white;
+    color:white;
+    font-weight: bold;
+    font-family:Verdana,sans-serif;font-size:12pt;
+    overflow-x:auto;
+    display:table-cell;
+}
+
+.search-results tbody th,.search-results tbody td {
+    border-top: 1px solid rgb(1, 1, 110);
+    border-right: 1px solid rgb(1, 1, 110);
+}
+.prevent-text-select {
+    -webkit-user-select: none; /* Safari */
+    -ms-user-select: none; /* IE 10 and IE 11 */
+    user-select: none; /* Standard syntax */
+}
+
+th.citation-label {
+    text-align:left;
+}
+
+th.citation {
+    background:none;
+    color: black;
+    text-align:left;
+    font-weight: bold;
+}
+
+th.scripture-label {
+    text-align:center;
+}
+
+tr[aria-checked="true"] { cursor: pointer; background-color: rgba(3, 213, 250, 0.719); position: relative;}
+tr[aria-checked="false"] { cursor: pointer; background-color: none; position: relative;}
+
+app-cite-context-menu.modal-context {position:relative; display:block; top: 80px; left: 100px; z-index: 1}
+app-cite-context-menu.modal-context.hidden {position:relative; display:none; z-index:1}
+app-cite-context-menu {position:relative;}
+div.modal-context {position:absolute;}
+nav.cite-scripture {
+    padding: 4px;
+    background-color: black;
+}
+.description {
+    background-color: black;
+}

@@ -1,0 +1,42 @@
+.workbench-edit {
+    background-color: black;
+    color:white;
+}
+.workbench-edit .header {
+    margin-left: 36px;
+    font-weight: bold;
+}
+
+.workbench-edit div.theme {
+    display: inline;
+    overflow-x: auto;
+    overflow-y: none;
+    color:gold;
+    font-weight:500;
+}
+.workbench-edit div.selected.missing {
+    color: red;
+    background-color: black;
+}
+div.search-results { width:100%; overflow-y: scroll; }
+.search-results table {
+    width: 100%;
+}
+
+.search-results thead th  {
+    background:rgb(1, 1, 110); border-top: 1px solid white;
+    color:white;
+    font-weight: bold;
+    font-family:Verdana,sans-serif;font-size:12pt;
+    overflow-x:auto;
+    display:table-cell;
+}
+
+.search-results tbody th,.search-results tbody td {
+    border-top: 1px solid rgb(1, 1, 110);
+    border-right: 1px solid rgb(1, 1, 110);
+}
+
+nav.create {
+    padding: 1px;
+}

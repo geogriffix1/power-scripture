@@ -1,0 +1,28 @@
+<header></header>
+<nav class="workbench-search">
+    <div class="workbench-settings">
+        <a class="settings" title="Settings" (click)="onClickSettings()">
+            <i class="settings active"></i>
+        </a>
+    </div>
+    <div class="workbench-title">
+        {{searchType}}
+        <div class="settings">
+            <h3>Search Type:</h3>
+            <div class="settings-selector" *ngFor="let item of searchTypes; index as i">
+                <a class="menu-radio-{{i === activeType ? 'checked' : 'unchecked'}}" (click)="onRadioClickSettings(i)">
+                    <i class="radio-icon"></i>
+                    <span>{{item}}</span>
+                </a>
+            </div>
+        </div>
+    </div>
+</nav>
+<section>
+    @if(activeType == 1 || activeType == 2) {
+    <div><app-search-scripture [activeType]=activeType></app-search-scripture></div>
+    }
+    @else if(activeType == 0) {
+    <div><app-cite-scripture></app-cite-scripture></div>
+    }
+</section>

@@ -1,0 +1,57 @@
+CREATE DATABASE  IF NOT EXISTS `power_scripture_test` /*!40100 DEFAULT CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci */ /*!80016 DEFAULT ENCRYPTION='N' */;
+USE `power_scripture_test`;
+-- MySQL dump 10.13  Distrib 8.0.36, for Win64 (x86_64)
+--
+-- Host: 127.0.0.1    Database: power_scripture_test
+-- ------------------------------------------------------
+-- Server version	8.0.37
+
+/*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
+/*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
+/*!40101 SET @OLD_COLLATION_CONNECTION=@@COLLATION_CONNECTION */;
+/*!50503 SET NAMES utf8 */;
+/*!40103 SET @OLD_TIME_ZONE=@@TIME_ZONE */;
+/*!40103 SET TIME_ZONE='+00:00' */;
+/*!40014 SET @OLD_UNIQUE_CHECKS=@@UNIQUE_CHECKS, UNIQUE_CHECKS=0 */;
+/*!40014 SET @OLD_FOREIGN_KEY_CHECKS=@@FOREIGN_KEY_CHECKS, FOREIGN_KEY_CHECKS=0 */;
+/*!40101 SET @OLD_SQL_MODE=@@SQL_MODE, SQL_MODE='NO_AUTO_VALUE_ON_ZERO' */;
+/*!40111 SET @OLD_SQL_NOTES=@@SQL_NOTES, SQL_NOTES=0 */;
+
+--
+-- Table structure for table `bible_citation_verses`
+--
+
+DROP TABLE IF EXISTS `bible_citation_verses`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!50503 SET character_set_client = utf8mb4 */;
+CREATE TABLE `bible_citation_verses` (
+  `bible_citation_verse_id` int NOT NULL AUTO_INCREMENT,
+  `bible_citation_id` int DEFAULT NULL,
+  `bible_scripture_niv_id` int DEFAULT NULL,
+  `created_at` datetime DEFAULT NULL,
+  `updated_at` datetime DEFAULT NULL,
+  PRIMARY KEY (`bible_citation_verse_id`),
+  UNIQUE KEY `bible_citation_verse_id_UNIQUE` (`bible_citation_verse_id`)
+) ENGINE=InnoDB AUTO_INCREMENT=21 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='	';
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `bible_citation_verses`
+--
+
+LOCK TABLES `bible_citation_verses` WRITE;
+/*!40000 ALTER TABLE `bible_citation_verses` DISABLE KEYS */;
+INSERT INTO `bible_citation_verses` VALUES (5,2,10001,'2024-07-20 22:24:33','2024-07-20 22:24:33'),(6,2,10002,'2024-07-20 22:24:33','2024-07-20 22:24:33'),(7,2,10003,'2024-07-20 22:24:33','2024-07-20 22:24:33'),(8,2,10004,'2024-07-20 22:24:33','2024-07-20 22:24:33'),(9,5,11534,'2024-08-24 17:17:46','2024-08-24 17:17:46'),(10,5,11535,'2024-08-24 17:17:46','2024-08-24 17:17:46'),(11,5,11536,'2024-08-24 17:17:46','2024-08-24 17:17:46'),(12,5,11537,'2024-08-24 17:17:46','2024-08-24 17:17:46'),(13,5,11538,'2024-08-24 17:17:46','2024-08-24 17:17:46'),(14,5,11539,'2024-08-24 17:17:46','2024-08-24 17:17:46'),(15,6,12748,'2024-08-24 19:28:19','2024-08-24 19:28:19'),(16,6,12749,'2024-08-24 19:28:19','2024-08-24 19:28:19'),(17,6,12747,'2024-08-24 19:28:19','2024-08-24 19:28:19'),(18,6,12750,'2024-08-24 19:28:19','2024-08-24 19:28:19'),(19,6,12751,'2024-08-24 19:28:19','2024-08-24 19:28:19'),(20,6,12752,'2024-08-24 19:28:19','2024-08-24 19:28:19');
+/*!40000 ALTER TABLE `bible_citation_verses` ENABLE KEYS */;
+UNLOCK TABLES;
+/*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
+
+/*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
+/*!40014 SET FOREIGN_KEY_CHECKS=@OLD_FOREIGN_KEY_CHECKS */;
+/*!40014 SET UNIQUE_CHECKS=@OLD_UNIQUE_CHECKS */;
+/*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
+/*!40101 SET CHARACTER_SET_RESULTS=@OLD_CHARACTER_SET_RESULTS */;
+/*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
+/*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
+
+-- Dump completed on 2025-08-26  8:09:54
