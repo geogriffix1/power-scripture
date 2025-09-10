@@ -27,15 +27,17 @@ export class BibleService {
   async getChildren(parent:number): Promise<JstreeModel[]> {
     console.log(`parent=${parent}`);
     if (parent == 0) {
-      // special case because there is no actual node 0.
-      // Theme 0 has child themes but no child citations.
+      // In this case the parent is the top node of the tree.
+      // Theme 0 is not a not a real node in the database, but it has child themes.
+      // The list of child nodes is returned.
 
       console.log("fetching root themes");
 
       let rootUrl = `${this.ROOT_URL}themes?parent=0`;
       const data = await fetch(rootUrl);
       const rootThemes = await data.json() ?? [];
-
+      console.log("raw:");
+      console.log(data);
       if (rootThemes.length > 1) {
         rootThemes.themes.sort((a:any, b:any) => a.sequence - b.sequence);
       }
@@ -43,12 +45,15 @@ export class BibleService {
       let children = <JstreeModel[]>[];
 
       for (let i=0; i<rootThemes.themes.length; i++) {
+        console.log("root theme raw:");
+        console.log(rootThemes.themes[i]);
         let theme = new JstreeModel(
           `theme${rootThemes.themes[i].id}`,
           rootThemes.themes[i].name,
           rootThemes.themes[i].description ?? "",
           "theme",
           rootThemes.themes[i].sequence,
+          rootThemes.themes[i].path,
           new JstreeState(false, false, false)
         );
 
@@ -56,9 +61,13 @@ export class BibleService {
         children.push(theme);
       }
 
+      console.log("returning");
+
       return children;
     }
     else {
+      // In this case the parent theme may have both child themes and child citations.
+      // The list of child nodes are returned, themes first.
       console.log("fetching child themes");
       let childUrl = `${this.ROOT_URL}themes/${parent}`;
       const data = await fetch(childUrl);
@@ -81,6 +90,7 @@ export class BibleService {
           parentTheme.theme.themes[i].theme.description ?? "",
           "theme",
           parentTheme.theme.themes[i].theme.sequence,
+          parentTheme.theme.themes[i].theme.path,
           new JstreeState(false, false, false)
         );
 
@@ -95,6 +105,7 @@ export class BibleService {
           parentTheme.theme.themeToCitationLinks[i].themeToCitation.citation.description ?? "",
           "citation",
           parentTheme.theme.themeToCitationLinks[i].themeToCitation.citation.sequence,
+          "",
           new JstreeState(false, false, false)
         );
 
@@ -106,15 +117,43 @@ export class BibleService {
     }
   }
 
-  async getTheme(id:number) : Promise<ThemeExtendedModel> {
-    var url = `${this.ROOT_URL}themes/${id}`;
-    const data = await fetch(url);
-    const theme = (await data.json() ?? null)
-    console.log("GET THEME:");
-    console.log(JSON.stringify(theme));
-    return <ThemeExtendedModel>theme.theme;
+  async getTheme(id:number): Promise<ThemeExtendedModel> {
+      console.log("in asynchronous getTheme");
+      var url = `${this.ROOT_URL}themes/${id}`;
+      console.log(`url: ${url}`);
+      const data = await fetch(url);
+      console.log("fetch done");
+      const theme = (await data.json() ?? null);
+      console.log("GET THEME:");
+      console.log(JSON.stringify(theme));
+      return <ThemeExtendedModel>theme.theme;
   }
 
+  async setThemeSequence(id:number, sequence:number): Promise<boolean> {
+    var url = `${this.ROOT_URL}themes/${id}/sequence/${sequence}`;
+    const data = await fetch(url, {
+      method: "PUT",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+    console.log(`url: ${url}`);
+    const response = (await data.json() ?? null);
+    console.log(`setThemeSequence id: ${id} sequence: ${sequence}`);
+    console.log(response);
+    return response && response.message && response.message == "Success";
+  }
+
+  async setThemeToCitationSequence(id:number, sequence:number): Promise<boolean> {
+    var url = `${this.ROOT_URL}themeToCitations${id}/sequence/${sequence}`;
+    console.log(`url: ${url}`);
+    const data = await fetch(url);
+    const response = (await data.json() ?? null);
+    return response && response.message && response.message == "Success";
+  }
+
+  // The theme chain is a the theme heirarchy expressed as a directory structure
   async getThemeChain(id:number, callback:any) {
     var url = `${this.ROOT_URL}themes/chain/${id}`;
     const data = await fetch(url)
@@ -151,7 +190,8 @@ export class BibleService {
         path:"",
         expanded: false,
         themes: [],
-        themeToCitationLinks: []
+        themeToCitationLinks: [],
+        node: undefined
       };
       
       return error;
@@ -159,7 +199,7 @@ export class BibleService {
     return <ThemeExtendedModel>theme;
  }
 
- async editTheme(theme:ThemeExtendedModel) {
+ async editTheme(theme:ThemeExtendedModel): Promise<any> {
   var url = `${this.ROOT_URL}themes`;
   const data = await fetch(url, {
     method: "PUT",
@@ -170,10 +210,8 @@ export class BibleService {
     body: JSON.stringify(theme)
   });
 
-  let response = await data.json();
-  console.log("EDIT THEME");
-
-  return response.message;
+  let result = await data.json();
+  return result;
  }
 
  async resequenceThemes(parentTheme:number, themes:number[], callback:any) {
@@ -217,15 +255,24 @@ const data = await fetch(url, {
   }
  }
 
- async deleteTheme(themeId:number, callback:any) {
+async deleteTheme(themeId:number, callback:any) {
   var url = `${this.ROOT_URL}themes/${themeId}`;
-  const data = await fetch(url, {
-    method: "DELETE",
-    cache: "no-cache",
-    headers: {
-      "Content-Type": "application/json"
-    }
-  });
+  var data:any;
+  try {
+    console.log("fetching result");
+    data = await fetch(url, {
+      method: "DELETE",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+  }
+  catch (e) {
+    console.log("delete theme failed");
+    console.log(e);
+    callback(false, "Theme delete failed.");
+  }
 
   console.log("DELETE THEME");
   const result:any = await data.json();
@@ -234,6 +281,32 @@ const data = await fetch(url, {
   if (result !== null && result.deleteted !== null) {
     console.log("calling back success");
     callback(true, "Theme deleted successfully.");
+  }
+  else {
+    callback(false, "Theme delete failed.");
+  }
+ }
+
+async normalizeThemeSequence(parentId:number, callback:any) {
+  var url = `${this.ROOT_URL}themes/normalize-themes/${parentId}`;
+  const data = await fetch(url, {
+    method: "PUT",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+
+  console.log("NORMALIZE THEMES");
+  const result:any = await data.json();
+  console.log("result:");
+  console.log(result);
+  if (result && result.message && result.message == "Success" ) {
+    console.log("calling back success");
+    callback(true, "Themes resequenced successfully.");
+  }
+  else {
+    callback(false, "Theme resequence failed.");
   }
  }
 

@@ -9,6 +9,7 @@ module.exports = app => {
     router.get("/", bibleThemeToCitation.listAll);
     router.post("/", bibleThemeToCitation.create);
     router.put("/", bibleThemeToCitation.update);
+    router.put("/:id/sequence/:sequence", bibleThemeToCitation.setSequence);
     router.delete("/:id", bibleThemeToCitation.delete);
 
     app.use("/themeToCitations", router);

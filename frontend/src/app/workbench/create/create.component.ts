@@ -110,35 +110,34 @@ export class CreateComponent {
       let service = new BibleService;
       if (WorkbenchComponent.activeTheme) {
         let id = <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", "");
-        service.getTheme(id)
-          .then(theme => {
-            obj.activeTheme = <ThemeModel>theme;
-            console.log(`Active Theme set to: ${obj.activeTheme.path}`);
-          });
+        obj.activeTheme = await service.getTheme(id);
       }
       else {
         $(".workbench-parent-theme div.selected-theme").addClass("missing");
       }
-    })(this);
 
-    if (!CreateComponent.isSubscribed) {
-      BibleThemeTreeComponent.ActiveThemeSelector.subscribe((theme: JstreeModel) => {
-        console.log("in ActiveThemeSelector subscription - activeTheme:");
-        console.log(theme);
-        (async (obj:CreateComponent) => {
-          let service = new BibleService;
+      if (!CreateComponent.isSubscribed) {
+        BibleThemeTreeComponent.ActiveThemeSelector.subscribe((theme: JstreeModel) => {
+          console.log("in ActiveThemeSelector subscription - activeTheme:");
+          console.log(theme);
           let id = +theme.id.replace("theme", "");
           console.log(`invoking getTheme(${id})`);
-          service.getTheme(id)
-            .then(theme => {
-              obj.activeTheme = <ThemeModel>theme;
-              $("div.theme.selected-theme").text(obj.activeTheme.path);
-              console.log(`Active Theme set to: ${obj.activeTheme.path}`);
-              $(".workbench-parent-theme div.selected-theme").removeClass("missing");
-            });
-        })(this);
-      });
-    }
+          obj.activeTheme = <ThemeModel>{
+            id: +theme.id.replace("theme", ""),
+            name: theme.text,
+            description: theme.li_attr.title,
+            parent: +theme.parent.replace("theme", ""),
+            sequence: theme.li_attr.sequence,
+            childCount: Array.isArray(theme.children) ? theme.children.length : 0,
+            path: theme.data.path
+          };
+
+          $("div.theme.selected-theme").text(obj.activeTheme.path);
+          console.log(`Active Theme set to: ${obj.activeTheme.path}`);
+          $(".workbench-parent-theme div.selected-theme").removeClass("missing");
+        });
+      }
+    })(this);
   }
 
   ngAfterViewInit() {

@@ -30,7 +30,7 @@
                     (cdkDropListDropped)="onThemeDrop($event)"
                     (cdkDropListSorted)="onThemeResequencing($event)"
                 >
-                    @for (theme of editedTheme.themes; track theme) {
+                    @for (theme of childthemes; track theme) {
                     <div cdkDrag attr.node="theme{{theme.theme.id}}" class="draggable-theme" title="Drag and drop themes to resequense">           
                         <div class="draggable-sequence">{{theme.theme.sequence}}</div>
                         <div class="draggable-label">{{theme.theme.name}}</div>

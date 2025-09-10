@@ -741,3 +741,49 @@ exports.update = (req, res) => {
             ));
         });
 }
+
+
+exports.setSequence = (req, res) => {
+    var message;
+    if (!message && (!req.params.id || typeof Number(req.params.id) != "number")) {
+        message = "Error: id is missing or invalid. Must be a number.";
+    }
+
+    if (!message && (!req.params.sequence || typeof Number(req.params.sequence) != "number")) {
+        message = "Error: sequence is missing or invlaid. Must be a number.";
+    }
+
+    if (!message && req.params.sequence < 1) {
+        message = "Error: sequence must be a number greater than zero";
+    }
+
+    if (message) {
+        res.status(500).send(errorMessage(
+            500,
+            "Server Error",
+            req.path,
+            message,
+            "Usage: PUT/themeToCitations/[id]/sequence/[sequence]"
+        ));
+
+        return;
+    }
+    (async (req) => {
+        await dbAccess.execute(`call set_theme_to_citation_sequence(${+req.params.id}, ${+req.params.sequence})`, (err, results) => {
+            if (err) {
+                res.status(500).send(errorMessage(
+                    500,
+                    "Server Error",
+                    req.path,
+                    `Error attempting to set theme sequence number: ${err.message}`,
+                    "Usage: PUT/themeToCitations/[id]/sequence/[sequence]"
+
+                ))
+            }
+            else {
+                res.send({ message: "Success" });
+            }
+        });
+
+    })(req);
+}

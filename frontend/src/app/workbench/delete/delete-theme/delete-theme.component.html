@@ -1,0 +1,16 @@
+<div class="workbench-delete">
+    <div class="theme theme-icon"><img src="/assets/images/Folder.png" title="Navigate by Theme Tree to the target folder"></div>
+    <div class="theme selected missing">
+            Please select the <b>Theme</b> from the <b>Bible Theme Tree</b>
+    </div>
+</div>
+<nav class="cite-scripture">
+    <div class="workbench-settings">
+        <a class="menu menu-icon-delete" href="#">
+            <i class="theme psmenu-icon" (click)="DeleteTheme()" title="Click to Delete"></i>
+        </a>
+    </div>
+    <input id="name" #name type="text" class="command-line" placeholder="Theme Name" title="The name of the theme" disabled>
+    <input id="description" #description type="text" class="command-line" placeholder="Theme Description" title="The description of the theme" disabled>
+    <div class="command-message"></div>
+</nav>

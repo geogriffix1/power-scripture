@@ -209,6 +209,9 @@ exports.create = (req, res) => {
         return;
     }
 
+    obj.name = obj.name.replace("'", "\\'");
+    obj.description = obj.description.replace("'", "\\'");
+
     addContext = context => {
         return new Promise(resolve => {
             resolve({ context: context });
@@ -318,7 +321,7 @@ exports.delete = (req, res) => {
             else {
                 (async () => {
                     const refreshThemePathsAsync = require("../appHelpers/refreshThemePathsAsync");
-                    await refreshThemePathsAsnc();
+                    await refreshThemePathsAsync();
                     res.send({ deleted: themeId });
                  })();
            }
@@ -366,6 +369,9 @@ exports.edit = (req, res) => {
 
         return;
     }
+
+    obj.name = obj.name.replace("'", "\\'");
+    obj.description = obj.description.replace("'", "\\'");
 
     addContext = context => {
         return new Promise(resolve => {
@@ -657,9 +663,9 @@ exports.edit = (req, res) => {
             ));
         });
 }
+
 exports.resequenceThemes = (req, res) => {
-    var obj = req.body;
-    console.log(obj);
+    var themeId = req.params.id;
     var message = null;
     if (!obj) {
         message = "Error: theme resequence object is missing from the message body";
@@ -707,7 +713,13 @@ exports.resequenceThemes = (req, res) => {
     (async () => {
         await dbAccess.execute(query, (err, results) => {
             if (err) {
-                res.send(`Error attempting to resequence themes: ${err.message}`);
+                res.status(500).send(errorMessage(
+                    500,
+                    "Server Error",
+                    req.path,
+                    `Error attempting to resequence themes: ${err.message}`,
+                    "Usage: In message body { \"parentTheme\": themeId, \"theme\": [{\"themeId\": id1}, {\"themeId\": id2}, ...] }"
+                ));
             }
             else {
                 refreshThemePaths();
@@ -715,6 +727,30 @@ exports.resequenceThemes = (req, res) => {
             }
         });
     })();
+}
+
+exports.normalizeThemes = (req, res) => {
+    var parentId = req.params.id;
+    (async (parentId) => {
+        await dbAccess.execute(`call normalize_theme_sequence(${parentId})`, (err, results) => {
+            if (err) {
+                res.status(500).send(errorMessage(
+                    500,
+                    "Server Error",
+                    req.path,
+                    `Error attempting to normalize child themes: ${err.message}`,
+                    "Usage: In message body { \"parentTheme\": themeId, \"citations\": [{\"themeToCitationId\": id1}, {\"themeToCitationId\": id2}, ...] }"
+                ));
+            }
+            else {
+                (async () => {
+                    const refreshThemePathsAsync = require("../appHelpers/refreshThemePathsAsync");
+                    await refreshThemePathsAsync();
+                    res.send({ message: "Success" });
+                })();
+            }
+        });
+    })(parentId);
 }
 
 exports.resequenceCitations = (req, res) => {
@@ -767,11 +803,85 @@ exports.resequenceCitations = (req, res) => {
     (async () => {
         await dbAccess.execute(query, (err, results) => {
             if (err) {
-                res.send(`Error attempting to resequence citations: ${err.message}`);
+                res.status(500).send(errorMessage(
+                    500,
+                    "Server Error",
+                    req.path,
+                    `Error attempting to resequence citations: ${err.message}`,
+                    "Usage: In message body { \"parentTheme\": themeId, \"citations\": [{\"themeToCitationId\": id1}, {\"themeToCitationId\": id2}, ...] }"
+                ));
+                res.send();
             }
             else {
                 res.send({ message: "Success" });
             }
         });
     })();
+}
+
+
+exports.normalizeCitations = (req, res) => {
+    var parentId = req.params.id;
+    (async (parentId) => {
+        await dbAccess.execute(`call normalize_citation_sequence(${parentId})`, (err, results) => {
+            if (err) {
+                res.status(500).send(errorMessage(
+                    500,
+                    "Server Error",
+                    req.path,
+                    `Error attempting to normalize citation sequence: ${err.message}`,
+                    "Usage: In message body { \"parentTheme\": themeId, \"citations\": [{\"themeToCitationId\": id1}, {\"themeToCitationId\": id2}, ...] }"
+                ));
+                res.send();
+            }
+            else {
+                res.send({ message: "Success" });
+            }
+        });
+    })(parentId);
+}
+
+exports.setSequence = (req, res) => {
+    var message;
+    if (!message && (!req.params.id || typeof Number(req.params.id) != "number")) {
+        message = "Error: theme Id is missing or invalid. Must be a number.";
+    }
+
+    if (!message && (!req.params.sequence || typeof Number(req.params.sequence) != "number")) {
+        message = "Error: sequence is missing or invlaid. Must be a number.";
+    }
+
+    if (!message && req.params.sequence < 1) {
+        message = "Error: sequence must be a number greater than zero";
+    }
+
+    if (message) {
+        res.status(500).send(errorMessage(
+            500,
+            "Server Error",
+            req.path,
+            message,
+            "Usage: PUT /themes/[id]/sequence/[sequence]"
+        ));
+
+        return;
+    }
+    (async (req) => {
+        await dbAccess.execute(`call set_theme_sequence(${+req.params.id}, ${+req.params.sequence})`, (err, results) => {
+            if (err) {
+                res.status(500).send(errorMessage(
+                    500,
+                    "Server Error",
+                    req.path,
+                    `Error attempting to set theme sequence number: ${err.message}`,
+                    "Usage: PUT /themes/[id]/sequence/[sequence]"
+
+                ))
+            }
+            else {
+                res.send({ message: "Success" });
+            }
+        });
+
+    })(req);
 }

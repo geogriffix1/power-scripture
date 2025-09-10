@@ -1,0 +1,35 @@
+<header></header>
+<nav class="workbench-delete">
+    @if (activeType > 0) {
+    <div class="workbench-settings">
+        <a class="settings" title="Settings" (click)=onClickSettings()>
+            <i class="settings active"></i>
+        </a>
+    </div>
+    }
+    <div class="workbench-title">
+        {{deleteType}}
+        <div class="settings">
+            <h3>Delete Element Type:</h3>
+            <div class="settings-selector" *ngFor="let item of deleteTypes; index as i">
+                @if (i > 0) {
+                <a class="menu-radio-{{i === activeType ? 'checked' : 'unchecked'}}" (click)=onRadioClickSettings(i)>
+                    <i class="radio-icon"></i>
+                    <span>{{item}}</span>
+                </a>
+                }
+            </div>
+        </div>
+    </div>
+</nav>
+<section>
+    @if(activeType == 0) {
+    <div></div>
+    }
+    @else if(activeType == 1) {
+    <app-delete-theme></app-delete-theme>
+    }
+    @else if(activeType == 2) {
+    <app-delete-citation ></app-delete-citation>
+    }
+</section>

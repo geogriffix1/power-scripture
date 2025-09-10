@@ -1,7 +1,8 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { BibleService } from '../../../bible.service';
 import { WorkbenchComponent } from '../../workbench.component';
-import { ThemeModel, ThemeExtendedModel } from '../../../model/theme.model';
+import { ThemeModel } from '../../../model/theme.model';
+import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-tree.component';
 
 @Component({
   selector: 'app-create-theme',
@@ -40,8 +41,7 @@ export class CreateThemeComponent {
     console.log("activeTheme:");
     console.log(JSON.stringify(WorkbenchComponent.activeTheme));
 
-
-    (async () => {
+    (async (obj) => {
       let service = new BibleService;
       if (WorkbenchComponent.activeTheme) {
         let id = <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", "");
@@ -54,7 +54,9 @@ export class CreateThemeComponent {
                $("div.command-message").text(theme.description);
              }
              else {
-              console.log("theme.id!=-1");
+              BibleThemeTreeComponent.appendTheme(theme);
+              obj.nameField.nativeElement.value = "";
+              obj.descriptionField.nativeElement.value = "";
                $("div.command-message").text(`Theme "${theme.name}" created successfully`); 
              }
           });
@@ -62,7 +64,7 @@ export class CreateThemeComponent {
       else {
         $(".workbench-parent-theme div.selected-theme").addClass("missing");
       }
-    })();
+    })(this);
     console.log("Create Theme clicked.")
   }
 }

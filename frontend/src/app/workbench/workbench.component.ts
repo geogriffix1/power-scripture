@@ -33,9 +33,16 @@ export class WorkbenchComponent {
   onCreateClick() {
     this.router.navigate(['create']);
   }
+
   onEditClick() {
     AppComponent.editObject = undefined;
     this.router.navigate(['edit']);
+  }
+
+  onDeleteClick() {
+    console.log("onDeleteClick");
+    AppComponent.editObject = undefined;
+    this.router.navigate(['delete']);
   }
 
   resizeObserver = new ResizeObserver(elements => {

@@ -17,6 +17,7 @@ import { ThemeToCitationLinkModel } from '../../../model/themeToCitation.model';
   templateUrl: './edit-theme.component.html',
   styleUrl: './edit-theme.component.css'
 })
+
 export class EditThemeComponent {
   activeTheme!: ThemeExtendedModel;
   editedTheme!: ThemeExtendedModel;
@@ -41,26 +42,34 @@ export class EditThemeComponent {
   draggingClass?:string;
 
   onThemeResequencing(event:CdkDragSortEvent<any,any>) {
-    console.log("theme Entered");
-    console.log(event);
     var currentIndex = event.currentIndex;
     var attr = `[node=${event.item.element.nativeElement.attributes.getNamedItem("node")!.value}]`;
     $(`body > ${attr} > div`).first().text(currentIndex + 1);
   }
 
   onThemeDrop(event: CdkDragDrop<ThemeModelReference[]>) {
+    let service = new BibleService;
 
-    console.log("Drop");
+    console.log("Drop Theme");
     console.log(event);
 
+    // angular system function
     moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
+    (async () => {
+      this.childthemes = event.container.data.map(theme => theme);
 
-    for (let index = 0; index < this.childthemes.length; index++) {
-      this.childthemes[index].theme.sequence = index + 1;
-    }
-
-    this.isEdited = true;
-  }
+      for (let index = 0; index < this.childthemes.length; index++) {
+        console.log(`node: ${index+1} ${this.childthemes[index].theme.name} ${this.childthemes[index].theme.sequence}`);
+        if (this.childthemes[index].theme.sequence != index + 1) {
+          await service.setThemeSequence(this.childthemes[index].theme.id, index + 1);
+          this.childthemes[index].theme.sequence = index + 1;
+        }
+        
+        let targetTheme = BibleThemeTreeComponent.getDomNode(`theme${this.childthemes[index].theme.id}`);
+        BibleThemeTreeComponent.moveDomNode(targetTheme.parent, targetTheme, index);
+      }
+    })();
+ }
 
   onCitationResequencing(event:CdkDragSortEvent<any,any>) {
     console.log("citation Entered");
@@ -71,23 +80,22 @@ export class EditThemeComponent {
   }
 
   onCitationDrop(event: CdkDragDrop<ThemeToCitationLinkModel[]>) {
-
+    
     console.log("Drop citation");
     console.log(event);
 
+    // angular system function
     moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
 
     for (let index = 0; index < this.citations.length; index++) {
       this.citations[index].themeToCitation.sequence = index + 1;
     }
-
-    this.isEdited = true;
   }
 
   EditTheme() {
     $(".command-message").text("");
-    this.editedTheme.name = <string>$("#name").val();
-    this.editedTheme.description = <string>$("#description").val();
+    this.editedTheme.name = (<string>$("#name").val() ?? "").trim();
+    this.editedTheme.description = (<string>$("#description").val() ?? "").trim();
 
     console.log(`name change: ${this.activeTheme.name} to ${this.editedTheme.name}`);
     console.log(`description change: ${this.activeTheme.description} to ${this.editedTheme.description}`);
@@ -95,138 +103,62 @@ export class EditThemeComponent {
     this.isEdited ||= this.editedTheme.description != this.activeTheme.description;
 
     console.log(`Edit theme isEdited: ${this.isEdited}`);
-
-    var themesAreResequenced = false;
-    var citationsAreResequenced = false;
-
-    for (let i = 0; i < this.activeTheme.themes.length; i++) {
-      if (this.activeTheme.themes[i].theme.sequence != this.editedTheme.themes[i].theme.sequence) {
-        themesAreResequenced = true;
-        console.log("Child themes have been resequenced.");
-        break;
-      }
-    }
-
-    for (let i = 0; i < this.activeTheme.themeToCitationLinks.length; i++) {
-      if (this.activeTheme.themeToCitationLinks[i].themeToCitation.sequence != this.editedTheme.themeToCitationLinks[i].themeToCitation.sequence) {
-        citationsAreResequenced = true;
-        console.log("Citations have been resequenced");
-        break;
-      }
-    }
-
-    let node = $(`#theme${this.editedTheme.id}`).jstree('get_node');
-    console.log("node:");
-    console.log(node);
-
     if (this.isEdited) {
-      let service = new BibleService;
-    
-      (async (obj:EditThemeComponent) => {
-        let response = await service.editTheme(obj.editedTheme)
-        $(".command-message").text(response);
-        console.log(`about to fetch the node theme${obj.editedTheme.id}`);
-        let node = $(`#theme${obj.editedTheme.id}`).jstree('get_node');
-        node[0].innerHTML.replace(/(<i.*?<a.*?\/i>)(.*?)(<\/a>)/, `$1${obj.editedTheme.name}$3`);
-        var title = node[0].attributes.getNamedItem('title');
-        title.textContent = obj.editedTheme.description;
-
-
-      })(this);
-      if (!themesAreResequenced && !citationsAreResequenced) {
-        $(".command-message").text("Edit Saved.");
+      if (!this.editedTheme.name) {
+        $(".command-message").text("Name is required");
         return;
-      }   
-    }
-    else if (!themesAreResequenced && !citationsAreResequenced) {
-      $(".command-message").text("No edits have been made.");
-      return;
-    }
+      }
 
-    let service = new BibleService;
-
-    // TODO: Resequence themes and Citations in the database
-    let parentTheme = this.editedTheme.id;
-    let themeSequenceList:number[] = [];
-    let citationSequenceList:number[] = [];
-
-    if (themesAreResequenced) {
-      this.editedTheme
-        .themes
-        .sort((a, b) => a.theme.sequence - b.theme.sequence)
-        .forEach(theme => themeSequenceList.push(theme.theme.id));
-    }
-
-    if (citationsAreResequenced) {
-      this.editedTheme
-        .themeToCitationLinks
-        .sort((a, b)  => a.themeToCitation.sequence - b.themeToCitation.sequence)
-        .forEach(citation => citationSequenceList.push(citation.themeToCitation.sequence));
-    }
-
-    // if (themesAreResequenced || citationsAreResequenced) {
-    //   $('#theme-tree-full').jstree('load', [`theme${this.editedTheme.id}`]);
-    //   let node = $(`#theme-tree-full`).jstree('get_node');
-    //   console.log("node with resequenced children:");
-    //   console.log(node);
-    //   //node[0].state.loaded = false;
-    // }
-
-    if (themesAreResequenced) {
-      console.log("resequencing themes");
-      service.resequenceThemes(parentTheme, themeSequenceList, (themeResponse:any) => {
-        console.log("resequencing themes callback");
-        if (citationsAreResequenced) {
-          service.resequenceCitations(parentTheme, citationSequenceList, (citationResponse:any) => {
-            $('#theme-tree-full').jstree(true)._load_node(`theme${this.editedTheme.id}`);
+      (async (obj:EditThemeComponent) => {
+        let service = new BibleService;
+        var parentTheme:ThemeExtendedModel;
+        if (obj.editedTheme.name != obj.activeTheme.name) {
+          parentTheme = await service.getTheme(obj.editedTheme.id);
+          parentTheme.themes.map(child => {
+            if (child.theme.name == obj.editedTheme.name) {
+              $(".command-message").text("Error: There is already a theme with that name here");
+              return;
+            }
           });
         }
-        else {
-          console.log('theme resequence response:');
-          service.getTheme(this.editedTheme.id)
-          .then(theme => {
-            let domThemes = $(`#theme${this.editedTheme.id} li`);
 
-            let position = 0;
-            theme.themes.forEach(subTheme => {
-              let slot = domThemes[position++];
-              let slotHtml = slot.outerHTML;
-              console.log("slot:");
-              console.log(slotHtml);
-              let domNode = $(`#theme${subTheme.theme.id}`);
-              let html = domNode[0].outerHTML;
-              console.log(html);
+        try {
+          let response = await service.editTheme(obj.editedTheme);
+          console.log("response from editTheme:");
+          console.log(response);
+          if (response.message == "Success") {
+            console.log("successful");
+            let node = <JstreeModel>BibleThemeTreeComponent.getDomNode(`theme${obj.activeTheme.id}`);
+            node.text = obj.editedTheme.name;
+            node.li_attr.title = obj.editedTheme.description;
+            node.data.path = obj.editedTheme.path;
 
-              // slot.attr('title', <string>domNode.attr('title'));
-              // slot.attr('id', <string>domNode.attr('id'));
-              // slot.attr('sequence', <string>domNode.attr('sequence'));
-            
-              // domNode.attr("sequence", position);
-              // domNode.attr("id", slot.id)
-//              console.log("domNode:");
-//              console.log(domNode);
-            });
-          //node = $(`#theme${this.editedTheme.id}`);
-          //console.log(node);
-        //   var childnodesHolder = [];
-        //   var childrenHolder = [];
-        //   node[0].childNodes[2].childNodes.forEach((child:any) => {
-        //      childnodesHolder.push(child);
-        //   });
-        //   node[0].childNodes[2].childNodes.forEach((child:any) => {
-        //     childnodesHolder.push(child.ChildNode);
-        //  });
-        // console.log(node);
-        //   $(`#theme-tree-full`).jstree('refresh_node', `theme${this.editedTheme.id}`);
-          });
+            obj.activeTheme = <ThemeExtendedModel> {
+              id: obj.editedTheme.id,
+              name: obj.editedTheme.name,
+              description: obj.editedTheme.description,
+              parent: obj.editedTheme.parent,
+              sequence: obj.editedTheme.sequence,
+              path: obj.editedTheme.path,
+              expanded: obj.editedTheme.expanded,
+              themes: obj.editedTheme.themes,
+              themeToCitationLinks: obj.editedTheme.themeToCitationLinks
+            };
+
+            console.log("calling theme tree component");
+            console.log(obj.activeTheme);
+            BibleThemeTreeComponent.refreshDomNode(`theme${obj.activeTheme.id}`);
+          }
+          else {
+            console.log(response.message);
+            throw "Failed";
+          }
         }
-      });
-    }
-    else if (citationsAreResequenced) {
-      service.resequenceCitations(parentTheme, citationSequenceList, (response:any) => {
-        console.log(response);
-        $('#theme-tree-full').jstree('load_node', [`theme${this.editedTheme.id}`, BibleThemeTreeComponent.LoadNodeCallback]);
-      });
+        catch {
+          $(".command-message").text("Theme Edit failed")
+        }
+  
+      })(this);
     }
   }
 
@@ -263,6 +195,11 @@ export class EditThemeComponent {
     this.sectionHeight = rect.height;
   }
 
+  async getDbTheme(id:number) : Promise<ThemeExtendedModel> {
+    const service = new BibleService;
+    return await service.getTheme(id);
+  }
+
   ngOnInit() {
     console.log("initializing edit theme component");
     EditThemeComponent.isActive = true;
@@ -278,6 +215,7 @@ export class EditThemeComponent {
   ngAfterViewInit() {
     console.log("ngAfterViewInit");
     if (!EditThemeComponent.isSubscribed) {
+      // subscribe to resizing events and to changes of active theme and active citation first time through
       WorkbenchComponent.WorkbenchResizeBroadcaster
         .subscribe((rect:DOMRectReadOnly) => {
           this.workbenchDomRect(rect);
@@ -294,94 +232,90 @@ export class EditThemeComponent {
           }
         });
 
-      (async (obj:EditThemeComponent) => {
+      (async (obj:EditThemeComponent) => { 
         BibleThemeTreeComponent.ActiveThemeSelector
           .subscribe((node:any) => {
-            if (!this.activeTheme && WorkbenchComponent.activeTheme) {
-              let service = new BibleService;
-              let id = <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", "");
-              service.getTheme(id)
-                .then(theme => {
-                  obj.activeTheme = <ThemeExtendedModel>theme;
-                  $("#name").val(theme.name);
-                  $("#description").val(theme.description);
-                  $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
-                  console.log(`Active Theme set to: ${obj.activeTheme.path}`);
-                  $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
-                  console.log(obj.activeTheme);
-                  let themes:ThemeModelReference[] = [];
-                  let themeToCitationLinks:ThemeToCitationLinkModel[] = [];
-                  obj.activeTheme.themes.sort((a, b) => a.theme.sequence - b.theme.sequence).forEach(theme => themes.push(theme)); 
-                  obj.activeTheme.themeToCitationLinks.sort((a, b) => a.themeToCitation.sequence - b.themeToCitation.sequence).forEach(link => themeToCitationLinks.push(link));
-                  obj.editedTheme = {
-                    id: obj.activeTheme.id,
-                    parent: obj.activeTheme.parent,
-                    name: obj.activeTheme.name,
-                    sequence: obj.activeTheme.sequence,
-                    description: obj.activeTheme.description,
-                    expanded: obj.activeTheme.expanded,
-                    themes: themes,
-                    themeToCitationLinks: themeToCitationLinks,
-                    childCount: themes.length + themeToCitationLinks.length,
-                    path: obj.activeTheme.path
-                  };
+            // Whenever the active theme changes while this component is active
+            if (EditThemeComponent.isActive) {
+              if (WorkbenchComponent.activeTheme) {
+                let service = new BibleService;
+                let id = <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", "");
+                service.getTheme(id)
+                  .then(theme => {
+                    obj.activeTheme = theme;
+                    $("#name").val(obj.activeTheme.name).show(500);
+                    $("#description").val(obj.activeTheme.description).show(500);
+                    $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
+                    console.log(`Active Theme set to: ${obj.activeTheme.path}`);
+                    console.log(obj.activeTheme);
+                    let themes:ThemeModelReference[] = [];
+                    let themeToCitationLinks:ThemeToCitationLinkModel[] = [];
+                    obj.activeTheme.themes.sort((a, b) => a.theme.sequence - b.theme.sequence).forEach(theme => themes.push(theme)); 
+                    obj.activeTheme.themeToCitationLinks.sort((a, b) => a.themeToCitation.sequence - b.themeToCitation.sequence).forEach(link => themeToCitationLinks.push(link));
 
-                  obj.childthemes = obj.editedTheme.themes;
-                  obj.citations = obj.editedTheme.themeToCitationLinks;
-                  obj.isEdited = false;
-                });
+                    obj.childthemes = obj.activeTheme.themes;
+                    obj.citations = obj.activeTheme.themeToCitationLinks;
+                    obj.isEdited = false;
+
+                    obj.editedTheme = <ThemeExtendedModel> {
+                      id: obj.activeTheme.id,
+                      name: obj.activeTheme.name,
+                      description: obj.activeTheme.description,
+                      parent: obj.activeTheme.parent,
+                      sequence: obj.activeTheme.sequence,
+                      path: obj.activeTheme.path,
+                      expanded: obj.activeTheme.expanded,
+                      themes: themes,
+                      themeToCitationLinks: themeToCitationLinks
+                    };
+                  });
+              }
             }
-            else {
-              $(".workbench-theme div.selected.theme").addClass("missing");
-            }
-        })
+            else { console.log("EditThemeComponent is not active"); }
+          });
       })(this);
 
       EditThemeComponent.isSubscribed = true;
     }
 
-    if (WorkbenchComponent.activeTheme) {
-      console.log(`Active Theme: ${WorkbenchComponent.activeTheme.text}`);
-    }
-    else {
-      console.log("no WorkbenchComponent.activeTheme");
-    }
+    // SETUP - if there is an active theme, the active theme is initialized
     (async (obj:EditThemeComponent) => {
       let service = new BibleService;
       if (WorkbenchComponent.activeTheme) {
         let id = <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", "");
         service.getTheme(id)
           .then(theme => {
-            obj.activeTheme = <ThemeExtendedModel>theme;
-            $("#name").val(theme.name);
-            $("#description").val(theme.description);
+            obj.activeTheme = theme;
+            $("#name").val(obj.activeTheme.name).show(500);
+            $("#description").val(obj.activeTheme.description).show(500);
             $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
             console.log(`Active Theme set to: ${obj.activeTheme.path}`);
             console.log(obj.activeTheme);
             let themes:ThemeModelReference[] = [];
             let themeToCitationLinks:ThemeToCitationLinkModel[] = [];
-            obj.activeTheme.themes.sort((a, b) => a.theme.sequence - b.theme.sequence).forEach(theme => themes.push(theme)); 
-            obj.activeTheme.themeToCitationLinks.sort((a, b) => a.themeToCitation.sequence - b.themeToCitation.sequence).forEach(link => themeToCitationLinks.push(link));
-            obj.editedTheme = {
+            obj.activeTheme.themes
+              .sort((a, b) => a.theme.sequence - b.theme.sequence)
+              .forEach(theme => themes.push(theme)); 
+            obj.activeTheme.themeToCitationLinks
+              .sort((a, b) => a.themeToCitation.sequence - b.themeToCitation.sequence)
+              .forEach(link => themeToCitationLinks.push(link));
+
+            obj.childthemes = themes;
+            obj.citations = themeToCitationLinks;
+            obj.isEdited = false;
+
+            obj.editedTheme = <ThemeExtendedModel> {
               id: obj.activeTheme.id,
-              parent: obj.activeTheme.parent,
               name: obj.activeTheme.name,
-              sequence: obj.activeTheme.sequence,
               description: obj.activeTheme.description,
+              parent: obj.activeTheme.parent,
+              sequence: obj.activeTheme.sequence,
+              path: obj.activeTheme.path,
               expanded: obj.activeTheme.expanded,
               themes: themes,
-              themeToCitationLinks: themeToCitationLinks,
-              childCount: themes.length + themeToCitationLinks.length,
-              path: obj.activeTheme.path
+              themeToCitationLinks: themeToCitationLinks
             };
-
-            obj.childthemes = obj.editedTheme.themes;
-            obj.citations = obj.editedTheme.themeToCitationLinks;
-            obj.isEdited = false;
-    });
-}
-      else {
-        $(".workbench-theme div.selected.theme").addClass("missing");
+          });
       }
     })(this);
   }

@@ -8,8 +8,11 @@ module.exports = app => {
     router.get("/chain/:id", bibleTheme.chain);
     router.post("/", bibleTheme.create);
     router.put("/", bibleTheme.edit);
-    router.put("/resequence/themes", bibleTheme.resequenceThemes);
-    router.put("/resequence/citations", bibleTheme.resequenceThemes);
+    router.put("/:id/sequence/:sequence", bibleTheme.setSequence);
+    router.put("/resequence-themes/:id", bibleTheme.resequenceThemes);
+    router.put("/normalize-themes/:id", bibleTheme.normalizeThemes);
+    router.put("/resequence-citations/:id", bibleTheme.resequenceThemes);
+    router.put("/normalize-citations/:id", bibleTheme.normalizeCitations);
     router.delete("/:id", bibleTheme.delete);
 
     app.use("/themes", router);

@@ -8,7 +8,8 @@ export interface ThemeModel {
     parent: number,
     sequence: number,
     childCount: number,
-    path: string
+    path: string,
+    node: JstreeModel | undefined;
 }
 
 export interface ThemeModelReference {
@@ -17,6 +18,6 @@ export interface ThemeModelReference {
 
 export interface ThemeExtendedModel extends ThemeModel {
     expanded: boolean;
-    themes: ThemeModelReference[],
-    themeToCitationLinks: ThemeToCitationLinkModel[]
+    themes: ThemeModelReference[];
+    themeToCitationLinks: ThemeToCitationLinkModel[];
 }

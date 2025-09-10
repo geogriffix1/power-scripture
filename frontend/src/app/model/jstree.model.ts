@@ -6,7 +6,7 @@ export class JstreeModel {
     state: JstreeState;
     a_attr: any;
     li_attr: any;
-    children: JstreeModel[] | boolean;
+    children: string[] | boolean;
     type: string;
     data: any;
     parent!:string;
@@ -17,7 +17,8 @@ export class JstreeModel {
         title:string,
         icon:string,
         sequence:number,
-        state:JstreeState
+        path:string,
+        state: JstreeState | any
     ) {
         this.id = id;
         this.text = text;
@@ -36,34 +37,37 @@ export class JstreeModel {
             sequence: sequence
         };
 
-        this.children = <JstreeModel[]>[];
-        this.data = {};
+        this.children = <string[]>[];
+        this.data = { path: path };
     }
             
     static getJstreeModel(node: any): JstreeModel {
         let pattern = /(theme|citation)(\d+)/;
         let icon = node.id.replace(pattern, '$1');
-        let model = new JstreeModel(node.id, node.text, node.li_attr.title, icon, node.li_attr.sequence, new JstreeState(false, false, true));
+        let model = new JstreeModel(node.id, node.text, node.li_attr.title, icon, node.li_attr.sequence, node.data.path, new JstreeState(false, false, true));
         model.parent = node.parent;
         return model;
     }
 
     static getJstreeModelFromExtendedTheme(node: ThemeExtendedModel): JstreeModel {
-        let jstreeModel = JstreeModel.getJstreeModel(node);
-        jstreeModel.children = [];
+
+        let jstreeModel = new JstreeModel(`theme${node.id}`, node.name, node.description, "theme", node.sequence, node.path, new JstreeState(false, false, false));
+        jstreeModel.children = <string[]>[];
         console.log("in getJstreeModelFromExtendedModel node: (JstreeModel)")
         console.log(node);
         node.themes.sort((a, b) => a.theme.sequence - b.theme.sequence);
         node.themes.forEach(theme => {
-            let treeTheme = JstreeModel.getJstreeModel(theme.theme);
-            (<JstreeModel[]>jstreeModel.children).push(treeTheme);
+            (<string[]>jstreeModel.children).push(`theme${theme.theme.id}`);
         });
 
         node.themeToCitationLinks.sort((a, b) => a.themeToCitation.sequence - b.themeToCitation.sequence);
         node.themeToCitationLinks.forEach(themeToCitation => {
-            let treeTheme = JstreeModel.getJstreeModel(themeToCitation.themeToCitation);
-            (<JstreeModel[]>jstreeModel.children).push(treeTheme);
+            (<string[]>jstreeModel.children).push(`citation${themeToCitation.themeToCitation.id}`);
         })
+
+        if ((<string[]>jstreeModel.children).length == 0) {
+            jstreeModel.children = false;
+        }
 
         return jstreeModel;
     }
