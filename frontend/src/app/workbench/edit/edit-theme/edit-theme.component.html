@@ -55,7 +55,7 @@
                     (cdkDropListDropped)="onCitationDrop($event)"
                     (cdkDropListSorted)="onCitationResequencing($event)"
                 >
-                    @for (citation of editedTheme.themeToCitationLinks; track citation) {
+                    @for (citation of citations; track citation) {
                     <div cdkDrag attr.node="citation{{citation.themeToCitation.id}}" class="draggable-citation" title="Drag and drop citations to resequense">           
                         <div class="draggable-sequence">{{citation.themeToCitation.sequence}}</div>
                         <div class="draggable-label">{{citation.themeToCitation.citation.citationLabel}}</div>
