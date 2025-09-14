@@ -1,9 +1,10 @@
 import { Injectable } from '@angular/core';
 import { ThemeExtendedModel } from './model/theme.model';
+import { CitationExtendedModel } from './model/citation.model';
 import { ThemeChainModel } from './model/themeChain.model';
 import { ScriptureModel } from './model/scripture.model';
 import { JstreeModel, JstreeState } from './model/jstree.model';
-import { ThemeToCitationLinkModel } from './model/themeToCitation.model';
+import { ThemeToCitationModel, ThemeToCitationLinkModel } from './model/themeToCitation.model';
 
 @Injectable({
   providedIn: 'root'
@@ -36,8 +37,8 @@ export class BibleService {
       let rootUrl = `${this.ROOT_URL}themes?parent=0`;
       const data = await fetch(rootUrl);
       const rootThemes = await data.json() ?? [];
-      console.log("raw:");
-      console.log(data);
+      //console.log("raw:");
+      //console.log(data);
       if (rootThemes.length > 1) {
         rootThemes.themes.sort((a:any, b:any) => a.sequence - b.sequence);
       }
@@ -45,8 +46,8 @@ export class BibleService {
       let children = <JstreeModel[]>[];
 
       for (let i=0; i<rootThemes.themes.length; i++) {
-        console.log("root theme raw:");
-        console.log(rootThemes.themes[i]);
+        // console.log("root theme raw:");
+        // console.log(rootThemes.themes[i]);
         let theme = new JstreeModel(
           `theme${rootThemes.themes[i].id}`,
           rootThemes.themes[i].name,
@@ -61,14 +62,13 @@ export class BibleService {
         children.push(theme);
       }
 
-      console.log("returning");
+      //console.log("returning");
 
       return children;
     }
     else {
       // In this case the parent theme may have both child themes and child citations.
       // The list of child nodes are returned, themes first.
-      console.log("fetching child themes");
       let childUrl = `${this.ROOT_URL}themes/${parent}`;
       const data = await fetch(childUrl);
       let parentTheme = await data.json() ?? [];
@@ -118,15 +118,33 @@ export class BibleService {
   }
 
   async getTheme(id:number): Promise<ThemeExtendedModel> {
-      console.log("in asynchronous getTheme");
       var url = `${this.ROOT_URL}themes/${id}`;
-      console.log(`url: ${url}`);
       const data = await fetch(url);
-      console.log("fetch done");
       const theme = (await data.json() ?? null);
-      console.log("GET THEME:");
-      console.log(JSON.stringify(theme));
       return <ThemeExtendedModel>theme.theme;
+  }
+
+  async getCitation(id:number): Promise<CitationExtendedModel> {
+    var url = `${this.ROOT_URL}citations/${id}/full`;
+    const data = await fetch(url);
+    const citation = (await data.json() ?? null);
+    return <CitationExtendedModel>citation.citation;
+  }
+
+  async getThemeToCitation(id:number) : Promise<ThemeToCitationLinkModel> {
+    var url = `${this.ROOT_URL}themeToCitations/${id}/full`;
+    const data = await fetch(url);
+    const themeToCitation = (await data.json() ?? null);
+    console.log("GET THEME TO CITATION");
+    console.log(JSON.stringify(themeToCitation));
+    return <ThemeToCitationLinkModel>themeToCitation;
+  }
+
+  async getThemeToCitationByThemeAndCitation(themeId:number, citationId:number): Promise<ThemeToCitationModel> {
+    var url = `${this.ROOT_URL}themeToCitations/theme/${themeId}/citation${citationId}`;
+    const data = await fetch(url);
+    const themeToCitation = (await data.json() ?? null);
+    return <ThemeToCitationModel>themeToCitation.themeToCitation;
   }
 
   async setThemeSequence(id:number, sequence:number): Promise<boolean> {
@@ -138,17 +156,21 @@ export class BibleService {
         "Content-Type": "application/json"
       }
     });
-    console.log(`url: ${url}`);
     const response = (await data.json() ?? null);
-    console.log(`setThemeSequence id: ${id} sequence: ${sequence}`);
-    console.log(response);
     return response && response.message && response.message == "Success";
   }
 
   async setThemeToCitationSequence(id:number, sequence:number): Promise<boolean> {
-    var url = `${this.ROOT_URL}themeToCitations${id}/sequence/${sequence}`;
+    var url = `${this.ROOT_URL}themeToCitations/${id}/sequence/${sequence}`;
     console.log(`url: ${url}`);
-    const data = await fetch(url);
+    const data = await fetch(url, {
+      method: "PUT",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+
     const response = (await data.json() ?? null);
     return response && response.message && response.message == "Success";
   }
@@ -158,8 +180,6 @@ export class BibleService {
     var url = `${this.ROOT_URL}themes/chain/${id}`;
     const data = await fetch(url)
     const chain = (await data.json() ?? [])
-    console.log("GET THEME CHAIN");
-    console.log(JSON.stringify(chain));
     callback(chain);
   }
 
@@ -249,7 +269,6 @@ const data = await fetch(url, {
   });
 
   let response = await data.json();
-  console.log("RESEQUENCE CITATIONS");
   if (callback) {
     callback(response);
   }
@@ -274,10 +293,7 @@ async deleteTheme(themeId:number, callback:any) {
     callback(false, "Theme delete failed.");
   }
 
-  console.log("DELETE THEME");
   const result:any = await data.json();
-  console.log("result:");
-  console.log(result);
   if (result !== null && result.deleteted !== null) {
     console.log("calling back success");
     callback(true, "Theme deleted successfully.");
@@ -297,27 +313,14 @@ async normalizeThemeSequence(parentId:number, callback:any) {
     }
   });
 
-  console.log("NORMALIZE THEMES");
   const result:any = await data.json();
-  console.log("result:");
-  console.log(result);
   if (result && result.message && result.message == "Success" ) {
-    console.log("calling back success");
     callback(true, "Themes resequenced successfully.");
   }
   else {
     callback(false, "Theme resequence failed.");
   }
  }
-
-  async getThemeToCitation(id:number) : Promise<ThemeToCitationLinkModel> {
-    var url = `${this.ROOT_URL}themeToCitations/${id}/full`;
-    const data = await fetch(url);
-    const themeToCitation = (await data.json() ?? null);
-    console.log("GET THEME TO CITATION");
-    console.log(JSON.stringify(themeToCitation));
-    return <ThemeToCitationLinkModel>themeToCitation;
-  }
 
   async citeScriptures(cite:string) : Promise<ScriptureModel[]> {
     var url = `${this.ROOT_URL}scriptures/${cite}`;
@@ -408,7 +411,6 @@ async normalizeThemeSequence(parentId:number, callback:any) {
     });
 
     const creationResults = (await data.json() ?? []);
-    console.log("CREATE CITATION");
 
     if (creationResults)
       console.log(JSON.stringify(creationResults));

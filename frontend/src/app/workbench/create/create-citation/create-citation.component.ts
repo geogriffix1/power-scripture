@@ -2,13 +2,13 @@ import { Component, Input, ViewChild, OnInit, OnDestroy } from '@angular/core';
 import { WorkbenchComponent } from '../../workbench.component';
 import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel';
 import { CreateComponent } from '../create.component';
-import { CreateCitationContextMenuComponent } from '../../../context-menu/create-citation-context-menu.component';
+//import { CreateCitationContextMenuComponent } from '../../../context-menu/create-citation-context-menu.component';
 
 @Component({
   selector: 'app-create-citation',
   standalone: true,
   imports: [
-    CreateCitationContextMenuComponent,
+    //CreateCitationContextMenuComponent,
     CreateComponent],
   templateUrl: './create-citation.component.html',
   styleUrl: './create-citation.component.css'

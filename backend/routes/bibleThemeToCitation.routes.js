@@ -4,8 +4,10 @@ module.exports = app => {
 
     router.get("/:id", bibleThemeToCitation.listOne);
     router.get("/:id/full", bibleThemeToCitation.listOne);
-    router.get("/themeId=\d+/", bibleThemeToCitation.listAll);
-    router.get("/citationId=\d+/", bibleThemeToCitation.listAll);
+    router.get("/theme/:themeId/citation/:citationId", bibleThemeToCitation.listOne);
+    router.get("/theme/:themeId/citation/:citationId/full", bibleThemeToCitation.listOne);
+    router.get("/theme/:themeId/", bibleThemeToCitation.listAll);
+    router.get("/citation/:citationId", bibleThemeToCitation.listAll);
     router.get("/", bibleThemeToCitation.listAll);
     router.post("/", bibleThemeToCitation.create);
     router.put("/", bibleThemeToCitation.update);

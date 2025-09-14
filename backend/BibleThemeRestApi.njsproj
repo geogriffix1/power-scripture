@@ -42,7 +42,7 @@
     </Content>
     <Content Include="controllers\bibleCitation.controller.js" />
     <Content Include="controllers\bibleCitationVerse.controller.js" />
-    <Content Include="controllers\bibleCitationVerseMarkup.controller.js" />
+    <Content Include="controllers\bibleCitationMarkup.controller.js" />
     <Content Include="controllers\bibleScripture.controller.js">
       <SubType>Code</SubType>
     </Content>
@@ -65,7 +65,7 @@
     </Content>
     <Content Include="models\bibleCitation.model.js" />
     <Content Include="models\bibleCitationVerse.model.js" />
-    <Content Include="models\bibleCitationVerseMarkup.model.js" />
+    <Content Include="models\bibleCitationMarkup.model.js" />
     <Content Include="models\bibleScripture.model.js">
       <SubType>Code</SubType>
     </Content>
@@ -82,7 +82,7 @@
     </Content>
     <Content Include="routes\bibleCitation.routes.js" />
     <Content Include="routes\bibleCitationVerse.routes.js" />
-    <Content Include="routes\bibleCitationVerseMarkup.routes.js" />
+    <Content Include="routes\bibleCitationMarkup.routes.js" />
     <Content Include="routes\bibleScripture.routes.js">
       <SubType>Code</SubType>
     </Content>

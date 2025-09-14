@@ -8,22 +8,42 @@ const tools = new responseTools;
 
 const pagination = 200;
 exports.listOne = (req, res) => {
-    var query = eval(req.params.id);
-    if (typeof query !== "number") {
-        res.status(400).send(errorMessage(
-            400,
-            "Invalid Parameter",
-            req.path,
-            "Query argument must be the numeric citation id",
-            "Usage (e.g. /themeToCitation/2000) returns the citation whose id equates to 2000.",
-            ""
-        ));
+    const themeToCitation = new bibleThemeToCitation;
+    if (req.params.id) {
+        var query = eval(req.params.id);
+        if (typeof query !== "number") {
+            res.status(400).send(errorMessage(
+                400,
+                "Invalid Parameter",
+                req.path,
+                "Query argument must be the numeric theme to citation id",
+                "Usage (e.g. /themeToCitation/2000) returns the theme to citation element whose id equates to 2000.",
+                ""
+            ));
+        }
+        else {
+            themeToCitation.values = { id: query };
+        }
+    }
+    else if (req.params.themeId && req.params.citationId) {
+        var query1 = eval(req.params.themeId);
+        var query2 = eval(req.params.citationId);
+        if (typeof query1 !== "number" || typeof query2 !== "number") {
+            res.status(400).send(errorMessage(
+                400,
+                "Invalid Parameter",
+                req.path,
+                "Query theme and citation argurment must both be numeric",
+                "Usage (e.g. /themeToCitation/theme/2000/citation/1000) returns the theme to citation element whose theme id equates to 2000 and whose  citation id equates to 1000.",
+                ""
+            ));
+        }
+        else {
+            themeToCitation.values = { themeId: query1, citationId: query2 };
+        }
     }
 
-    const themeToCitation = new bibleThemeToCitation;
-    themeToCitation.values = { id: query };
-    var isFull = req.route.path == "/:id/full";
-
+    var isFull = req.route.path.endsWith("full");
     if (isFull) {
         const selectString = themeToCitation.getJoinSelectString();
         console.log(selectString);
@@ -61,7 +81,7 @@ exports.listOne = (req, res) => {
         });
     }
     else {
-        const selectString = themeToCitation.getSelectString();
+        const selectString = themeToCitation.getSelectString() + " limit 1";
         dbAccess.query(selectString, (err, results) => {
             if (err) {
                 res.status(500).send(errorMessage(
@@ -80,7 +100,7 @@ exports.listOne = (req, res) => {
 };
 
 exports.listAll = (req, res) => {
-    const params = req.query;
+    const params = req.params;
     var input = "/themeToCitations/";
     if (params && Object.keys(params) > 0) {
         input += "?";
@@ -91,8 +111,8 @@ exports.listAll = (req, res) => {
         }
     }
 
-    var citationId = null;
-    var themeId = null;
+    var citationId = req.params.citationId;
+    var themeId = req.params.themeId;
     var page = 1;
     if (params && params.page) {
         page = params.page;

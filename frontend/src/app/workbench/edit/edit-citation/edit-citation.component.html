@@ -1,9 +1,44 @@
 <div class="workbench-edit">
     <div class="header">Edit Citation</div>
-    @if (!activeCitation) {
-    <div class="citatation citation-icon"><img src="/assets/images/Script.png" title="Navigate by Theme Tree to the target citation"></div>
+    <div class="citation citation-icon"><img src="/assets/images/Script.png" title="Navigate by Theme Tree to the target citation"></div>
     <div class="citation selected missing">
-        Please select an active <b>Citation</b> from the <b>Bible Theme Tree</b>
+        Please select the <b>Citation</b> from the <b>Bible Theme Tree</b>
     </div>
-    }
 </div>
+<nav class="cite-scripture">
+    <div class="workbench-settings">
+        <i class="citation edit-icon" (click)="EditCitation()" title="Click to Save Changes"></i>
+    </div>
+    <div class="input">
+        <input
+            id="description"
+            #description
+            type="text"
+            title="Enter citation description"
+            placeholder="Type description here"
+        >
+    </div>
+</nav>
+<section class="scrollable-content">
+    <div class="resequencing">
+        <table class="row-clickable">
+            <thead>
+                <tr>
+                    <th class="label" colspan="2">{{citationLabel}}</th>
+                </tr>
+                <tr>
+                    <th class="citation">Citation</th>
+                    <th class="verses">Scripture</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- @for(range of scriptureRanges; track range; let index = $index) {
+                <tr aria-checked="false" id="range_{{index}}" >    
+                    <th class="citation">{{range.citation}}</th>
+                    <td class="verses">{{range.verses}}</td>
+                </tr>
+                } -->
+            </tbody>
+        </table>
+    </div>
+</section>

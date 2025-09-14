@@ -46,7 +46,7 @@ class BibleCitationModel {
         const attr = require("./dbAttributes");
         const verseTable = require("../models/bibleCitationVerse.model");
         const scriptureTable = require("../models/bibleScripture.model");
-        const markupTable = require("../models/bibleCitationVerseMarkup.model");
+        const markupTable = require("../models/BibleCitationMarkup.model");
 
         const verse = new verseTable;
         const scripture = new scriptureTable;

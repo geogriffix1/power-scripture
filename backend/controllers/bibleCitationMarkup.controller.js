@@ -1,4 +1,4 @@
-const bibleCitationVerseMarkup = require("../models/bibleCitationVerseMarkup.model");
+const bibleCitationMarkup = require("../models/bibleCitationMarkup.model");
 const bibleCitationVerse = require("../models/bibleCitationVerse.model");
 const bibleCitation = require("../models/bibleCitation.model");
 const bibleScripture = require("../models/bibleScripture.model");
@@ -20,7 +20,7 @@ exports.listOne = (req, res) => {
         ));
     }
 
-    var bibleVerseMarkup = new bibleCitationVerseMarkup;
+    var bibleVerseMarkup = new BibleCitationMarkup;
     bibleVerseMarkup.values = { id: id };
     dbAccess.query(bibleVerseMarkup.getSelectString(), (err, result) => {
         if (err) {
@@ -39,7 +39,7 @@ exports.listOne = (req, res) => {
 }
 
 exports.listAll = (req, res) => {
-    var citationVerseMarkup = new bibleCitationVerseMarkup;
+    var citationVerseMarkup = new BibleCitationMarkup;
     dbAccess.query(citationVerseMarkup.getJoinSelectString(), (err, results) => {
         if (err) {
             res.status(500).send(errorMessage(
@@ -270,7 +270,7 @@ exports.create = (req, res) => {
 
             tasks.push(addContext(context));
 
-            var markup = new bibleCitationVerseMarkup;
+            var markup = new BibleCitationMarkup;
             markup.values = {
                 citationVerseId: context.citationVerse.id,
                 citationId: context.citationVerse.citationId,
@@ -292,7 +292,7 @@ exports.create = (req, res) => {
 
                     tasks.push(addContext(context));
 
-                    var markup = new bibleCitationVerseMarkup;
+                    var markup = new BibleCitationMarkup;
                     markup.values = { id: context.citationVerseMarkupId };
 
                     tasks.push(getQuery(markup.getSelectString()));

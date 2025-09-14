@@ -50,16 +50,11 @@ export class EditThemeComponent {
   onThemeDrop(event: CdkDragDrop<ThemeModelReference[]>) {
     let service = new BibleService;
 
-    console.log("Drop Theme");
-    console.log(event);
-
     // angular system function
     moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
-    (async () => {
-      this.childthemes = event.container.data.map(theme => theme);
 
+    (async () => {
       for (let index = 0; index < this.childthemes.length; index++) {
-        console.log(`node: ${index+1} ${this.childthemes[index].theme.name} ${this.childthemes[index].theme.sequence}`);
         if (this.childthemes[index].theme.sequence != index + 1) {
           await service.setThemeSequence(this.childthemes[index].theme.id, index + 1);
           this.childthemes[index].theme.sequence = index + 1;
@@ -72,24 +67,28 @@ export class EditThemeComponent {
  }
 
   onCitationResequencing(event:CdkDragSortEvent<any,any>) {
-    console.log("citation Entered");
-    console.log(event);
     var currentIndex = event.currentIndex;
     var attr = `[node=${event.item.element.nativeElement.attributes.getNamedItem("node")!.value}]`;
     $(`body > ${attr} > div`).first().text(currentIndex + 1);
   }
 
   onCitationDrop(event: CdkDragDrop<ThemeToCitationLinkModel[]>) {
-    
-    console.log("Drop citation");
-    console.log(event);
+    let service = new BibleService;
 
     // angular system function
     moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
 
-    for (let index = 0; index < this.citations.length; index++) {
-      this.citations[index].themeToCitation.sequence = index + 1;
-    }
+    (async () => {
+      for (let index = 0; index < this.citations.length; index++) {
+        if (this.citations[index].themeToCitation.sequence != index + 1) {
+          await service.setThemeToCitationSequence(this.citations[index].themeToCitation.id, index + 1);
+          this.citations[index].themeToCitation.sequence = index + 1;
+        }
+      
+        let targetCitation = BibleThemeTreeComponent.getDomNode(`citation${this.citations[index].themeToCitation.citationId}`);
+        BibleThemeTreeComponent.moveDomNode(targetCitation.parent, targetCitation.id, this.childthemes.length + index);
+      }
+    })();
   }
 
   EditTheme() {
@@ -97,12 +96,9 @@ export class EditThemeComponent {
     this.editedTheme.name = (<string>$("#name").val() ?? "").trim();
     this.editedTheme.description = (<string>$("#description").val() ?? "").trim();
 
-    console.log(`name change: ${this.activeTheme.name} to ${this.editedTheme.name}`);
-    console.log(`description change: ${this.activeTheme.description} to ${this.editedTheme.description}`);
     this.isEdited = this.editedTheme.name != this.activeTheme.name;
     this.isEdited ||= this.editedTheme.description != this.activeTheme.description;
 
-    console.log(`Edit theme isEdited: ${this.isEdited}`);
     if (this.isEdited) {
       if (!this.editedTheme.name) {
         $(".command-message").text("Name is required");
@@ -124,10 +120,7 @@ export class EditThemeComponent {
 
         try {
           let response = await service.editTheme(obj.editedTheme);
-          console.log("response from editTheme:");
-          console.log(response);
           if (response.message == "Success") {
-            console.log("successful");
             let node = <JstreeModel>BibleThemeTreeComponent.getDomNode(`theme${obj.activeTheme.id}`);
             node.text = obj.editedTheme.name;
             node.li_attr.title = obj.editedTheme.description;
@@ -145,8 +138,6 @@ export class EditThemeComponent {
               themeToCitationLinks: obj.editedTheme.themeToCitationLinks
             };
 
-            console.log("calling theme tree component");
-            console.log(obj.activeTheme);
             BibleThemeTreeComponent.refreshDomNode(`theme${obj.activeTheme.id}`);
           }
           else {
@@ -213,7 +204,6 @@ export class EditThemeComponent {
   }
 
   ngAfterViewInit() {
-    console.log("ngAfterViewInit");
     if (!EditThemeComponent.isSubscribed) {
       // subscribe to resizing events and to changes of active theme and active citation first time through
       WorkbenchComponent.WorkbenchResizeBroadcaster
@@ -246,8 +236,6 @@ export class EditThemeComponent {
                     $("#name").val(obj.activeTheme.name).show(500);
                     $("#description").val(obj.activeTheme.description).show(500);
                     $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
-                    console.log(`Active Theme set to: ${obj.activeTheme.path}`);
-                    console.log(obj.activeTheme);
                     let themes:ThemeModelReference[] = [];
                     let themeToCitationLinks:ThemeToCitationLinkModel[] = [];
                     obj.activeTheme.themes.sort((a, b) => a.theme.sequence - b.theme.sequence).forEach(theme => themes.push(theme)); 
@@ -289,8 +277,6 @@ export class EditThemeComponent {
             $("#name").val(obj.activeTheme.name).show(500);
             $("#description").val(obj.activeTheme.description).show(500);
             $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
-            console.log(`Active Theme set to: ${obj.activeTheme.path}`);
-            console.log(obj.activeTheme);
             let themes:ThemeModelReference[] = [];
             let themeToCitationLinks:ThemeToCitationLinkModel[] = [];
             obj.activeTheme.themes
@@ -321,7 +307,6 @@ export class EditThemeComponent {
   }
 
   ngOnDestroy() {
-    console.log("ngOnDestroy");
     EditThemeComponent.isActive = false;
   }
 }

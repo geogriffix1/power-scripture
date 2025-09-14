@@ -27,7 +27,7 @@ require("./routes/bibleTheme.routes")(app);
 require("./routes/bibleCitation.routes")(app);
 require("./routes/bibleThemeToCitation.routes")(app);
 require("./routes/bibleCitationVerse.routes")(app);
-require("./routes/bibleCitationVerseMarkup.routes")(app);
+require("./routes/bibleCitationMarkup.routes")(app);
 require("./routes/publisher.routes")(app);
 
 refreshThemePaths();

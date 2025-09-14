@@ -1,4 +1,4 @@
-export interface CitationVerseMarkupModel {
+export interface CitationMarkupModel {
     id: number,
     citationId: number,
     citationVerseId: number,

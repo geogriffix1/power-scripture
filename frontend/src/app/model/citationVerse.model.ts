@@ -1,5 +1,5 @@
 import { ScriptureModel } from './scripture.model';
-import { CitationVerseMarkupModel } from './citationVerseMarkup.model';
+import { CitationMarkupModel } from './CitationMarkup.model';
 
 export interface CitationVerseModel {
     id: number,
@@ -10,5 +10,5 @@ export interface CitationVerseModel {
 
 export interface CitationVerseExtendedModel extends CitationVerseModel {
     scripture: ScriptureModel,
-    markups: CitationVerseMarkupModel[];
+    markups: CitationMarkupModel[];
 }

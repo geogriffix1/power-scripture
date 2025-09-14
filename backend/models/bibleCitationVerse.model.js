@@ -42,7 +42,7 @@ class BibleCitationVerseModel {
     getJoinSelectString = () => {
         const attr = require("./dbAttributes");
         const scriptureModel = require("./bibleScripture.model");
-        const markupModel = require("./bibleCitationVerseMarkup.model");
+        const markupModel = require("./BibleCitationMarkup.model");
 
         return attr.tableAttribute.getJoinSelectString(this.table.tableName, this, [new scriptureModel, new markupModel]);
     }

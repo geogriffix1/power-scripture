@@ -1,8 +1,8 @@
-class BibleCitationVerseMarkupModel {
+class BibleCitationMarkupModel {
     constructor() {
         const attr = require("./dbAttributes");
-        this.table = new attr.tableAttribute("bible_citation_verse_markups", this);
-        this.id = new attr.columnAttribute("bible_citation_verse_markup_id", "INT", true);
+        this.table = new attr.tableAttribute("bible_citation_markups", this);
+        this.id = new attr.columnAttribute("bible_citation_markup_id", "INT", true);
         this.citationVerseId = new attr.columnAttribute("bible_citation_verse_id", "INT", false, "bible_citation_verses");
         this.citationId = new attr.columnAttribute("bible_citation_id", "INT", false, "bible_citations");
         this.textIndex = new attr.columnAttribute("text_index", "INT");
@@ -53,7 +53,7 @@ class BibleCitationVerseMarkupModel {
         const citationModel = require("./bibleCitation.model");
         const citationVerseModel = require("./bibleCitationVerse.model");
         const scriptureModel = require("./bibleScripture.model");
-        const markupModel = require("./bibleCitationVerseMarkup.model");
+        const markupModel = require("./bibleCitationMarkup.model");
 
         const citation = new citationModel;
         const verse = new citationVerseModel;
@@ -82,4 +82,4 @@ class BibleCitationVerseMarkupModel {
     }
 }
 
-module.exports = BibleCitationVerseMarkupModel;
+module.exports = BibleCitationMarkupModel;

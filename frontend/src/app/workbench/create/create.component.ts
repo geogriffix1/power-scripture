@@ -68,13 +68,10 @@ export class CreateComponent {
   }
 
   onRadioClickSettings(index:number) {
-    console.log("onRadioClickSettings");
     if (this.activeType != index) {
       console.log(`navigating to ${this.paths[index]}`);
       this.router.navigate([this.paths[index]]);
     }
-    // this.activeType = index;
-    // this.createType = this.createTypes[index];
     $("div.settings.settings-active").hide(500).removeClass("settings-active");
     this.settingsActive = false; 
   }
