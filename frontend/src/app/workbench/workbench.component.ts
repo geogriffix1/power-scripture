@@ -10,11 +10,10 @@ import { ScriptureModel } from '../model/scripture.model';
 import { JstreeModel } from '../model/jstree.model';
 
 @Component({
-  selector: 'app-workbench',
-  standalone: true,
-  imports: [RouterOutlet],
-  templateUrl: './workbench.component.html',
-  styleUrl: './workbench.component.css'
+    selector: 'app-workbench',
+    imports: [RouterOutlet],
+    templateUrl: './workbench.component.html',
+    styleUrl: './workbench.component.css'
 })
 
 export class WorkbenchComponent {

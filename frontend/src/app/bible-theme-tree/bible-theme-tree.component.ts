@@ -10,11 +10,10 @@ import $ from 'jquery';
 import 'jstree';
 
 @Component({
-  selector: 'app-bible-theme-tree',
-  standalone: true,
-  imports: [CommonModule],
-  templateUrl: './bible-theme-tree.component.html',
-  styleUrl: './bible-theme-tree.component.css'
+    selector: 'app-bible-theme-tree',
+    imports: [CommonModule],
+    templateUrl: './bible-theme-tree.component.html',
+    styleUrl: './bible-theme-tree.component.css'
 })
 export class BibleThemeTreeComponent implements OnInit {
   static service: ServiceDirective;

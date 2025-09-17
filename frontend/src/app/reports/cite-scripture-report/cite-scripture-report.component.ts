@@ -5,11 +5,10 @@ import { CitationDocumentCreator } from './cite-scripture-report-generator';
 import { CiteScriptureRangeModel } from '../../model/citeScriptureRangeModel';
 
 @Component({
-  selector: 'app-cite-scripture-report',
-  standalone: true,
-  imports: [],
-  templateUrl: './cite-scripture-report.component.html',
-  styleUrl: './cite-scripture-report.component.css'
+    selector: 'app-cite-scripture-report',
+    imports: [],
+    templateUrl: './cite-scripture-report.component.html',
+    styleUrl: './cite-scripture-report.component.css'
 })
 export class CiteScriptureReportComponent {
   @Input()

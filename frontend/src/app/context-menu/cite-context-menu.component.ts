@@ -3,11 +3,10 @@ import { Router } from '@angular/router';
 import { ContextMenu } from './interfaces/context-menu';
 import { ContextMenuItem } from './interfaces/context-menu-item';
 @Component({
-  selector: 'app-cite-context-menu',
-  standalone: true,
-  imports: [],
-  templateUrl: './cite-context-menu.component.html',
-  styleUrl: './cite-context-menu.component.css'
+    selector: 'app-cite-context-menu',
+    imports: [],
+    templateUrl: './cite-context-menu.component.html',
+    styleUrl: './cite-context-menu.component.css'
 })
 export class CiteContextMenuComponent {
   menuName = "Bible Verse Citation Context Menu";

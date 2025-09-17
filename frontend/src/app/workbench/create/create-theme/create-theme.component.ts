@@ -5,11 +5,10 @@ import { ThemeModel } from '../../../model/theme.model';
 import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-tree.component';
 
 @Component({
-  selector: 'app-create-theme',
-  standalone: true,
-  imports: [],
-  templateUrl: './create-theme.component.html',
-  styleUrl: './create-theme.component.css'
+    selector: 'app-create-theme',
+    imports: [],
+    templateUrl: './create-theme.component.html',
+    styleUrl: './create-theme.component.css'
 })
 export class CreateThemeComponent {
   @ViewChild('name', { static: true }) nameField!: ElementRef;

@@ -5,11 +5,10 @@ import { CreateComponent } from '../create.component';
 //import { CreateCitationContextMenuComponent } from '../../../context-menu/create-citation-context-menu.component';
 
 @Component({
-  selector: 'app-create-citation',
-  standalone: true,
-  imports: [],
-  templateUrl: './create-citation.component.html',
-  styleUrl: './create-citation.component.css'
+    selector: 'app-create-citation',
+    imports: [],
+    templateUrl: './create-citation.component.html',
+    styleUrl: './create-citation.component.css'
 })
 export class CreateCitationComponent {
   selectedFolder!:string;

@@ -7,18 +7,17 @@ import { EditThemeComponent } from './edit-theme/edit-theme.component';
 import { EditCitationComponent } from './edit-citation/edit-citation.component';
 
 @Component({
-  selector: 'app-edit',
-  standalone: true,
-  imports: [
-    CommonModule,
-    NgFor,
-    NgIf,
-    WorkbenchComponent,
-    EditThemeComponent,
-    EditCitationComponent
-  ],
-  templateUrl: './edit.component.html',
-  styleUrl: './edit.component.css'
+    selector: 'app-edit',
+    imports: [
+        CommonModule,
+        NgFor,
+        NgIf,
+        WorkbenchComponent,
+        EditThemeComponent,
+        EditCitationComponent
+    ],
+    templateUrl: './edit.component.html',
+    styleUrl: './edit.component.css'
 })
 export class EditComponent implements OnInit {
 

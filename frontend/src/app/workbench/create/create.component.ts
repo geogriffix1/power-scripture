@@ -11,16 +11,15 @@ import { BibleService } from '../../bible.service';
 import $ from 'jquery';
 
 @Component({
-  selector: 'app-create',
-  standalone: true,
-  imports: [
-    CommonModule,
-    NgFor,
-    CiteScriptureComponent,
-    CreateThemeComponent
-  ],
-  templateUrl: './create.component.html',
-  styleUrl: './create.component.css'
+    selector: 'app-create',
+    imports: [
+        CommonModule,
+        NgFor,
+        CiteScriptureComponent,
+        CreateThemeComponent
+    ],
+    templateUrl: './create.component.html',
+    styleUrl: './create.component.css'
 })
 export class CreateComponent {
 

@@ -10,11 +10,10 @@ import { CitationExtendedModel } from '../../../model/citation.model';
 import { CitationVerseModel, CitationVerseExtendedModel } from '../../../model/citationVerse.model';
 
 @Component({
-  selector: 'app-edit-citation',
-  standalone: true,
-  imports: [ScriptureRangeEditorComponent],
-  templateUrl: './edit-citation.component.html',
-  styleUrl: './edit-citation.component.css'
+    selector: 'app-edit-citation',
+    imports: [ScriptureRangeEditorComponent],
+    templateUrl: './edit-citation.component.html',
+    styleUrl: './edit-citation.component.css'
 })
 export class EditCitationComponent {
   activeCitation!: CitationExtendedModel;

@@ -6,13 +6,10 @@ import { BibleService } from '../../../bible.service';
 import { ThemeModel, ThemeExtendedModel, ThemeModelReference } from '../../../model/theme.model';
 import { ThemeToCitationLinkModel } from '../../../model/themeToCitation.model';
 @Component({
-  selector: 'app-delete-theme',
-  standalone: true,
-  imports: [
-
-  ],
-  templateUrl: './delete-theme.component.html',
-  styleUrl: './delete-theme.component.css'
+    selector: 'app-delete-theme',
+    imports: [],
+    templateUrl: './delete-theme.component.html',
+    styleUrl: './delete-theme.component.css'
 })
 export class DeleteThemeComponent {
   activeTheme!: ThemeModel;

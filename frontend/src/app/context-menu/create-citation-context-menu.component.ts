@@ -3,11 +3,10 @@ import { ContextMenu } from './interfaces/context-menu';
 import { ContextMenuItem } from './interfaces/context-menu-item';
 
 @Component({
-  selector: 'app-create-citation-context-menu',
-  standalone: true,
-  imports: [],
-  templateUrl: './create-citation-context-menu.component.html',
-  styleUrl: './create-citation-context-menu.component.css'
+    selector: 'app-create-citation-context-menu',
+    imports: [],
+    templateUrl: './create-citation-context-menu.component.html',
+    styleUrl: './create-citation-context-menu.component.css'
 })
 export class CreateCitationContextMenuComponent implements ContextMenu, OnInit {
   menuName = "Create Bible Citation Context Menu";

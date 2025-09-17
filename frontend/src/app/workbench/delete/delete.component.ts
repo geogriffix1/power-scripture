@@ -7,18 +7,17 @@ import { DeleteThemeComponent } from './delete-theme/delete-theme.component';
 import { DeleteCitationComponent } from './delete-citation/delete-citation.component';
 
 @Component({
-  selector: 'app-delete',
-  standalone: true,
-  imports: [
-    CommonModule,
-    NgFor,
-    NgIf,
-    WorkbenchComponent,
-    DeleteThemeComponent,
-    DeleteCitationComponent
-  ],
-  templateUrl: './delete.component.html',
-  styleUrl: './delete.component.css'
+    selector: 'app-delete',
+    imports: [
+        CommonModule,
+        NgFor,
+        NgIf,
+        WorkbenchComponent,
+        DeleteThemeComponent,
+        DeleteCitationComponent
+    ],
+    templateUrl: './delete.component.html',
+    styleUrl: './delete.component.css'
 })
 export class DeleteComponent implements OnInit {
 

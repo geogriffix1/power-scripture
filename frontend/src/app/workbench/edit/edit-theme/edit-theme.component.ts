@@ -7,15 +7,14 @@ import { BibleService } from '../../../bible.service';
 import { ThemeModel, ThemeExtendedModel, ThemeModelReference } from '../../../model/theme.model';
 import { ThemeToCitationLinkModel } from '../../../model/themeToCitation.model';
 @Component({
-  selector: 'app-edit-theme',
-  standalone: true,
-  imports: [
-    CdkDropListGroup,
-    CdkDropList,
-    CdkDrag
-  ],
-  templateUrl: './edit-theme.component.html',
-  styleUrl: './edit-theme.component.css'
+    selector: 'app-edit-theme',
+    imports: [
+        CdkDropListGroup,
+        CdkDropList,
+        CdkDrag
+    ],
+    templateUrl: './edit-theme.component.html',
+    styleUrl: './edit-theme.component.css'
 })
 
 export class EditThemeComponent {

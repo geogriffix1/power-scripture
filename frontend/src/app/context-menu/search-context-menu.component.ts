@@ -3,11 +3,10 @@ import { ContextMenu } from './interfaces/context-menu';
 import { ContextMenuItem } from './interfaces/context-menu-item';
 
 @Component({
-  selector: 'app-search-context-menu',
-  standalone: true,
-  imports: [],
-  templateUrl: './search-context-menu.component.html',
-  styleUrl: './search-context-menu.component.css'
+    selector: 'app-search-context-menu',
+    imports: [],
+    templateUrl: './search-context-menu.component.html',
+    styleUrl: './search-context-menu.component.css'
 })
 export class SearchContextMenuComponent implements ContextMenu, OnInit {
   menuName = "Search Context Menu";

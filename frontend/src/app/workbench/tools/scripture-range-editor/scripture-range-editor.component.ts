@@ -13,11 +13,10 @@ import * as BibleBookList from './BibleBookList.json';
 import $ from 'jquery';
 
 @Component({
-  selector: 'app-scripture-range-editor',
-  standalone: true,
-  imports: [NgStyle],
-  templateUrl: './scripture-range-editor.component.html',
-  styleUrl: './scripture-range-editor.component.css'
+    selector: 'app-scripture-range-editor',
+    imports: [NgStyle],
+    templateUrl: './scripture-range-editor.component.html',
+    styleUrl: './scripture-range-editor.component.css'
 })
 export class ScriptureRangeEditorComponent {
   @ViewChild('book', { static: true }) bookField!: ElementRef;

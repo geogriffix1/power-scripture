@@ -11,14 +11,13 @@ import * as wordList from './BibleWordlist.json';
 import $ from 'jquery';
 
 @Component({
-  selector: 'app-search-scripture',
-  standalone: true,
-  imports: [
-    SearchContextMenuComponent,
-    SearchScriptureReportComponent
-  ],
-  templateUrl: './search-scripture.component.html',
-  styleUrl: './search-scripture.component.css'
+    selector: 'app-search-scripture',
+    imports: [
+        SearchContextMenuComponent,
+        SearchScriptureReportComponent
+    ],
+    templateUrl: './search-scripture.component.html',
+    styleUrl: './search-scripture.component.css'
 })
 export class SearchScriptureComponent implements OnInit{
   static isActive:boolean = false;

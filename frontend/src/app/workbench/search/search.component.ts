@@ -6,18 +6,17 @@ import { CiteScriptureComponent } from './cite-scripture/cite-scripture.componen
 import $ from 'jquery';
 
 @Component({
-  selector: 'app-search',
-  standalone: true,
-  imports: [
-    NavbarComponent,
-    CiteScriptureComponent,
-    SearchScriptureComponent,
-    CommonModule,
-    NgFor,
-    NgIf
-  ],
-  templateUrl: './search.component.html',
-  styleUrl: './search.component.css'
+    selector: 'app-search',
+    imports: [
+        NavbarComponent,
+        CiteScriptureComponent,
+        SearchScriptureComponent,
+        CommonModule,
+        NgFor,
+        NgIf
+    ],
+    templateUrl: './search.component.html',
+    styleUrl: './search.component.css'
 })
 export class SearchComponent {
     searchTypes = [

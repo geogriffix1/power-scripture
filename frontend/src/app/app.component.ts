@@ -8,15 +8,14 @@ import { fromEvent, Subscription, Subject } from 'rxjs';
 import $ from 'jquery';
 
 @Component({
-  selector: 'app-root',
-  standalone: true,
-  imports: [
-    AngularSplitModule,
-    BibleThemeTreeComponent,
-    WorkbenchComponent
-  ],
-  templateUrl: './app.component.html',
-  styleUrl: './app.component.css'
+    selector: 'app-root',
+    imports: [
+        AngularSplitModule,
+        BibleThemeTreeComponent,
+        WorkbenchComponent
+    ],
+    templateUrl: './app.component.html',
+    styleUrl: './app.component.css'
 })
 export class AppComponent implements OnInit {
   title = 'power-scripture';

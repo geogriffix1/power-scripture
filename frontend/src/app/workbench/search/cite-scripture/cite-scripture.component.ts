@@ -11,14 +11,13 @@ import * as BibleBookList from './BibleBookList.json';
 import $ from 'jquery';
 
 @Component({
-  selector: 'app-cite-scripture',
-  standalone: true,
-  imports: [
-    CiteContextMenuComponent,
-    CiteScriptureReportComponent
-  ],
-  templateUrl: './cite-scripture.component.html',
-  styleUrl: './cite-scripture.component.css'
+    selector: 'app-cite-scripture',
+    imports: [
+        CiteContextMenuComponent,
+        CiteScriptureReportComponent
+    ],
+    templateUrl: './cite-scripture.component.html',
+    styleUrl: './cite-scripture.component.css'
 })
 export class CiteScriptureComponent {
   @ViewChild('book', { static: true }) bookField!: ElementRef;

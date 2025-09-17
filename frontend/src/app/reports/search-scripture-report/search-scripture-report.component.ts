@@ -7,11 +7,10 @@ import { ScriptureModel } from '../../model/scripture.model';
 import { ScriptureRangeModel } from '../../model/scriptureRange.model';
 
 @Component({
-  selector: 'app-search-scripture-report',
-  standalone: true,
-  imports: [],
-  templateUrl: './search-scripture-report.component.html',
-  styleUrl: './search-scripture-report.component.css'
+    selector: 'app-search-scripture-report',
+    imports: [],
+    templateUrl: './search-scripture-report.component.html',
+    styleUrl: './search-scripture-report.component.css'
 })
 export class SearchScriptureReportComponent {
   @Input()
