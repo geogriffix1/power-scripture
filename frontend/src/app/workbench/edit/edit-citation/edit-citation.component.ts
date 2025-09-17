@@ -1,6 +1,8 @@
 import { Component, Input, ViewChild, OnInit, OnDestroy } from '@angular/core';
+import { ChangeDetectorRef } from '@angular/core';
 import { WorkbenchComponent } from '../../workbench.component';
 import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-tree.component';
+import { ScriptureRangeEditorComponent } from '../../tools/scripture-range-editor/scripture-range-editor.component';
 import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel';
 import { EditComponent } from '../edit.component';
 import { BibleService } from '../../../bible.service';
@@ -10,9 +12,7 @@ import { CitationVerseModel, CitationVerseExtendedModel } from '../../../model/c
 @Component({
   selector: 'app-edit-citation',
   standalone: true,
-  imports: [
-    //EditCitationContextMenuComponent,
-    EditComponent],
+  imports: [ScriptureRangeEditorComponent],
   templateUrl: './edit-citation.component.html',
   styleUrl: './edit-citation.component.css'
 })
@@ -26,6 +26,8 @@ export class EditCitationComponent {
   citationLabel!:string;
   scriptureRanges!: CiteScriptureRangeModel[];
   editedCitationVerses!: CitationVerseModel[];
+
+  constructor(private cdr: ChangeDetectorRef) {}
 
   workbenchDomRect(rect:DOMRectReadOnly) {
     this.sectionWidth = rect.width;
@@ -83,6 +85,10 @@ export class EditCitationComponent {
                 let id = <number><unknown>WorkbenchComponent.activeCitation.id.replace("citation", "");
                 service.getCitation(id)
                   .then(citation => {
+
+                      console.log("citation:");
+                      console.log(citation);
+
                     obj.activeCitation = citation;
                     $("div.citation.selected").text(obj.activeCitation.citationLabel).removeClass("missing").show(500);
                     $("#description").val(obj.activeCitation.description);
@@ -93,7 +99,20 @@ export class EditCitationComponent {
                         verses: obj.activeCitation.verses
                     };
 
-                    obj.editedCitationVerses = obj.editedCitation.verses;
+                    console.log("generating scripture ranges");
+                    WorkbenchComponent.setScriptureRanges(obj.editedCitation);
+                    obj.scriptureRanges = [];
+                    WorkbenchComponent.scriptureRanges.forEach(sr => {
+                      obj.scriptureRanges.push(<CiteScriptureRangeModel>{
+                        citation: sr.citation,
+                        verses: sr.verses,
+                        scriptures: sr.scriptures
+                      })
+                    });
+                    console.log(`scripture range count: ${obj.scriptureRanges.length}`);
+                    obj.scriptureRanges.forEach(range => {
+                      console.log(`citation: ${range.citation}`)
+                    });
                   });
               }
             }
@@ -112,7 +131,7 @@ export class EditCitationComponent {
         service.getCitation(id)
           .then(citation => {
             obj.activeCitation = citation;
-            $("div.citation").text(obj.activeCitation.citationLabel).removeClass("missing").show(500);
+            $("div.citation.selected").text(obj.activeCitation.citationLabel).removeClass("missing").show(500);
             $("#description").val(obj.activeCitation.description);
             obj.editedCitation = <CitationExtendedModel>{
                 id: obj.activeCitation.id,
@@ -121,7 +140,18 @@ export class EditCitationComponent {
                 verses: obj.activeCitation.verses
             };
 
-            obj.editedCitationVerses = obj.editedCitation.verses;
+            console.log("citation:");
+            console.log(citation);
+
+            console.log("generating scripture ranges");
+            WorkbenchComponent.setScriptureRanges(obj.editedCitation);
+            obj.scriptureRanges = WorkbenchComponent.scriptureRanges.map(sr => sr);
+            console.log(`scripture range count: ${obj.scriptureRanges.length}`)
+            obj.scriptureRanges.forEach(range => {
+              console.log(`citation: ${range.citation}`)
+            });
+
+            this.cdr.detectChanges();
           });
       };
     })(this);

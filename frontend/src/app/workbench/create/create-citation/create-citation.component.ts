@@ -7,9 +7,7 @@ import { CreateComponent } from '../create.component';
 @Component({
   selector: 'app-create-citation',
   standalone: true,
-  imports: [
-    //CreateCitationContextMenuComponent,
-    CreateComponent],
+  imports: [],
   templateUrl: './create-citation.component.html',
   styleUrl: './create-citation.component.css'
 })

@@ -30,7 +30,7 @@
                     (cdkDropListDropped)="onThemeDrop($event)"
                     (cdkDropListSorted)="onThemeResequencing($event)"
                 >
-                    @for (theme of childthemes; track theme) {
+                    @for (theme of childthemes; track theme.theme.id) {
                     <div cdkDrag attr.node="theme{{theme.theme.id}}" class="draggable-theme" title="Drag and drop themes to resequense">           
                         <div class="draggable-sequence">{{theme.theme.sequence}}</div>
                         <div class="draggable-label">{{theme.theme.name}}</div>
@@ -55,7 +55,7 @@
                     (cdkDropListDropped)="onCitationDrop($event)"
                     (cdkDropListSorted)="onCitationResequencing($event)"
                 >
-                    @for (citation of citations; track citation) {
+                    @for (citation of citations; track citation.themeToCitation.id) {
                     <div cdkDrag attr.node="citation{{citation.themeToCitation.id}}" class="draggable-citation" title="Drag and drop citations to resequense">           
                         <div class="draggable-sequence">{{citation.themeToCitation.sequence}}</div>
                         <div class="draggable-label">{{citation.themeToCitation.citation.citationLabel}}</div>

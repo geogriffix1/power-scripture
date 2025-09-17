@@ -1,30 +1,30 @@
-import { Component, inject, Input, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
-import { Subscription, Observable, fromEvent, merge } from 'rxjs';
+import { Component, Directive, Input, HostListener, OnInit, OnDestroy, inject, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Subscription, fromEvent } from 'rxjs';
+import { NgStyle } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
+import { BibleService } from '../../../bible.service';
+import { ScriptureModel, ScriptureSearchResultModel } from '../../../model/scripture.model';
 import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel';
+import { CiteContextMenuComponent } from '../../../context-menu/cite-context-menu.component';
+import { SearchScriptureReportComponent } from '../../../reports/search-scripture-report/search-scripture-report.component';
 import { AppComponent } from '../../../app.component';
 import { WorkbenchComponent } from '../../workbench.component';
-import { BibleService } from '../../../bible.service';
-import { CiteContextMenuComponent } from '../../../context-menu/cite-context-menu.component';
-import { CiteScriptureReportComponent } from '../../../reports/cite-scripture-report/cite-scripture-report.component';
 import * as BibleBookList from './BibleBookList.json';
 import $ from 'jquery';
 
 @Component({
-  selector: 'app-cite-scripture',
+  selector: 'app-scripture-range-editor',
   standalone: true,
-  imports: [
-    CiteContextMenuComponent,
-    CiteScriptureReportComponent
-  ],
-  templateUrl: './cite-scripture.component.html',
-  styleUrl: './cite-scripture.component.css'
+  imports: [NgStyle],
+  templateUrl: './scripture-range-editor.component.html',
+  styleUrl: './scripture-range-editor.component.css'
 })
-export class CiteScriptureComponent {
+export class ScriptureRangeEditorComponent {
   @ViewChild('book', { static: true }) bookField!: ElementRef;
   @ViewChild('chapter', { static: true }) chapterField!: ElementRef;
   @ViewChild('verse', { static: true }) verseField!: ElementRef;
   @ViewChild('endVerse', { static: true }) endVerseField!: ElementRef;
+
 
   unicodeSuperscriptNumbers = [
     "\u2070",
@@ -567,16 +567,16 @@ export class CiteScriptureComponent {
   }
 
   ngOnInit() {
-    CiteScriptureComponent.isActive = true;
-    console.log("CiteScriptureComponent onInit");
+    ScriptureRangeEditorComponent.isActive = true;
+    console.log("ScriptureRangeEditorComponent onInit");
     this.scriptureRanges = <CiteScriptureRangeModel[]>[];
     console.log("CiteScriptureComponent - end onInit");
     let rect = WorkbenchComponent.getWorkbenchSize();
     this.workbenchDomRect(rect);
 
-    if (!CiteScriptureComponent.isSubscribed) {
+    if (!ScriptureRangeEditorComponent.isSubscribed) {
       AppComponent.mouseupBroadcaster.subscribe(event => {
-        if (CiteScriptureComponent.isActive) {
+        if (ScriptureRangeEditorComponent.isActive) {
           console.log("mouse event:");
           let targetId:string = event.target?.id ?? ""
           console.log(`target id: "${targetId}"`);
@@ -603,10 +603,10 @@ export class CiteScriptureComponent {
   }
 
   ngAfterViewInit() {
-    if (!CiteScriptureComponent.isSubscribed) {
+    if (!ScriptureRangeEditorComponent.isSubscribed) {
       WorkbenchComponent.WorkbenchResizeBroadcaster
         .subscribe((rect:DOMRectReadOnly) => {
-          if (CiteScriptureComponent.isActive) {
+          if (ScriptureRangeEditorComponent.isActive) {
             this.workbenchDomRect(rect);
             //let commandWidth = 80//rect.width - 20;
             $(".command-label.book,.command.book").css('width', `${this.widthBook}`);
@@ -623,7 +623,7 @@ export class CiteScriptureComponent {
           }
       });
 
-      CiteScriptureComponent.isSubscribed = true;
+      ScriptureRangeEditorComponent.isSubscribed = true;
     }
 
     this.bookFieldKeyupSubscription = fromEvent(this.bookField.nativeElement, 'keyup')
@@ -867,7 +867,7 @@ export class CiteScriptureComponent {
   
   ngOnDestroy() {
     console.log("unsubscribing")
-    CiteScriptureComponent.isActive = false;
+    ScriptureRangeEditorComponent.isActive = false;
     if (this.bookFieldKeyupSubscription) {
       this.bookFieldKeyupSubscription.unsubscribe();
       this.chapterFieldKeyupSubscription.unsubscribe();
@@ -876,3 +876,4 @@ export class CiteScriptureComponent {
     }
   }
 }
+

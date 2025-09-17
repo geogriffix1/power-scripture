@@ -84,7 +84,7 @@ export class EditThemeComponent {
           await service.setThemeToCitationSequence(this.citations[index].themeToCitation.id, index + 1);
           this.citations[index].themeToCitation.sequence = index + 1;
         }
-      
+
         let targetCitation = BibleThemeTreeComponent.getDomNode(`citation${this.citations[index].themeToCitation.citationId}`);
         BibleThemeTreeComponent.moveDomNode(targetCitation.parent, targetCitation.id, this.childthemes.length + index);
       }

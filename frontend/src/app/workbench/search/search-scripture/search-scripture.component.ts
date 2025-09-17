@@ -14,7 +14,6 @@ import $ from 'jquery';
   selector: 'app-search-scripture',
   standalone: true,
   imports: [
-    WorkbenchComponent,
     SearchContextMenuComponent,
     SearchScriptureReportComponent
   ],

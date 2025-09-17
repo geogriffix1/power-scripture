@@ -28,7 +28,7 @@
                 </tr>
             </thead>
             <tbody>
-                @for(result of searchResults; track result) {
+                @for(result of searchResults; track result.id) {
                 <tr [accessKey]=result.id [ariaChecked]="false"
                     (click)=onSelectItemClick(result.id)
                     (contextmenu)=showModalContextMenu($event)>

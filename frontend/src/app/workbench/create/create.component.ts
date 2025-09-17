@@ -16,10 +16,8 @@ import $ from 'jquery';
   imports: [
     CommonModule,
     NgFor,
-    NgIf,
-    WorkbenchComponent,
-     CiteScriptureComponent,
-     CreateThemeComponent
+    CiteScriptureComponent,
+    CreateThemeComponent
   ],
   templateUrl: './create.component.html',
   styleUrl: './create.component.css'
