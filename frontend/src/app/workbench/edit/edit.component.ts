@@ -10,9 +10,6 @@ import { EditCitationComponent } from './edit-citation/edit-citation.component';
     selector: 'app-edit',
     imports: [
         CommonModule,
-        NgFor,
-        NgIf,
-        WorkbenchComponent,
         EditThemeComponent,
         EditCitationComponent
     ],

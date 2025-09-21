@@ -47,6 +47,7 @@ export class BibleThemeTreeComponent implements OnInit {
     $('#theme-tree-full').jstree({
       core: {
         multiple: false,
+        worker: false,
         check_callback : true,
         data: function (node:any, cb:any) {
           BibleThemeTreeComponent.LoadNodeCallback = cb;

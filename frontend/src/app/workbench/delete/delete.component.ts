@@ -10,9 +10,6 @@ import { DeleteCitationComponent } from './delete-citation/delete-citation.compo
     selector: 'app-delete',
     imports: [
         CommonModule,
-        NgFor,
-        NgIf,
-        WorkbenchComponent,
         DeleteThemeComponent,
         DeleteCitationComponent
     ],

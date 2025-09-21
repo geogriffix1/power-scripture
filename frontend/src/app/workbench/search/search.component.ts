@@ -8,12 +8,9 @@ import $ from 'jquery';
 @Component({
     selector: 'app-search',
     imports: [
-        NavbarComponent,
         CiteScriptureComponent,
         SearchScriptureComponent,
-        CommonModule,
-        NgFor,
-        NgIf
+        CommonModule
     ],
     templateUrl: './search.component.html',
     styleUrl: './search.component.css'
