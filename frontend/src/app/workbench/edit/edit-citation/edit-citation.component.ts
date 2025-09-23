@@ -11,7 +11,9 @@ import { CitationVerseModel, CitationVerseExtendedModel } from '../../../model/c
 
 @Component({
     selector: 'app-edit-citation',
-    imports: [ScriptureRangeEditorComponent],
+    imports: [
+      ScriptureRangeEditorComponent
+    ],
     templateUrl: './edit-citation.component.html',
     styleUrl: './edit-citation.component.css'
 })
@@ -36,6 +38,24 @@ export class EditCitationComponent {
   static isActive = false;
   static isSubscribed = false;
 
+  OpenCloseScriptureRange(i:number) {
+    console.log(`OpenCloseScriptureRange(${i})`)
+    let activeRange = this.scriptureRanges[i];
+    console.log(activeRange);
+    let isOpen:boolean = activeRange.isOpen !== undefined ? activeRange.isOpen : false;
+
+    if (isOpen) {
+      $(`#range_${i}_title .spin-arrow-icon`).animate({rotate: "0deg"}, 500);
+      $(`#range_${i}_content`).slideUp(500);
+    }
+    else {
+      $(`#range_${i}_title .spin-arrow-icon`).animate({rotate: "90deg"}, 500);
+      $(`#range_${i}_content`).slideDown(500);
+    }
+
+    this.scriptureRanges[i].isOpen = !isOpen;
+  }
+
   EditCitation() {
 
   }
@@ -54,22 +74,17 @@ export class EditCitationComponent {
   ngAfterViewInit() {
     console.log("afterViewInit");
     if (!EditCitationComponent.isSubscribed) {
-      console.log("not subscribed");
       WorkbenchComponent.WorkbenchResizeBroadcaster
         .subscribe((rect:DOMRectReadOnly) => {
-          console.log("resizing")
-          this.workbenchDomRect(rect);
-          if(EditCitationComponent.isActive) {
-            console.log("EditCitationComponent is active for resize");
-            this.workbenchDomRect(rect);
-            this.sectionWidth - rect.width - 4;
-            $("app-edit-theme").width(rect.width);
-            $("#description").width(rect.width - 60);
-            let viewTop = $("as-split-area.workbench").offset()!.top;
+          if (EditCitationComponent.isActive) {
+            $("#description").css('width', (rect.width - 70) + "px");
+            console.log(`description width set to ${(rect.width - 70) + "px"}`);
+            let viewTop  = <number>$("as-split-area.workbench").offset()!.top;
             let viewHeight = <number>$("as-split-area.workbench").innerHeight();
-            let resultsTop = $("section.scrollable-content").offset()!.top;
-            this.verseListHeight = viewHeight - resultsTop + viewTop;
-            $("div.resequencing").css("height", this.verseListHeight + "px");
+            let viewBottom = viewTop + viewHeight;
+            let scrollingTop = <number>$("div.scrolling").offset()!.top;
+            this.verseListHeight = viewBottom - scrollingTop;
+            $("div.scrolling").css("height", this.verseListHeight + "px");            
           }
         });
       
@@ -105,7 +120,8 @@ export class EditCitationComponent {
                       obj.scriptureRanges.push(<CiteScriptureRangeModel>{
                         citation: sr.citation,
                         verses: sr.verses,
-                        scriptures: sr.scriptures
+                        scriptures: sr.scriptures,
+                        isOpen: false
                       })
                     });
                     console.log(`scripture range count: ${obj.scriptureRanges.length}`);
@@ -144,25 +160,21 @@ export class EditCitationComponent {
 
             console.log("generating scripture ranges");
             WorkbenchComponent.setScriptureRanges(obj.editedCitation);
-            obj.scriptureRanges = WorkbenchComponent.scriptureRanges.map(sr => sr);
-            console.log(`scripture range count: ${obj.scriptureRanges.length}`)
-            obj.scriptureRanges.forEach(range => {
-              console.log(`citation: ${range.citation}`)
+            obj.scriptureRanges = WorkbenchComponent.scriptureRanges.map(sr => {
+              sr.isOpen = false;
+              return sr;
             });
-
-            this.cdr.detectChanges();
           });
       };
     })(this);
 
-    let rect = WorkbenchComponent.getWorkbenchSize();
-    //$("#description").css('width', (rect.width - 5) + "px");
-    let viewTop = <number>$("as-split-area.workbench").offset()!.top;
+    let viewTop  = <number>$("as-split-area.workbench").offset()!.top;
     let viewHeight = <number>$("as-split-area.workbench").innerHeight();
-    let resultsTop = $("section.scrollable-content").offset()!.top;
-    let searchResultsHeight = viewTop + viewHeight - resultsTop;
-
-    $("div.search-results").css("height", searchResultsHeight + "px");
+    let viewBottom = viewTop + viewHeight;
+    let scrollingTop = <number>$("div.scrolling").offset()!.top;
+    this.verseListHeight = viewBottom - scrollingTop;
+    $("div.scrolling").css("height", this.verseListHeight + "px");
+    console.log("initializing done");          
   }
 
   ngOnDestroy() {

@@ -19,29 +19,21 @@
         >
     </div>
 </nav>
-<div class="scripture-range-editor">
+<div class="scripture-range-editor hidden">
     <app-scripture-range-editor></app-scripture-range-editor>
 </div>
 <section class="scrollable-content">
-    <div class="resequencing">
-        <table class="row-clickable">
-            <thead>
-                <tr>
-                    <th class="label" colspan="2">{{citationLabel}}</th>
-                </tr>
-                <tr>
-                    <th class="citation">Citation</th>
-                    <th class="verses">Scripture</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for(range of scriptureRanges; track range; let index = $index) {
-                <tr aria-checked="false" id="range_{{index}}" >    
-                    <th class="citation">{{range.citation}}</th>
-                    <td class="verses">{{range.verses}}</td>
-                </tr>
-                }
-            </tbody>
-        </table>
+    <div class="scrolling">
+    @if (scriptureRanges) {
+        @for (range of scriptureRanges; track range; let i = $index) {
+        <div id="range_{{i}}_title" class="scripture-range">
+            <i class="spin-arrow-icon" (click)="OpenCloseScriptureRange(i)" title="Expand to view scriptures"></i>
+            <span>{{range.citation}}</span>
+        </div>
+        <div id="range_{{i}}_content" class="scripture-text" style="display: none;">
+            {{range.verses}}
+        </div>
+        }
+    }
     </div>
 </section>

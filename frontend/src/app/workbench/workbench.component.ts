@@ -93,6 +93,7 @@ export class WorkbenchComponent {
           let scriptureRange:CiteScriptureRangeModel = {
             citation: citation,
             verses: verses,
+            isOpen: false,
             scriptures: scriptures
           };
 

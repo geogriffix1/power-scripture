@@ -84,7 +84,7 @@ section.scrollable-content {
     width:100%;
 }
 
-div.resequencing { width:100%; overflow-y: auto; }
+div.scrolling { width:100%; overflow-y: auto; }
 
 .search-results table {
     width: 100%;

@@ -23,7 +23,6 @@ export class CreateCitationComponent {
   ngOnInit() {
     CreateCitationComponent.isActive = true;
     let rect = WorkbenchComponent.getWorkbenchSize();
-    //this.workbenchDomRect(rect);
   
     console.log("create-citation ngOnInit rect:");
     console.log(rect);
@@ -40,7 +39,6 @@ export class CreateCitationComponent {
 
   ngAfterViewInit() {
     let rect = WorkbenchComponent.getWorkbenchSize();
-    //$("#description").css('width', (rect.width - 5) + "px");
     let viewTop = <number>$("as-split-area.workbench").offset()!.top;
     let viewHeight = <number>$("as-split-area.workbench").innerHeight();
     let resultsTop = $("section.scrollable-content").offset()!.top;

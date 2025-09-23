@@ -44,8 +44,8 @@ export class EditScriptureRangeContextMenuComponent {
     console.log(`router is null? ${!router}`)
     EditScriptureRangeContextMenuComponent.instance.menuItems = [];
     EditScriptureRangeContextMenuComponent.instance.menuItems.push({
-      text: "Select All",
-      title: "Select all scripture ranges entered",
+      text: "Edit the Scripture Range of the citation",
+      title: "Adjust the range of scriptures",
       isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canSelectAll(); },
       onClick: (entry:any) => {
         EditScriptureRangeContextMenuComponent.instance.callbacks.selectAll();
@@ -53,8 +53,8 @@ export class EditScriptureRangeContextMenuComponent {
       }
     });
     EditScriptureRangeContextMenuComponent.instance.menuItems.push({
-      text: "Deselect All",
-      title: "Deselect all scripture ranges",
+      text: "Scripture Markup",
+      title: "Apply markups to selected scriptures",
       isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canDeselectAll(); },
       onClick: (entry:any) => {
         EditScriptureRangeContextMenuComponent.instance.callbacks.deselectAll();
@@ -62,8 +62,8 @@ export class EditScriptureRangeContextMenuComponent {
       }
     });
     EditScriptureRangeContextMenuComponent.instance.menuItems.push({
-      text: "Remove Selected",
-      title: "Remove all selected scripture ranges from the list",
+      text: "Remove Scripture Range",
+      title: "Delete the range of scriptures from the citation",
       isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canRemoveSelected(); },
       onClick: (entry:any) => {
         EditScriptureRangeContextMenuComponent.instance.callbacks.removeSelected(scriptureRanges);
@@ -71,8 +71,8 @@ export class EditScriptureRangeContextMenuComponent {
       }
     });
     EditScriptureRangeContextMenuComponent.instance.menuItems.push({
-      text: "Save Selected Citations",
-      title: "Store selected citations as a Bible Citation in a theme",
+      text: "Save Citation",
+      title: "Save the full citation as edited",
       isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canSaveCitation(); },
       onClick: (entry:any) => {
         EditScriptureRangeContextMenuComponent.instance.callbacks.saveCitation(scriptureRanges, router);
