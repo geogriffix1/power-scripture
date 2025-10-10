@@ -286,6 +286,7 @@ nav.command-line {background-color: black; padding: 4px;}
 i.search-icon {background: url("assets/images/Search.png")  center center no-repeat; display:inline-block; width: 32px; height: 32px; cursor:pointer; }
 i.save-icon {background: url("assets/images/Save.png") center  center no-repeat; display: inline-block; width: 32px; height: 32px; cursor: pointer; }
 i.edit-icon {background: url("assets/images/Edit page.png") center center no-repeat; display: inline-block; width :32px; height: 32px; cursor: pointer; }
+i.delete-icon {background: url("assets/images/Delete.png") center center no-repeat; display: inline-block; width :32px; height: 32px; cursor: pointer; }
 i.spin-arrow-icon {background: url("assets/images/SpinArrow.png") center center no-repeat; display: inline-block; width: 32px; height: 32px; cursor: pointer; }
 .command-line input[type=text] {display: inline-block; height: 32px;}
 .command-suggest li {background-color: lightgray; color: black; }

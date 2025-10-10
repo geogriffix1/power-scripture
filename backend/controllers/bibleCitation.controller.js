@@ -176,38 +176,35 @@ exports.create = (req, res) => {
 
                 if (!message && obj.scriptureIds && Array.isArray(obj.scriptureIds)) {
                     methodType = "scripture ids";
-                    for (var index in obj.scriptureIds) {
-                        var id = obj.scriptureIds[index];
-                        if (id) {
-                            id = eval(id);
-                        }
-
-                        if (typeof eval(obj.scriptureIds[index]) != "number") {
-                            message = `Error: scriptureIds must contain numeric values: ${id} is not a number.`
-                            break;
+                    obj.scriptureIds.forEach(scriptureId => {
+                        id = Number(scriptureId);
+                        if (id === NaN) {
+                            message = `Error: scriptureIds is an array of numeric values: ${id} is not a number.`
+                            return;
                         }
 
                         scriptureIds.push(id);
-                    }
+                    });
                 }
-                else if (obj.scriptures && Array.isArray(obj.scriptures)) {
-                    for (var index in obj.scriptures) {
-                        var scripture = obj.scriptures[index];
-                        if (scripture.id && typeof eval(scripture.id) == "number" && eval(scripture.id) > 0) {
-                            scriptureIds.push(eval(scripture.id));
-                            methodType = "scripture ids"; // if all of the arrays have valid ids we use only the ids
+                else if (!message && obj.scriptures && Array.isArray(obj.scriptures)) {
+                    obj.scriptures.forEach(scripture => {
+                        var id;
+                        if (scripture.id) {
+                            id = Number(scripture.id);
+                            if (id !== NaN && id > 0) {
+                                scriptureIds.push(id);
+                                methodType = "scripture ids"
+                            }
                         }
                         else {
                             methodType = null;
-                            break;
+                            return;
                         }
-                    }
+                    });
 
                     if (!methodType) {
                         methodType = "scriptures";
-                        var scripture = null;
-                        for (var index in obj.scriptures) {
-                            scripture = obj.scriptures[index];
+                        for (var scripture in obj.scriptures) {
                             console.log("scripture:");
                             console.log(scripture);
                             foundVerse = null;
@@ -565,7 +562,6 @@ exports.update = (req, res) => {
         });
     }
 
-
     verifyCitation = (obj) => {
         return new Promise((resolve, reject) => {
             console.log("in the verifyCitation Promise");
@@ -595,7 +591,6 @@ exports.update = (req, res) => {
         console.log("in biblecitation.controller updateCitation");
         return new Promise((resolve, reject) => {
             var error;
-            var citation;
             dbAccess.update(updateString, (err, result) => {
                 if (err) {
                     error = err;
@@ -636,13 +631,14 @@ exports.update = (req, res) => {
             Promise.all(tasks)
                 .then(data => {
                     var context = data[0].context;
-                    var insertId = data[1].insertId;
 
                     var citation = new bibleCitation;
                     citation.values = { id: context.values.id };
                     getQuery(citation.getSelectString())
                         .then(results => {
                             var result = results[0];
+                            console.log("returning results");
+                            console.log(result);
                             res.send(result);
                         });
                 });

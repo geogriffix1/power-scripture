@@ -91,24 +91,99 @@ exports.listAll = (req, res) => {
             ));
         }
         else {
-            var citationVerses = [];
+            var verses = [];
 
             console.log(results);
             var citationVerse = null;
             for (var i = 0; i < results.length; i++) {
                 var result = results[i];
-                if (citationVerse === null) {
+                if (citationVerse === null || citationVerse.id != tools.getObjectFromResult(result, 1).id) {
+                    if (citationVerse !== null) {
+                        verses.push(citationVerse);
+                    }
+
                     citationVerse = tools.getObjectFromResult(result, 1);
+                    citationVerse.scripture = tools.getObjectFromResult(result, 2);
+                    let markup = tools.getObjectFromResult(result, 3);
+                    if (markup.id === null) {
+                        citationVerse.markups = [];
+                    }
+                    else {
+                        citationVerse.markups = [markup];
+                    }
                 }
-
-                citationVerse.citation = tools.getObjectFromResult(result, 2);
-                citationVerse.scripture = tools.getObjectFromResult(result, 3);
-
-                citationVerses.push(citationVerse);
-                citationVerse = null;
+                else {
+                    citationVerse.markups.push(tools.getObjectFromResult(result, 3));
+                }
             }
 
-            res.send(citationVerses);
+            if (citationVerse !== null) {
+                verses.push(citationVerse);
+            }
+
+            res.send(verses);
+        }
+    });
+}
+
+exports.citationId = (req, res) => {
+    var citationId = Number(req.params.id);
+    if (!typeof id == NaN) {
+        res.status(400).send(errorMessage(
+            400,
+            "Invalid Parameter",
+            req.path,
+            "Query argument must be the numeric citation id of the verses",
+            "Usage (e.g. /verse/citation/2000) returns all citation verses whose parent citation id equates to 2000."
+        ));
+    }
+
+    var bibleVerse = new bibleCitationVerse;
+    bibleVerse.values = { citationId: citationId };
+
+    const selectString = bibleVerse.getJoinSelectString();
+    dbAccess.query(selectString, (err, results) => {
+        if (err) {
+            res.status(500).send(errorMessage(
+                500,
+                "Server Error",
+                req.path,
+                err.message,
+                ""
+            ));
+        }
+        else {
+            var verses = [];
+
+            console.log(results);
+            var citationVerse = null;
+            for (var i = 0; i < results.length; i++) {
+                var result = results[i];
+                if (citationVerse === null || citationVerse.id != tools.getObjectFromResult(result, 1).id) {
+                    if (citationVerse !== null) {
+                        verses.push(citationVerse);
+                    }
+
+                    citationVerse = tools.getObjectFromResult(result, 1);
+                    citationVerse.scripture = tools.getObjectFromResult(result, 2);
+                    let markup = tools.getObjectFromResult(result, 3);
+                    if (markup.id === null) {
+                        citationVerse.markups = [];
+                    }
+                    else {
+                        citationVerse.markups = [markup];
+                    }
+                }
+                else {
+                    citationVerse.markups.push(tools.getObjectFromResult(result, 3));
+                }
+            }
+
+            if (citationVerse !== null) {
+                verses.push(citationVerse);
+            }
+
+            res.send(verses);
         }
     });
 }

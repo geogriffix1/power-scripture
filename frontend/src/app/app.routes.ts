@@ -9,10 +9,14 @@ export const routes: Routes = [
     { path: 'create', component: CreateComponent },
     { path: 'create/citation', component: CreateComponent },
     { path: 'create/theme', component: CreateComponent },
+    { path: 'edit', component: EditComponent },
     { path: 'edit/theme', component: EditComponent },
     { path: 'edit/citation', component: EditComponent },
-    { path: 'edit', component: EditComponent },
+    { path: 'edit/citation/range', component: EditComponent },
+    { path: 'edit/citation/verse', component: EditComponent },
+    { path: 'edit/citation/verse/markup', component: EditComponent },
     { path: 'delete', component: DeleteComponent },
     { path: 'delete/citation', component: DeleteComponent },
-    { path: 'delete/theme', component: DeleteComponent }
+    { path: 'delete/theme', component: DeleteComponent },
+    { path: '**', redirectTo: '/search' }
 ];

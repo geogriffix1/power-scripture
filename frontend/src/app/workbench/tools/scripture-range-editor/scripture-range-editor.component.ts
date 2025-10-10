@@ -1,28 +1,51 @@
-import { Component, Directive, Input, HostListener, OnInit, OnDestroy, inject, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
-import { Subscription, fromEvent } from 'rxjs';
+import { Component, Directive, Input, Output, EventEmitter, HostListener, OnInit, OnDestroy, inject, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
+import { Subscription, Subject, fromEvent, map, filter } from 'rxjs';
 import { NgStyle } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BibleService } from '../../../bible.service';
 import { ScriptureModel, ScriptureSearchResultModel } from '../../../model/scripture.model';
 import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel';
 import { CiteContextMenuComponent } from '../../../context-menu/cite-context-menu.component';
-import { SearchScriptureReportComponent } from '../../../reports/search-scripture-report/search-scripture-report.component';
+import { CiteScriptureReportComponent } from '../../../reports/cite-scripture-report/cite-scripture-report.component';
+import { CitationExtendedModel } from '../../../model/citation.model';
 import { AppComponent } from '../../../app.component';
 import { WorkbenchComponent } from '../../workbench.component';
 import * as BibleBookList from './BibleBookList.json';
 import $ from 'jquery';
+//import { EditScriptureRangeContextMenuComponent } from '../../../context-menu/edit-scripture-range-context-menu/edit-scripture-range-context-menu.component';
 
 @Component({
     selector: 'app-scripture-range-editor',
-    imports: [NgStyle],
+    imports: [
+      NgStyle
+    ],
     templateUrl: './scripture-range-editor.component.html',
     styleUrl: './scripture-range-editor.component.css'
 })
 export class ScriptureRangeEditorComponent {
+  private _citation?: CitationExtendedModel;
   @ViewChild('book', { static: true }) bookField!: ElementRef;
   @ViewChild('chapter', { static: true }) chapterField!: ElementRef;
   @ViewChild('verse', { static: true }) verseField!: ElementRef;
   @ViewChild('endVerse', { static: true }) endVerseField!: ElementRef;
+  @Input()
+  set citation(value: CitationExtendedModel | undefined) {
+
+    this._citation = value;
+    console.log("CITATION SET IN SCRIPTURE-RANGE-EDITOR");
+  }
+  get citation(): CitationExtendedModel | undefined {
+    return this._citation;
+  }
+
+//   if (value) {
+//     this.initializeEditor(value); // safely reinit
+//   } else {
+//     this.resetEditor(); // optional: clear form or state
+//   }
+// }
+//@Input() citation?: CitationExtendedModel;
+  @Output() edited = new EventEmitter<number>();
 
 
   unicodeSuperscriptNumbers = [
@@ -48,6 +71,9 @@ export class ScriptureRangeEditorComponent {
   context:any = {
     showCiteScriptureReport: Boolean
   };
+
+  static inputElement: any;
+  static RangeEditorIsActiveBroadcaster: any;
 
   createCitation = false;
 
@@ -98,7 +124,7 @@ export class ScriptureRangeEditorComponent {
       return;
     }
 
-    let description = <string>$("#description").val();
+    let description = <string>$("#description").val() ?? "";
     console.log(description);
     console.log(`activeThemeId: ${WorkbenchComponent.activeTheme.id}`);
     let parentThemeId = <number><unknown>WorkbenchComponent.activeTheme.id.replace(/theme(\d+)/, "$1");
@@ -212,49 +238,75 @@ export class ScriptureRangeEditorComponent {
     console.log("runAdd()");
     if ($("#endVerse.legal").length > 0) {
       $("div.command-message").text('').hide(100);
-      (async () => {
+      (async (obj: ScriptureRangeEditorComponent) => {
         console.log(`book: (innerText=${this.bookField.nativeElement.value})`);
         console.log(this.bookField.nativeElement);
-        let cite = `${this.bookField.nativeElement.value} ` + 
+        let range = `${this.bookField.nativeElement.value} ` + 
           `${this.chapterField.nativeElement.value}:` +
           `${this.verseField.nativeElement.value}`;
         
         if (this.endVerseField.nativeElement.innerText != this.verseField.nativeElement.value) {
-          cite = `${cite}-${this.endVerseField.nativeElement.value}`;
+          range = `${range}-${this.endVerseField.nativeElement.value}`;
         }
 
         let bibleService = new BibleService;
-        let scriptures = await bibleService.citeScriptures(cite);
-        let pattern = /Obadiah|Philemon|2 John|3 John|Jude/
-        let isSingleChapterBook = scriptures[0].book.match(pattern);
-        let citation = `${scriptures[0].book} ${scriptures[0].chapter}:${scriptures[0].verse}`;
-        if (isSingleChapterBook) {
-          citation = `${scriptures[0].book} ${scriptures[0].verse}`;
-        }
+        let newRangeScriptures = await bibleService.citeScriptures(range);
+        //let existing = await bibleService.getCitationVerses((<CitationExtendedModel>this._citation).id);
 
-        let scriptureText = scriptures[0].text;
+        if (this?.citation) {
+          let thisCitation = <CitationExtendedModel>this?.citation;
+        console.log(`citation.id: ${this._citation?.id}`);
+          let scriptureIds = new Set(thisCitation.verses.map(verse => Number(verse.scriptureId)));
+          let newRangeScriptureIds = newRangeScriptures.map(scripture => scripture.id);
+          let uniqueScriptureIds = newRangeScriptureIds.filter(scriptureId => !scriptureIds.has(scriptureId));
 
-        if (scriptures.length > 1) {
-          citation = `${citation}-${scriptures[scriptures.length - 1].verse}`;
-          for (let i = 1; i < scriptures.length; i++) {
-            let verseNumber = scriptures[i].verse;
-            let prefix = this.superscript(verseNumber);
-            scriptureText = `${scriptureText} ${prefix}${scriptures[i].text}`;
+          if (uniqueScriptureIds.length > 0) {
+            uniqueScriptureIds.forEach(scriptureId => {
+              let verse = bibleService.createCitationVerse(thisCitation.id, scriptureId).then();
+              console.log(`verse created for scripture: ${scriptureId}`);
+              console.log(verse);
+            });
+
+            this.edited.emit(this._citation?.id);
+          }
+          else
+          {
+            $(".command-message").text("No new scriptures added");
           }
         }
 
-        let scriptureRange:CiteScriptureRangeModel = {
-          citation: citation,
-          verses: scriptureText,
-          scriptures: scriptures
-       };
 
-       this.scriptureRanges.push(scriptureRange);
+        //WorkbenchComponent.setScriptureRanges
+      //   let pattern = /Obadiah|Philemon|2 John|3 John|Jude/
+      //   let isSingleChapterBook = scriptures[0].book.match(pattern);
+      //   let citation = `${scriptures[0].book} ${scriptures[0].chapter}:${scriptures[0].verse}`;
+      //   if (isSingleChapterBook) {
+      //     citation = `${scriptures[0].book} ${scriptures[0].verse}`;
+      //   }
+
+      //   let scriptureText = scriptures[0].text;
+
+      //   if (scriptures.length > 1) {
+      //     citation = `${citation}-${scriptures[scriptures.length - 1].verse}`;
+      //     for (let i = 1; i < scriptures.length; i++) {
+      //       let verseNumber = scriptures[i].verse;
+      //       let prefix = this.superscript(verseNumber);
+      //       scriptureText = `${scriptureText} ${prefix}${scriptures[i].text}`;
+      //     }
+      //   }
+
+      //   let scriptureRange:CiteScriptureRangeModel = {
+      //     citation: citation,
+      //     verses: scriptureText,
+      //     scriptures: scriptures
+      //  };
+
+      //  this.scriptureRanges.push(scriptureRange);
        $(".command input[type=text]").val('').removeClass('legal');
        this.isChapterDisabled = true;
        this.isVerseDisabled = true;
        this.isEndVerseDisabled = true;
-      })();
+      })(this);
     }
     else {
       $("div.command-message").text("Please complete the verse range.").show(100);
@@ -572,8 +624,8 @@ export class ScriptureRangeEditorComponent {
     console.log("CiteScriptureComponent - end onInit");
     let rect = WorkbenchComponent.getWorkbenchSize();
     this.workbenchDomRect(rect);
-
     if (!ScriptureRangeEditorComponent.isSubscribed) {
+      ScriptureRangeEditorComponent.inputElement = $("#book")[0];
       AppComponent.mouseupBroadcaster.subscribe(event => {
         if (ScriptureRangeEditorComponent.isActive) {
           console.log("mouse event:");
@@ -591,12 +643,11 @@ export class ScriptureRangeEditorComponent {
               $("#booklist,#chapterlist,#verselist,#endverselist").hide(100);
           }
 
-          CiteContextMenuComponent.hide();
+          //EditScriptureRangeContextMenuComponent.hide();
         }
       });
     }
 
-    this.scriptureRanges = WorkbenchComponent.scriptureRanges ?? [];
     console.log("routes:");
     console.log(this.router);
   }
@@ -623,8 +674,10 @@ export class ScriptureRangeEditorComponent {
       });
 
       ScriptureRangeEditorComponent.isSubscribed = true;
+
     }
 
+    this.scriptureRanges = WorkbenchComponent.scriptureRanges ?? [];
     this.bookFieldKeyupSubscription = fromEvent(this.bookField.nativeElement, 'keyup')
       .subscribe(ev => {
         $("div.command-message").text('').hide(100);

@@ -9,6 +9,7 @@ import $ from 'jquery';
 
 @Component({
     selector: 'app-root',
+    standalone: true,
     imports: [
         AngularSplitModule,
         BibleThemeTreeComponent,

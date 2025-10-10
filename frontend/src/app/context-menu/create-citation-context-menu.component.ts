@@ -29,7 +29,7 @@ export class CreateCitationContextMenuComponent implements ContextMenu, OnInit {
 
     CreateCitationContextMenuComponent.instance.menuItems.push({
       text: "Create Bible Citation",
-      title: "Save this Bible Citation into the database",
+      title: "Save this Bible Citation",
       isActive: () => { return CreateCitationContextMenuComponent.instance.callbacks.canCreateCitation(); },
       onClick: (entry:any) => {
         CreateCitationContextMenuComponent.instance.callbacks.selectAll();

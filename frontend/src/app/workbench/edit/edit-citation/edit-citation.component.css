@@ -31,7 +31,7 @@
     color: red;
     background-color: black;
 }
-.theme-member {
+.theme-member , .scripture-range {
     border: 2px solid darkslategray;
     background-color:field;
     color: black;
@@ -230,6 +230,34 @@ div.scripture-range {
 div.scripture-range span {
     margin-left: 6px;
     font-weight: bold;
+}
+
+.scripture-range.container {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 2px 10px;
+    min-height: 40px;
+    height: auto;
+    border-radius: 5px;
+}
+
+.scripture-range .left-icon {
+    flex-shrink: 0;
+    margin-top: 4px;
+    margin-right: 10px;
+}
+
+.scripure-range .text {
+    flex-grow: 1;
+    margin-right: 10px;
+    word-wrap: break-word;
+}
+
+.scripture-range .right-icons {
+    display: flex;
+    gap: 5px;
+    flex-shrink: 0;
 }
 
 tr[aria-checked="true"] { cursor: pointer; background-color: rgba(3, 213, 250, 0.719); position: relative;}

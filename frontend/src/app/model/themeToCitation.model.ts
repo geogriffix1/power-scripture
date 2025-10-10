@@ -1,7 +1,7 @@
 import { CitationModel } from './citation.model';
 export interface ThemeToCitationModel {
     id: number,
-    citation: CitationModel,
+    //citation: CitationModel,
     citationLabel: string,
     description: string,
     citationId: number,

@@ -185,10 +185,16 @@ export class BibleThemeTreeComponent implements OnInit {
     return domNode;
   }
 
-  public static refreshDomNode(nodeId: string) {
+  public static refreshDomNodeFromDb(nodeId: string) {
     console.log("refreshDomNode");
     const themeTree = $('#theme-tree-full').jstree(true);
-    themeTree.refresh_node(nodeId);
+    (themeTree as any).redraw_node(nodeId, true);
+  }
+
+  public static refreshDomNode(node: JstreeModel) {
+    console.log("refreshDomNode");
+    const themeTree = $('#theme-tree-full').jstree(true);
+    (themeTree as any).redraw_node(node, true);
   }
 
   public static openDomThemeNode(node: JstreeModel) {
@@ -266,16 +272,23 @@ export class ServiceDirective {
     });
   }
 
-  public refreshNode (node:JstreeModel) {
-    let id:number = <number><unknown>node.id.replace(/theme|citation/, "");
-    if (node.id.startsWith("theme")) {
-      this.provider.getTheme(id).then(theme => {
-        let node = JstreeModel.getJstreeModelFromExtendedTheme(theme);
-        console.log("refreshed theme node");
-        console.log(node);
-      });
-    }
-  }
+  // public refreshNode (node:JstreeModel) {
+  //   let id:number = <number><unknown>node.id.replace(/theme|citation/, "");
+  //   if (node.id.startsWith("theme")) {
+  //     this.provider.getTheme(id).then(theme => {
+  //       let node = JstreeModel.getJstreeModelFromExtendedTheme(theme);
+  //       console.log("refreshed theme node");
+  //       console.log(node);
+  //     });
+  //   }
+  //   else if (node.id.startsWith("citation")) {
+  //     let citationId = node.li_attr.citationId;
+  //     this.provider.getThemeTreeCitation(citationId)
+  //       .then(themeToCitation => {
+  //         let node = JstreeModel.getJstreeModelFromThemeToCitation(themeToCitation);
+  //       })
+  //   }
+  // }
 
   // public async deleteTheme(node:JstreeModel, callback:any) {
   //   console.log("Delete Theme");

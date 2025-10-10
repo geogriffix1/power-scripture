@@ -1,4 +1,5 @@
 import { ThemeModel, ThemeExtendedModel } from "./theme.model";
+import { ThemeToCitationModel } from "./themeToCitation.model";
 
 export class JstreeModel {
     id: string;
@@ -18,7 +19,8 @@ export class JstreeModel {
         icon:string,
         sequence:number,
         path:string,
-        state: JstreeState | any
+        state: JstreeState | any,
+        citationId?:number
     ) {
         this.id = id;
         this.text = text;
@@ -34,7 +36,8 @@ export class JstreeModel {
         this.li_attr = {
             class: 'theme-tree-node',
             title: title ?? '',
-            sequence: sequence
+            sequence: sequence,
+            citationId: citationId
         };
 
         this.children = <string[]>[];
@@ -44,7 +47,17 @@ export class JstreeModel {
     static getJstreeModel(node: any): JstreeModel {
         let pattern = /(theme|citation)(\d+)/;
         let icon = node.id.replace(pattern, '$1');
-        let model = new JstreeModel(node.id, node.text, node.li_attr.title, icon, node.li_attr.sequence, node.data.path, new JstreeState(false, false, true));
+        let model = new JstreeModel(
+            node.id,
+            node.text,
+            node.li_attr.title,
+            icon,
+            node.li_attr.sequence,
+            node.data.path,
+            new JstreeState(false, false, true),
+            node.li_attr?.citationId
+        );
+
         model.parent = node.parent;
         return model;
     }
@@ -53,8 +66,6 @@ export class JstreeModel {
 
         let jstreeModel = new JstreeModel(`theme${node.id}`, node.name, node.description, "theme", node.sequence, node.path, new JstreeState(false, false, false));
         jstreeModel.children = <string[]>[];
-        console.log("in getJstreeModelFromExtendedModel node: (JstreeModel)")
-        console.log(node);
         node.themes.sort((a, b) => a.theme.sequence - b.theme.sequence);
         node.themes.forEach(theme => {
             (<string[]>jstreeModel.children).push(`theme${theme.theme.id}`);
@@ -69,6 +80,22 @@ export class JstreeModel {
             jstreeModel.children = false;
         }
 
+        return jstreeModel;
+    }
+
+    static getJstreeModelFromThemeToCitation(node: ThemeToCitationModel): JstreeModel {
+        let jstreeModel = new JstreeModel(
+            `citation${node.id}`,
+            node.citationLabel,
+            node.description,
+            "citation",
+            node.sequence,
+            "",
+            new JstreeState(false, false, false),
+            node.citationId);
+        jstreeModel.children = false;
+        console.log("in getJstreeModelFromThemeToCitation node: (JstreeModel)");
+        console.log(node);
         return jstreeModel;
     }
 }

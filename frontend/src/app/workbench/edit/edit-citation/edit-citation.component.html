@@ -5,30 +5,39 @@
         Please select the <b>Citation</b> from the <b>Bible Theme Tree</b>
     </div>
 </div>
+@if (activeCitationNode()) {
 <nav class="cite-scripture">
     <div class="workbench-settings">
-        <i class="citation edit-icon" (click)="EditCitation()" title="Click to Save Changes"></i>
+        <i class="citation save-icon" (click)="EditCitationDescription()" title="Click to Save changes to the Citation Description"></i>
     </div>
     <div class="input">
         <input
-            id="description"
-            #description
+            id="citationDescription"
             type="text"
             title="Enter citation description"
             placeholder="Type description here"
         >
     </div>
+    <div class="command-message"></div>
 </nav>
-<div class="scripture-range-editor hidden">
-    <app-scripture-range-editor></app-scripture-range-editor>
+    @if (activeRoute == "edit/citation") {
+<div class="scripture-range-editor">
+    <app-scripture-range-editor [citation]="editedCitation" (edited)="onRangeAdded($event)"></app-scripture-range-editor>
 </div>
+    }
 <section class="scrollable-content">
-    <div class="scrolling">
-    @if (scriptureRanges) {
-        @for (range of scriptureRanges; track range; let i = $index) {
-        <div id="range_{{i}}_title" class="scripture-range">
-            <i class="spin-arrow-icon" (click)="OpenCloseScriptureRange(i)" title="Expand to view scriptures"></i>
-            <span>{{range.citation}}</span>
+    <div class="scrolling" #scrollableContent>
+    @if (scriptureRanges()) {
+        @for (range of scriptureRanges(); track range.citation; let i = $index) {
+        <div id="range_{{i}}_title" class="scripture-range container" aria-checked="false">
+            <div class="left-icon">
+                <i class="spin-arrow-icon" (click)="OpenCloseScriptureRange($event,i)" title="Expand to view scriptures"></i>
+            </div>
+            <div class="text">{{range.citation}}</div>
+            <div class="right-icons">
+                <i class="edit-icon" (click)="EditScriptureRange(i)" title="Edit this scripture range"></i>
+                <i class="delete-icon" (click)="DeleteScriptureRange(i)" title="Delete this scripture range"></i>
+            </div>
         </div>
         <div id="range_{{i}}_content" class="scripture-text" style="display: none;">
             {{range.verses}}
@@ -37,3 +46,9 @@
     }
     </div>
 </section>
+}
+@else {
+<section class="scrollable-content">
+    <div class="scrolling"></div>
+</section>
+}

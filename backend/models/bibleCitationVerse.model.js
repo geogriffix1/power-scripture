@@ -48,15 +48,27 @@ class BibleCitationVerseModel {
     }
     getInsertString = () => {
         const attr = require("./dbAttributes");
+        let scriptureHolder = this.scripture;
+        let markupHolder = this.markups;
+        this.scripture = null;
+        this.markups = null;
         this.createdAt.value = new Date().toISOString();
         this.updatedAt.value = new Date().toISOString();
-        return attr.tableAttribute.getInsertString(this);
+        let result = attr.tableAttribute.getInsertString(this);
+        this.scripture = scriptureHolder;
+        this.markups = markupHolder;
+        return result;
     }
 
     getUpdateString = () => {
         const attr = require("./dbAttributes");
+        let scriptureHolder = this.scripture;
+        let markupHolder = this.markups;
         this.updatedAt.value = new Date().toISOString();
-        return attr.tableAttribute.getUpdateString(this);
+        let result = attr.tableAttribute.getUpdateString(this);
+        this.scripture = scriptureHolder;
+        this.markups = markupHolder;
+        return result;
     }
 
     getDeleteString = () => {

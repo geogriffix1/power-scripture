@@ -112,6 +112,7 @@ export class CiteScriptureComponent {
         scriptures.push(scripture.id);
       }
     }
+
     service.createCitation(description, parentThemeId, scriptures);
     $('#theme-tree-full').jstree('refresh');
 
@@ -223,8 +224,11 @@ export class CiteScriptureComponent {
           cite = `${cite}-${this.endVerseField.nativeElement.value}`;
         }
 
+        console.log(`cite:  ${cite}`);
         let bibleService = new BibleService;
         let scriptures = await bibleService.citeScriptures(cite);
+        console.log("SCRIPTURES:");
+        console.log(scriptures);
         let pattern = /Obadiah|Philemon|2 John|3 John|Jude/
         let isSingleChapterBook = scriptures[0].book.match(pattern);
         let citation = `${scriptures[0].book} ${scriptures[0].chapter}:${scriptures[0].verse}`;

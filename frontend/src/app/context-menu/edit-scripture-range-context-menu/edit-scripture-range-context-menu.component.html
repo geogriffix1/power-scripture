@@ -1,10 +1,14 @@
 <div class="context-menu">
-    @for(menuItem of menuItems; track menuItem) {
+    @for(menuItem of menuItems; track menuItem.text) {
         @if(menuItem.isActive()) {
-    <div class="context-menu-item menu-item-active prevent-text-select" title={{menuItem.title}} (click)=menuItem.onClick()>{{menuItem.text}}</div>
+    <div class="context-menu-item menu-item-active prevent-text-select" title={{menuItem.title}} (click)=menuItem.onClick()>
+        {{menuItem.text}}
+    </div>
         }
         @else {
-    <div class="context-menu-item prevent-text-select" title={{menuItem.title}}>{{menuItem.text}}</div>
+    <div class="context-menu-item prevent-text-select" title={{menuItem.title}}>
+        {{menuItem.text}}
+    </div>
         }
     }
 </div>

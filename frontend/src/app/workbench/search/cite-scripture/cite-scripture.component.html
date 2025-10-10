@@ -9,18 +9,18 @@
     <div class="command-message"></div>
 </nav>
 <section class="command-Section">
-        <div class="command-labels">
+    <div class="command-labels">
         <div class="command-label" style="width:24px;">&nbsp;</div>
-        <div class="command-label book" style="width:{{widthBook}};"><label>Book</label></div>
-        <div class="command-label chapter" style="width:{{widthChapter}};"><label>Chapter</label></div>
-        <div class="command-label verse" style="width:{{widthChapter}};"><label>Verse</label></div>
-        <div class="command-label end-verse" style="width:{{widthChapter}};"><label>End Verse</label></div>
+        <div class="command-label book" [style.width.px]="widthBook"><label>Book</label></div>
+        <div class="command-label chapter" [style.width.px]="widthChapter"><label>Chapter</label></div>
+        <div class="command-label verse" [style.width.px]="widthChapter"><label>Verse</label></div>
+        <div class="command-label end-verse" [style.width.px]="widthChapter"><label>End Verse</label></div>
     </div>
     <div class="command-fields">
             <div class="command icon" style="width:24px;">
             <img class="add-icon" style="width:24px;" src="/assets/images/Add.png" (click)=runAdd() (mouseover)=onHoverImg($event) (mouseleave)=onNormalImg($event)>
         </div>
-        <div class="command book" style="width:{{widthBook}};">
+        <div class="command book" [style.width.px]="widthBook">
             <input id="book" #book type="text" title="Enter Bible book" (focus)=onFocusBook()>
             <div id="booklist" class="modal">
                 <div class="modal-content">
@@ -32,7 +32,7 @@
                 </div>
             </div>
         </div>
-        <div class="command chapter" style="width:{{widthChapter}};">
+        <div class="command chapter" [style.width.px]="widthChapter">
             <input id="chapter" #chapter type="text" title="Enter chapter number" (focus)=onFocusChapter() [disabled]=isChapterDisabled>
             <div id="chapterlist" class="modal">
                 <div class="modal-content">
@@ -44,7 +44,7 @@
                 </div>
             </div>
         </div>
-        <div class="command verse" style="width:{{widthChapter}};">
+        <div class="command verse" [style.width.px]="widthChapter">
             <input id="verse" #verse type="text" title="Enter starting verse number" (focus)=onFocusVerse() [disabled]=isVerseDisabled>
             <div id="verselist" class="modal">
                 <div class="modal-content">
@@ -55,7 +55,7 @@
                     </ul>
                 </div>
             </div>    </div>
-        <div class="command end-verse" style="width:{{widthChapter}};">
+        <div class="command end-verse" [style.width.px]="widthChapter">
             <input id="endVerse" #endVerse type="text" title="Enter ending verse number" (focus)=onFocusEndVerse() [disabled]=isEndVerseDisabled>
             <div id="endverselist" class="modal">
                 <div class="modal-content">

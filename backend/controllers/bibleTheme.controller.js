@@ -209,9 +209,6 @@ exports.create = (req, res) => {
         return;
     }
 
-    obj.name = obj.name.replace("'", "\\'");
-    obj.description = obj.description.replace("'", "\\'");
-
     addContext = context => {
         return new Promise(resolve => {
             resolve({ context: context });
@@ -369,9 +366,6 @@ exports.edit = (req, res) => {
 
         return;
     }
-
-    obj.name = obj.name.replace("'", "\\'");
-    obj.description = obj.description.replace("'", "\\'");
 
     addContext = context => {
         return new Promise(resolve => {

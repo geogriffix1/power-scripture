@@ -405,7 +405,7 @@ class TableAttribute {
         var qVal = ""
         if (typ.toUpperCase().startsWith("VARCHAR")) {
             if (val || val === "" || val === 0) {
-                qVal = `'${val}'`;
+                qVal = `'${val.replace("'", "\\'")}'`;
             }
             else {
                 qVal = null;

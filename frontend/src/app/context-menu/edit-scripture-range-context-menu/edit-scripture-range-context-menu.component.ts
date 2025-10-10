@@ -1,7 +1,8 @@
 import { Component, Input, OnInit } from '@angular/core';
-import { Router } from '@angular/router';
+//mport { Router } from '@angular/router';
 import { ContextMenu } from '../interfaces/context-menu';
 import { ContextMenuItem } from '../interfaces/context-menu-item';
+import { CiteScriptureRangeModel } from '../../model/citeScriptureRangeModel';
 
 @Component({
   selector: 'app-edit-scripture-range-context-menu',
@@ -19,17 +20,14 @@ export class EditScriptureRangeContextMenuComponent {
   @Input()
     selectedEntry!:any;
   @Input()
-    scriptureRanges!:any[];
-  @Input()
-    router!:Router;
+    scriptureRange!:any;
   @Input()
     context?:any;
 
   ngOnInit()
   {
     console.log("scripture range context menu component constructor");
-    console.log(`is router null? ${!this.router}`);
-    EditScriptureRangeContextMenuComponent.showContextMenu(this.scriptureRanges, this.context, this.router);
+    EditScriptureRangeContextMenuComponent.showContextMenu(this.scriptureRange);
   }
 
   constructor() {
@@ -37,62 +35,63 @@ export class EditScriptureRangeContextMenuComponent {
     EditScriptureRangeContextMenuComponent.instance = this;
   }
 
-  public static showContextMenu(scriptureRanges:any[], context:any, router:Router) {
+  public static showContextMenu(entry: CiteScriptureRangeModel) {
     console.log("showContextMenu");
     console.log(`context:`);
-    console.log(context);
-    console.log(`router is null? ${!router}`)
     EditScriptureRangeContextMenuComponent.instance.menuItems = [];
+    console.log("check 1");
     EditScriptureRangeContextMenuComponent.instance.menuItems.push({
-      text: "Edit the Scripture Range of the citation",
+      text: "Edit Scripture Range",
       title: "Adjust the range of scriptures",
-      isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canSelectAll(); },
+      isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canEditScriptureRange(); },
       onClick: (entry:any) => {
-        EditScriptureRangeContextMenuComponent.instance.callbacks.selectAll();
+        EditScriptureRangeContextMenuComponent.instance.callbacks.editScriptureRange(entry);
         this.hide();
       }
     });
-    EditScriptureRangeContextMenuComponent.instance.menuItems.push({
-      text: "Scripture Markup",
-      title: "Apply markups to selected scriptures",
-      isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canDeselectAll(); },
-      onClick: (entry:any) => {
-        EditScriptureRangeContextMenuComponent.instance.callbacks.deselectAll();
-        this.hide();
-      }
-    });
-    EditScriptureRangeContextMenuComponent.instance.menuItems.push({
-      text: "Remove Scripture Range",
-      title: "Delete the range of scriptures from the citation",
-      isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canRemoveSelected(); },
-      onClick: (entry:any) => {
-        EditScriptureRangeContextMenuComponent.instance.callbacks.removeSelected(scriptureRanges);
-        this.hide();
-      }
-    });
-    EditScriptureRangeContextMenuComponent.instance.menuItems.push({
-      text: "Save Citation",
-      title: "Save the full citation as edited",
-      isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canSaveCitation(); },
-      onClick: (entry:any) => {
-        EditScriptureRangeContextMenuComponent.instance.callbacks.saveCitation(scriptureRanges, router);
-        this.hide();
-      }
-    });
-    EditScriptureRangeContextMenuComponent.instance.menuItems.push({
-      text: "Export Selected",
-      title: "Export the selected scriptures to a file",
-      isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canExportSelected(); },
-      onClick: (entry:any) => {
-        EditScriptureRangeContextMenuComponent.instance.callbacks.exportSelected(scriptureRanges, context);
-        this.hide();
-      }
-    });
+    console.log("check 2");
+    // EditScriptureRangeContextMenuComponent.instance.menuItems.push({
+    //   text: "Scripture Markup",
+    //   title: "Apply markups to selected scriptures",
+    //   isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canDeselectAll(); },
+    //   onClick: (entry:any) => {
+    //     EditScriptureRangeContextMenuComponent.instance.callbacks.deselectAll();
+    //     this.hide();
+    //   }
+    // });
+    // EditScriptureRangeContextMenuComponent.instance.menuItems.push({
+    //   text: "Remove Scripture Range",
+    //   title: "Delete the range of scriptures from the citation",
+    //   isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canRemoveSelected(); },
+    //   onClick: (entry:any) => {
+    //     EditScriptureRangeContextMenuComponent.instance.callbacks.removeSelected(scriptureRanges);
+    //     this.hide();
+    //   }
+    // });
+    // EditScriptureRangeContextMenuComponent.instance.menuItems.push({
+    //   text: "Save Citation",
+    //   title: "Save the full citation as edited",
+    //   isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canSaveCitation(); },
+    //   onClick: (entry:any) => {
+    //     EditScriptureRangeContextMenuComponent.instance.callbacks.saveCitation(scriptureRanges);
+    //     this.hide();
+    //   }
+    // });
+    // EditScriptureRangeContextMenuComponent.instance.menuItems.push({
+    //   text: "Export Selected",
+    //   title: "Export the selected scriptures to a file",
+    //   isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canExportSelected(); },
+    //   onClick: (entry:any) => {
+    //     EditScriptureRangeContextMenuComponent.instance.callbacks.exportSelected(scriptureRanges, context);
+    //     this.hide();
+    //   }
+    // });
+
   }
     
   public static hide() {
     console.log("hiding");
-    $("edit-scripture-range-context-menu").addClass("hidden");
+    $("app-scripture-range-editor").addClass("hidden");
   }
 }
 

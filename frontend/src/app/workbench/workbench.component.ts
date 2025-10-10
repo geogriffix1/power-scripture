@@ -21,6 +21,8 @@ export class WorkbenchComponent {
   static activeCitation:JstreeModel;
   static activeTheme:JstreeModel;
   static scriptureRanges: CiteScriptureRangeModel[];
+  static activeScriptureRange: string;
+  static activeCitationVerse: CitationVerseExtendedModel;
   static WorkbenchResizeBroadcaster:Subject<DOMRectReadOnly>;
   static getWorkbenchSize() {
     let section = $("section.bible-workbench");
@@ -106,7 +108,7 @@ export class WorkbenchComponent {
         startVerse = result.verse;
         endVerse = result.verse;
         verses = result.text;
-        scriptures = [];
+        scriptures = [result];
       }
     }
 
@@ -141,6 +143,7 @@ export class WorkbenchComponent {
   }
 
   onEditClick() {
+    console.log("edit clicked!");
     AppComponent.editObject = undefined;
     this.router.navigate(['edit']);
   }
@@ -163,6 +166,8 @@ export class WorkbenchComponent {
 
     BibleThemeTreeComponent.ActiveCitationSelector.subscribe((citation:JstreeModel) => {
       WorkbenchComponent.activeCitation = citation;
+      console.log("In WorkbenchComponent, activeCitation:");
+      console.log(WorkbenchComponent.activeCitation);
     });
 
     BibleThemeTreeComponent.ActiveThemeSelector.subscribe((theme:JstreeModel) => {

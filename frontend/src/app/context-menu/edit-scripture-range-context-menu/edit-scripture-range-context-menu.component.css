@@ -1,3 +1,6 @@
+app-edit-scripture-range-context-menu.modal-context {position:relative; display:block; top: 80px; left: 100px; z-index: 1}
+app-edit-scripture-range-context-menu.modal-context.hidden {position:relative; display:none; z-index:1}
+app-edit-scripture-range-context-menu {position:relative;}
 div.context-menu.hidden {
     position:relative;
     display:none;

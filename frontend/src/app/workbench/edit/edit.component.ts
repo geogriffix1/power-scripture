@@ -1,10 +1,11 @@
 import { Router, ActivatedRoute } from '@angular/router'
-import { Component, Input, Output, OnInit } from '@angular/core';
-import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { Component, signal } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { BibleThemeTreeComponent } from '../../bible-theme-tree/bible-theme-tree.component';
 import { WorkbenchComponent } from '../workbench.component';
 import { EditThemeComponent } from './edit-theme/edit-theme.component';
 import { EditCitationComponent } from './edit-citation/edit-citation.component';
+import { JstreeModel } from '../../model/jstree.model';
 
 @Component({
     selector: 'app-edit',
@@ -16,13 +17,14 @@ import { EditCitationComponent } from './edit-citation/edit-citation.component';
     templateUrl: './edit.component.html',
     styleUrl: './edit.component.css'
 })
-export class EditComponent implements OnInit {
+export class EditComponent {
 
   constructor(
     private actRoute: ActivatedRoute,
     private router: Router,
   ) { }
-  paths = ["edit", "edit/theme", "edit/citation"];
+
+  paths = ["edit", "edit/theme", "edit/citation", "edit/citation/range", "edit/citation/verse", "edit/citation/verse/markup"];
   
   editTypes = [
     "Choose the type to edit",
@@ -32,14 +34,11 @@ export class EditComponent implements OnInit {
 
   static isSubscribed = false;
   static isActive = false;
+  activeThemeNode = signal(WorkbenchComponent.activeTheme);
+  activeCitationNode = signal(WorkbenchComponent.activeCitation);
 
-  @Input()
-    activeType = 0;
-  
-  @Output()
-    activeTheme = WorkbenchComponent.activeTheme;
-  @Output()
-    activeCitation = WorkbenchComponent.activeCitation;
+  activeType = 0;
+
   editType = this.editTypes[this.activeType];
   settingsActive = false;
   sectionWidth!:number;
@@ -114,8 +113,23 @@ export class EditComponent implements OnInit {
           }      
         });
 
+      BibleThemeTreeComponent.ActiveThemeSelector.subscribe((themeNode:JstreeModel) => {
+        console.log("edit component ActiveThemeSelector");
+        console.log(themeNode);
+        this.activeThemeNode.set(signal(themeNode)());
+        console.log("ActiveThemeSelector is done.")
+      });
+
+      BibleThemeTreeComponent.ActiveCitationSelector.subscribe((citationNode:JstreeModel) => {
+        console.log("edit component ActiveCitationSelector");
+        console.log(citationNode);
+        this.activeCitationNode.set(signal(citationNode)());
+        console.log("ActiveCitationSeletor done");
+      });
+
       EditComponent.isSubscribed = true;
     }
+
   }
 
   ngOnDestroy() {
