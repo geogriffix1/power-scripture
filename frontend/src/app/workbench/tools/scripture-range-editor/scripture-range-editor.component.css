@@ -134,7 +134,7 @@ div.search-results { width:100%; overflow-y: scroll; }
     width: 100%;
 }
 
-.search-results thead th  {
+thead th  {
     background:rgb(1, 1, 110); border-top: 1px solid white;
     color:white;
     font-weight: bold;
@@ -143,9 +143,11 @@ div.search-results { width:100%; overflow-y: scroll; }
     display:table-cell;
 }
 
-.search-results tbody th,.search-results tbody td {
+tbody th, tbody td {
+    padding: 4px;
     border-top: 1px solid rgb(1, 1, 110);
     border-right: 1px solid rgb(1, 1, 110);
+    color: black;
 }
 .prevent-text-select {
     -webkit-user-select: none; /* Safari */
@@ -159,7 +161,7 @@ th.citation-label {
 
 th.citation {
     background:none;
-    color: black;
+    color: white;
     text-align:left;
     font-weight: bold;
 }

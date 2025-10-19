@@ -341,6 +341,62 @@ exports.create = (req, res) => {
         });
 }
 
+exports.addToCitation = (req, res) => {
+    var citationId = null;
+    var scriptureIds = [];
+    var message = null;
+    if (!req.params.id || Number(req.params.id) === NaN) {
+        message = "Error, citation id is missing or invalid";
+    }
+
+    if (!message && (!req.body || !req.body.scriptureIds || !Array.isArray(req.body.scriptureIds))) {
+        message = "Error, scriptureIds array is invalid or missing from message body";
+    }
+
+    if (!message) {
+        citationId = Number(req.params.id);
+        scriptureIds = req.body.scriptureIds;
+        if (!scriptureIds.every(sid => Number(sid) !== NaN)) {
+            message = "Error, scriptureIds array contains one or more non-numeric values";
+        }
+    }
+
+    if (message) {
+        res.status(500).send(errorMessage(
+            500,
+            "Server Error",
+            req.path,
+            message,
+            ""
+        ));
+
+        return;
+    }
+
+    citationId = req.params.id;
+    scriptureIds = req.body.scriptureIds;
+    let payload = `{ "citation_id": ${citationId}, "scripture_ids": [${scriptureIds}] }`;
+
+    getQuery = (query) => {
+        return new Promise((resolve, reject) => {
+            dbAccess.query(query, (err, results) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(results);
+                }
+            });
+        });
+    }
+
+    let query = `CALL add_scriptures_to_citation('${payload}')`;
+    getQuery(query)
+        .then(results => {
+            res.send(results[0]);
+        });
+} 
+
 exports.edit = (req, res) => {
     var obj = null;
     var message = null;

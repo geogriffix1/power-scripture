@@ -18,7 +18,15 @@
     </div>
     <div class="command-fields">
             <div class="command icon" style="width:24px;">
-            <img class="add-icon" style="width:24px;" src="/assets/images/Add.png" (click)=runAdd() (mouseover)=onHoverImg($event) (mouseleave)=onNormalImg($event)>
+            <img 
+                class="add-icon"
+                title="Add Scripture Range to Citation"
+                style="width:24px;"
+                src="/assets/images/Add.png"
+                (click)=addRange()
+                (mouseover)=onHoverImg($event)
+                (mouseleave)=onNormalImg($event)
+            >
         </div>
         <div class="command book" [ngStyle]="{ width: widthBook }">
             <input id="book" #book type="text" title="Enter Bible book" (focus)=onFocusBook()>
@@ -69,29 +77,19 @@
         </div>
     </div>
 </section>
-<!-- @if (!citation) {
-<section class="scrollable-content">
-    <div class="search-results">
-        <table class="row-clickable">
-            <thead>
-                <tr>
-                    <th class="citation">Citation</th>
-                    <th class="verses">Scripture</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for(range of scriptureRanges; track range; let index = $index) {
-                <tr aria-checked="false"
-                    id="range_{{index}}"
-                    (click)=onClickCitation($event)
-                    (contextmenu)=showModalContextMenu($event)>
-                    
-                    <th class="citation">{{range.citation}}</th>
-                    <td class="verses">{{range.verses}}</td>
-                </tr>
-                }
-            </tbody>
-        </table>
-    </div>
-</section>
-} -->
+@if (activeScriptureRange) {
+    <table class="row-clickable">
+        <thead>
+            <tr>
+                <th class="citation">Citation</th>
+                <th class="verses">Scripture</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr aria-checked="false">
+                <th class="citation" title="Click the Plus (+) Icon to add this scripture range to the Citation">{{activeScriptureRange.citation}}</th>
+                <td class="verses" title="Click the Plus (+) Icon to add this scripture range to the Citation">{{activeScriptureRange.verses}}</td>
+            </tr>
+        </tbody>
+    </table>
+}

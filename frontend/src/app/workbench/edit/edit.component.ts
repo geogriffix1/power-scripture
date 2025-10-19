@@ -1,5 +1,5 @@
 import { Router, ActivatedRoute } from '@angular/router'
-import { Component, signal } from '@angular/core';
+import { Component, signal, EnvironmentInjector, runInInjectionContext } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { BibleThemeTreeComponent } from '../../bible-theme-tree/bible-theme-tree.component';
 import { WorkbenchComponent } from '../workbench.component';
@@ -22,7 +22,15 @@ export class EditComponent {
   constructor(
     private actRoute: ActivatedRoute,
     private router: Router,
-  ) { }
+    private injector: EnvironmentInjector
+   ) {
+    BibleThemeTreeComponent.ActiveCitationSelector.subscribe((node: JstreeModel) => {
+      runInInjectionContext(this.injector, () => {
+        console.log('Parent setting activeCitationNode', node);
+        this.activeCitationNode.set(node);
+      });
+    });
+  }
 
   paths = ["edit", "edit/theme", "edit/citation", "edit/citation/range", "edit/citation/verse", "edit/citation/verse/markup"];
   
@@ -104,7 +112,6 @@ export class EditComponent {
     if (!EditComponent.isSubscribed) {
       WorkbenchComponent.WorkbenchResizeBroadcaster
         .subscribe((rect:DOMRectReadOnly) => {
-          this.workbenchDomRect(rect);
           if (EditComponent.isActive) {
             this.workbenchDomRect(rect);            
             this.sectionWidth = rect.width - 4;
@@ -116,16 +123,17 @@ export class EditComponent {
       BibleThemeTreeComponent.ActiveThemeSelector.subscribe((themeNode:JstreeModel) => {
         console.log("edit component ActiveThemeSelector");
         console.log(themeNode);
-        this.activeThemeNode.set(signal(themeNode)());
+        this.activeThemeNode.set(themeNode);
         console.log("ActiveThemeSelector is done.")
       });
 
-      BibleThemeTreeComponent.ActiveCitationSelector.subscribe((citationNode:JstreeModel) => {
-        console.log("edit component ActiveCitationSelector");
-        console.log(citationNode);
-        this.activeCitationNode.set(signal(citationNode)());
-        console.log("ActiveCitationSeletor done");
-      });
+      //BibleThemeTreeComponent.ActiveCitationSelector.subscribe((citationNode:JstreeModel) => {
+      //  console.log("ActiveCitationSelector event -> citationNode:", citationNode);
+      //   console.log("Parent signal identity:", this.activeCitationNode);
+      //   console.log("Parent signal current value:", this.activeCitationNode());
+      //   this.activeCitationNode.set(citationNode);
+      //   this.cdr.detectChanges();
+      // });
 
       EditComponent.isSubscribed = true;
     }

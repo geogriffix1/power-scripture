@@ -27,7 +27,7 @@
     }
 <section class="scrollable-content">
     <div class="scrolling" #scrollableContent>
-    @if (scriptureRanges()) {
+    @if (scriptureRanges() && scriptureRanges().length > 0) {
         @for (range of scriptureRanges(); track range.citation; let i = $index) {
         <div id="range_{{i}}_title" class="scripture-range container" aria-checked="false">
             <div class="left-icon">
@@ -47,8 +47,8 @@
     </div>
 </section>
 }
-@else {
+<!-- @else {
 <section class="scrollable-content">
-    <div class="scrolling"></div>
+    <div class="scrolling" #scrollableContent></div>
 </section>
-}
+} -->

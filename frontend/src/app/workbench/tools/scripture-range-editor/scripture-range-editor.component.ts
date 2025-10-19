@@ -30,23 +30,15 @@ export class ScriptureRangeEditorComponent {
   @ViewChild('endVerse', { static: true }) endVerseField!: ElementRef;
   @Input()
   set citation(value: CitationExtendedModel | undefined) {
-
     this._citation = value;
     console.log("CITATION SET IN SCRIPTURE-RANGE-EDITOR");
+    console.log(this._citation);
   }
   get citation(): CitationExtendedModel | undefined {
     return this._citation;
   }
 
-//   if (value) {
-//     this.initializeEditor(value); // safely reinit
-//   } else {
-//     this.resetEditor(); // optional: clear form or state
-//   }
-// }
-//@Input() citation?: CitationExtendedModel;
   @Output() edited = new EventEmitter<number>();
-
 
   unicodeSuperscriptNumbers = [
     "\u2070",
@@ -73,7 +65,9 @@ export class ScriptureRangeEditorComponent {
   };
 
   static inputElement: any;
-  static RangeEditorIsActiveBroadcaster: any;
+  static RangeEditorIsActiveBroadcaster: any; 
+
+  activeScriptureRange?: CiteScriptureRangeModel;
 
   createCitation = false;
 
@@ -110,97 +104,98 @@ export class ScriptureRangeEditorComponent {
     this.createCitation = (this.activatedRoute.snapshot.routeConfig?.path ?? "") == "create/citation";
   }
 
-  CreateCitation() {
-    $("div.command-message").text("").hide(100);    
-    console.log("Create Citation Clicked");
-    console.log(this.scriptureRanges);
-    if (!this.scriptureRanges || this.scriptureRanges.length == 0) {
-      $("div.command-message").text("Citation not created - No scriptures have been selected").show(100);
-      return;
-    }
+  CreateCitation() {}
+  // CreateCitation() {
+  //   $("div.command-message").text("").hide(100);    
+  //   console.log("Create Citation Clicked");
+  //   console.log(this.scriptureRanges);
+  //   if (!this.scriptureRanges || this.scriptureRanges.length == 0) {
+  //     $("div.command-message").text("Citation not created - No scriptures have been selected").show(100);
+  //     return;
+  //   }
 
-    if (!WorkbenchComponent.activeTheme) {
-      $("div.command-message").text("Citation not created - Must select a parent Theme").show(100);
-      return;
-    }
+  //   if (!WorkbenchComponent.activeTheme) {
+  //     $("div.command-message").text("Citation not created - Must select a parent Theme").show(100);
+  //     return;
+  //   }
 
-    let description = <string>$("#description").val() ?? "";
-    console.log(description);
-    console.log(`activeThemeId: ${WorkbenchComponent.activeTheme.id}`);
-    let parentThemeId = <number><unknown>WorkbenchComponent.activeTheme.id.replace(/theme(\d+)/, "$1");
-    console.log(`parentThemeId: ${parentThemeId}`)
-    let service = new BibleService;
-    let scriptures:number[] = [];
-    for (let i = 0; i < this.scriptureRanges.length; i++) {
-      for (let j = 0; j < this.scriptureRanges[i].scriptures.length; j++) {
-        let scripture = this.scriptureRanges[i].scriptures[j];
-        console.log(`${scripture.id} - ${scripture.book} ${scripture.chapter}:${scripture.verse}`)
-        scriptures.push(scripture.id);
-      }
-    }
-    service.createCitation(description, parentThemeId, scriptures);
-    $('#theme-tree-full').jstree('refresh');
+  //   let description = <string>$("#description").val() ?? "";
+  //   console.log(description);
+  //   console.log(`activeThemeId: ${WorkbenchComponent.activeTheme.id}`);
+  //   let parentThemeId = <number><unknown>WorkbenchComponent.activeTheme.id.replace(/theme(\d+)/, "$1");
+  //   console.log(`parentThemeId: ${parentThemeId}`)
+  //   let service = new BibleService;
+  //   let scriptures:number[] = [];
+  //   for (let i = 0; i < this.scriptureRanges.length; i++) {
+  //     for (let j = 0; j < this.scriptureRanges[i].scriptures.length; j++) {
+  //       let scripture = this.scriptureRanges[i].scriptures[j];
+  //       console.log(`${scripture.id} - ${scripture.book} ${scripture.chapter}:${scripture.verse}`)
+  //       scriptures.push(scripture.id);
+  //     }
+  //   }
+  //   service.createCitation(description, parentThemeId, scriptures);
+  //   $('#theme-tree-full').jstree('refresh');
 
-    console.log("activeTheme:");
-    console.log(WorkbenchComponent.activeTheme);
-  }
+  //   console.log("activeTheme:");
+  //   console.log(WorkbenchComponent.activeTheme);
+  // }
 
-  callbacks = {
-    canSelectAll() { return true; },
-    selectAll() {
-      $("tbody > tr[aria-checked=false]").attr('aria-checked', 'true');
-    },
-    canDeselectAll() { return true; },
-    deselectAll() {
-      $("tbody > tr[aria-checked=true]").attr('aria-checked', 'false');
-    },
-    canRemoveSelected() { return true; },
-    removeSelected(citations:any[]) {
-      let toRemove = <number[]>[];
-      let selected = $("tbody > tr[aria-checked=true]");
-      for (let i = 0; i < selected.length; i++) {
-        let key = +selected[i].id.replace("range_", "");
-        toRemove.push(key);
-      }
+  // callbacks = {
+  //   canSelectAll() { return true; },
+  //   selectAll() {
+  //     $("tbody > tr[aria-checked=false]").attr('aria-checked', 'true');
+  //   },
+  //   canDeselectAll() { return true; },
+  //   deselectAll() {
+  //     $("tbody > tr[aria-checked=true]").attr('aria-checked', 'false');
+  //   },
+  //   canRemoveSelected() { return true; },
+  //   removeSelected(citations:any[]) {
+  //     let toRemove = <number[]>[];
+  //     let selected = $("tbody > tr[aria-checked=true]");
+  //     for (let i = 0; i < selected.length; i++) {
+  //       let key = +selected[i].id.replace("range_", "");
+  //       toRemove.push(key);
+  //     }
 
-      while(toRemove.length > 0) {
-        let key = toRemove.pop();
-        citations.splice(key!, 1);
-      }
-    },
-    canSaveCitation() { return true; },
-    saveCitation(citations:CiteScriptureRangeModel[], router:Router) {
-      WorkbenchComponent.scriptureRanges = [];
-      for (let i = 0; i < citations.length; i++) {
-        WorkbenchComponent.scriptureRanges.push(citations[i]);
-      }
+  //     while(toRemove.length > 0) {
+  //       let key = toRemove.pop();
+  //       citations.splice(key!, 1);
+  //     }
+  //   },
+  //   canSaveCitation() { return true; },
+  //   saveCitation(citations:CiteScriptureRangeModel[], router:Router) {
+  //     WorkbenchComponent.scriptureRanges = [];
+  //     for (let i = 0; i < citations.length; i++) {
+  //       WorkbenchComponent.scriptureRanges.push(citations[i]);
+  //     }
 
-      citations = [];
-      console.log("save citation");
-      console.log(`is router null? ${!router}`);
-      router.navigate(['/create/citation']);
-    },
-    canExportSelected(citations:any) { return true; },
-    exportSelected(citations:any, context:any) {
-      console.log("export selected");
-      let selected = $("tbody > tr[aria-checked=true]");
-      if (selected.length == 0) {
-        console.log(`all ${citations.length} citations selected`);
-        context.citations = citations;
-      }
-      else {
-        context.citations = [];
-        console.log()
-        for (let i=0; i < selected.length; i++) {
-          let key = +selected[i].id.replace("range_", "");
-          console.log(`selecting citations[${key}]`);
-          context.citations.push(citations[key]);
-        }
-      }
+  //     citations = [];
+  //     console.log("save citation");
+  //     console.log(`is router null? ${!router}`);
+  //     router.navigate(['/create/citation']);
+  //   },
+  //   canExportSelected(citations:any) { return true; },
+  //   exportSelected(citations:any, context:any) {
+  //     console.log("export selected");
+  //     let selected = $("tbody > tr[aria-checked=true]");
+  //     if (selected.length == 0) {
+  //       console.log(`all ${citations.length} citations selected`);
+  //       context.citations = citations;
+  //     }
+  //     else {
+  //       context.citations = [];
+  //       console.log()
+  //       for (let i=0; i < selected.length; i++) {
+  //         let key = +selected[i].id.replace("range_", "");
+  //         console.log(`selecting citations[${key}]`);
+  //         context.citations.push(citations[key]);
+  //       }
+  //     }
 
-      context.showCiteScriptureReport = true;
-    }
-  };
+  //     context.showCiteScriptureReport = true;
+  //   }
+  // };
 
   workbenchDomRect(rect:DOMRectReadOnly) {
     this.sectionWidth = rect.width;
@@ -234,11 +229,63 @@ export class ScriptureRangeEditorComponent {
     console.log(row);
   }
 
-  runAdd() {
-    console.log("runAdd()");
+  // runAdd() {
+  //   console.log("runAdd()");
+  //   if ($("#endVerse.legal").length > 0) {
+  //     $("div.command-message").text('').hide(100);
+  //     (async (obj: ScriptureRangeEditorComponent) => {
+  //       console.log(`book: (innerText=${this.bookField.nativeElement.value})`);
+  //       console.log(this.bookField.nativeElement);
+  //       let range = `${this.bookField.nativeElement.value} ` + 
+  //         `${this.chapterField.nativeElement.value}:` +
+  //         `${this.verseField.nativeElement.value}`;
+        
+  //       if (this.endVerseField.nativeElement.innerText != this.verseField.nativeElement.value) {
+  //         range = `${range}-${this.endVerseField.nativeElement.value}`;
+  //       }
+
+  //       let bibleService = new BibleService;
+  //       let newRangeScriptures = await bibleService.citeScriptures(range);
+  //       //let existing = await bibleService.getCitationVerses((<CitationExtendedModel>this._citation).id);
+
+  //       if (this?.citation) {
+  //         let thisCitation = <CitationExtendedModel>this?.citation;
+  //       console.log(`citation.id: ${this._citation?.id}`);
+  //         let scriptureIds = new Set(thisCitation.verses.map(verse => Number(verse.scriptureId)));
+  //         let newRangeScriptureIds = newRangeScriptures.map(scripture => scripture.id);
+  //         let uniqueScriptureIds = newRangeScriptureIds.filter(scriptureId => !scriptureIds.has(scriptureId));
+
+  //         if (uniqueScriptureIds.length > 0) {
+  //           uniqueScriptureIds.forEach(scriptureId => {
+  //             let verse = bibleService.createCitationVerse(thisCitation.id, scriptureId).then();
+  //             console.log(`verse created for scripture: ${scriptureId}`);
+  //             console.log(verse);
+  //           });
+
+  //           this.edited.emit(this._citation?.id);
+  //         }
+  //         else
+  //         {
+  //           $(".command-message").text("No new scriptures added");
+  //         }
+  //       }
+  //      $(".command input[type=text]").val('').removeClass('legal');
+  //      this.isChapterDisabled = true;
+  //      this.isVerseDisabled = true;
+  //      this.isEndVerseDisabled = true;
+  //     })(this);
+  //   }
+  //   else {
+  //     $("div.command-message").text("Please complete the verse range.").show(100);
+  //     console.log("not legal");
+  //   }
+  // }
+
+  runShow() {
+    console.log("runShow()");
     if ($("#endVerse.legal").length > 0) {
       $("div.command-message").text('').hide(100);
-      (async (obj: ScriptureRangeEditorComponent) => {
+      (async () => {
         console.log(`book: (innerText=${this.bookField.nativeElement.value})`);
         console.log(this.bookField.nativeElement);
         let range = `${this.bookField.nativeElement.value} ` + 
@@ -250,69 +297,91 @@ export class ScriptureRangeEditorComponent {
         }
 
         let bibleService = new BibleService;
-        let newRangeScriptures = await bibleService.citeScriptures(range);
-        //let existing = await bibleService.getCitationVerses((<CitationExtendedModel>this._citation).id);
+        let scriptures = await bibleService.citeScriptures(range);
 
-        if (this?.citation) {
-          let thisCitation = <CitationExtendedModel>this?.citation;
-        console.log(`citation.id: ${this._citation?.id}`);
-          let scriptureIds = new Set(thisCitation.verses.map(verse => Number(verse.scriptureId)));
-          let newRangeScriptureIds = newRangeScriptures.map(scripture => scripture.id);
-          let uniqueScriptureIds = newRangeScriptureIds.filter(scriptureId => !scriptureIds.has(scriptureId));
+        let pattern = /Obadiah|Philemon|2 John|3 John|Jude/
+        let isSingleChapterBook = scriptures[0].book.match(pattern);
+        let citation = `${scriptures[0].book} ${scriptures[0].chapter}:${scriptures[0].verse}`;
+        if (isSingleChapterBook) {
+          citation = `${scriptures[0].book} ${scriptures[0].verse}`;
+        }
 
-          if (uniqueScriptureIds.length > 0) {
-            uniqueScriptureIds.forEach(scriptureId => {
-              let verse = bibleService.createCitationVerse(thisCitation.id, scriptureId).then();
-              console.log(`verse created for scripture: ${scriptureId}`);
-              console.log(verse);
-            });
+        let scriptureText = scriptures[0].text;
 
-            this.edited.emit(this._citation?.id);
-          }
-          else
-          {
-            $(".command-message").text("No new scriptures added");
+        if (scriptures.length > 1) {
+          citation = `${citation}-${scriptures[scriptures.length - 1].verse}`;
+          for (let i = 1; i < scriptures.length; i++) {
+            let verseNumber = scriptures[i].verse;
+            let prefix = this.superscript(verseNumber);
+            scriptureText = `${scriptureText} ${prefix}${scriptures[i].text}`;
           }
         }
 
+        this.activeScriptureRange = {
+          citation: citation,
+          verses: scriptureText,
+          scriptures: scriptures
+        };
+        //let existing = await bibleService.getCitationVerses((<CitationExtendedModel>this._citation).id);
 
-        //WorkbenchComponent.setScriptureRanges
-      //   let pattern = /Obadiah|Philemon|2 John|3 John|Jude/
-      //   let isSingleChapterBook = scriptures[0].book.match(pattern);
-      //   let citation = `${scriptures[0].book} ${scriptures[0].chapter}:${scriptures[0].verse}`;
-      //   if (isSingleChapterBook) {
-      //     citation = `${scriptures[0].book} ${scriptures[0].verse}`;
-      //   }
+        // if (this?.citation) {
+        //   let thisCitation = <CitationExtendedModel>this?.citation;
+        // console.log(`citation.id: ${this._citation?.id}`);
+        //   let scriptureIds = new Set(thisCitation.verses.map(verse => Number(verse.scriptureId)));
+        //   let newRangeScriptureIds = newRangeScriptures.map(scripture => scripture.id);
+        //   let uniqueScriptureIds = newRangeScriptureIds.filter(scriptureId => !scriptureIds.has(scriptureId));
 
-      //   let scriptureText = scriptures[0].text;
+        //   if (uniqueScriptureIds.length > 0) {
+        //     // uniqueScriptureIds.forEach(scriptureId => {
+        //     //   let verse = bibleService.createCitationVerse(thisCitation.id, scriptureId).then();
+        //     //   console.log(`verse created for scripture: ${scriptureId}`);
+        //     //   console.log(verse);
+        //     // });
 
-      //   if (scriptures.length > 1) {
-      //     citation = `${citation}-${scriptures[scriptures.length - 1].verse}`;
-      //     for (let i = 1; i < scriptures.length; i++) {
-      //       let verseNumber = scriptures[i].verse;
-      //       let prefix = this.superscript(verseNumber);
-      //       scriptureText = `${scriptureText} ${prefix}${scriptures[i].text}`;
-      //     }
-      //   }
-
-      //   let scriptureRange:CiteScriptureRangeModel = {
-      //     citation: citation,
-      //     verses: scriptureText,
-      //     scriptures: scriptures
-      //  };
-
-      //  this.scriptureRanges.push(scriptureRange);
+        //     //this.edited.emit(this._citation?.id);
+        //   }
+        //   else
+        //   {
+        //     $(".command-message").text("No new scriptures added");
+        //   }
+        // }
        $(".command input[type=text]").val('').removeClass('legal');
        this.isChapterDisabled = true;
        this.isVerseDisabled = true;
        this.isEndVerseDisabled = true;
-      })(this);
+      })();
     }
     else {
       $("div.command-message").text("Please complete the verse range.").show(100);
       console.log("not legal");
     }
   }
+
+  addRange() {
+    if (this.activeScriptureRange) {
+      $("app-scripture-range-editor .command-message").text("").hide(500);
+
+    }
+    else {
+      $("app-scripture-range-editor .command-message").text("Add a scripture range after entering the Book, Chapter, and range of Verses.").show(500);
+    }
+  }
+
+
+        //WorkbenchComponent.setScriptureRanges
+
+      //  this.scriptureRanges.push(scriptureRange);
+  //      $(".command input[type=text]").val('').removeClass('legal');
+  //      this.isChapterDisabled = true;
+  //      this.isVerseDisabled = true;
+  //      this.isEndVerseDisabled = true;
+  //     })(this);
+  //   }
+  //   else {
+  //     $("div.command-message").text("Please complete the verse range.").show(100);
+  //     console.log("not legal");
+  //   }
+  // }
 
   superscript(n:number): string {
     let s = n.toString();
@@ -325,13 +394,13 @@ export class ScriptureRangeEditorComponent {
     return ss;
   }
 
-  public showModalContextMenu(event:MouseEvent) {
-    console.log("showModalContextMenu");
-    event.preventDefault();
-    CiteContextMenuComponent.showContextMenu(this.scriptureRanges, this.context, this.router);
-    let context = $("app-cite-context-menu");
-    context.removeClass("hidden");
-  }
+  // public showModalContextMenu(event:MouseEvent) {
+  //   console.log("showModalContextMenu");
+  //   event.preventDefault();
+  //   CiteContextMenuComponent.showContextMenu(this.scriptureRanges, this.context, this.router);
+  //   let context = $("app-cite-context-menu");
+  //   context.removeClass("hidden");
+  // }
 
   onFocusBook() {
     if (!$("#book").val()) {
@@ -497,7 +566,7 @@ export class ScriptureRangeEditorComponent {
       this.endVerseField.nativeElement.focus();      
       this.endVerseField.nativeElement.select();
     }, 0);
-    //$("#endVerse").trigger('focus');
+    $("#endVerse").trigger('focus');
 }
 
   onFocusEndVerse() {
@@ -521,7 +590,7 @@ export class ScriptureRangeEditorComponent {
     $("#booklist,#chapterlist,#verselist,#endverselist").hide();
     $("#endVerse").val(endVerse).addClass("legal");
     this.activeEndVerse = endVerse;
-    this.runAdd();
+    this.runShow();
   }
 
   onChangeChapter(chapter:string) {
@@ -647,9 +716,6 @@ export class ScriptureRangeEditorComponent {
         }
       });
     }
-
-    console.log("routes:");
-    console.log(this.router);
   }
 
   ngAfterViewInit() {
@@ -664,17 +730,10 @@ export class ScriptureRangeEditorComponent {
             $("#chapterlist,#verselist,#endverselist").css('width', this.widthChapter);
             $(".command-label.chapter,.command-label.verse,.command-label.end-verse").css('width', `${this.widthChapter}`);
             $(".command.chapter,.command.verse,.command.end-verse").css('width', `${this.widthChapter}`);
-            
-            let viewHeight = <number>$("as-split-area.workbench").innerHeight();
-            $("as-split-area.workbench").css("overflow-y", "unset");
-            let resultsTop = $("section.scrollable-content").offset()!.top;
-            let searchResultsHeight = viewHeight - resultsTop;
-            $("div.search-results").css("height", searchResultsHeight + "px");
           }
       });
 
       ScriptureRangeEditorComponent.isSubscribed = true;
-
     }
 
     this.scriptureRanges = WorkbenchComponent.scriptureRanges ?? [];
@@ -911,7 +970,7 @@ export class ScriptureRangeEditorComponent {
             this.endVerseField.nativeElement.blur();
             $("#endVerse").addClass("legal").removeClass("illegal").val(this.activeEndVerse);
             $("#endverselist").hide();
-            this.runAdd();
+            this.runShow();
           }
         }
       });

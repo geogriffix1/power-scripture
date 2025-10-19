@@ -80,7 +80,7 @@ export class WorkbenchComponent {
           endVerse++;
       }
       else {
-        if (book != "") {
+        if (book) {
           let isSingleChapterBook = book.match(/Obadiah|Philemon|2 John|3 John|Jude/);
           let firstVerse = `${book} ${chapter}:${startVerse}`;
           if (isSingleChapterBook) {

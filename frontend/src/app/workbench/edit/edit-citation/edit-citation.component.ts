@@ -1,4 +1,18 @@
-import { Component, Input, Signal, signal, effect, ElementRef, ViewChild } from '@angular/core';
+import {
+  Component,
+  Input,
+  Signal,
+  WritableSignal,
+  signal,
+  effect,
+  EnvironmentInjector,
+  runInInjectionContext,
+  inject,
+  OnChanges,
+  SimpleChanges,
+  ElementRef,
+  ViewChild
+} from '@angular/core';
 import { WorkbenchComponent } from '../../workbench.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-tree.component';
@@ -20,9 +34,12 @@ import { CitationVerseModel, CitationVerseExtendedModel } from '../../../model/c
 })
 export class EditCitationComponent {
   @Input({required: true})
-    activeCitationNode!: Signal<JstreeModel>
+    activeCitationNode!: Signal<JstreeModel | null>;
   @ViewChild("scrollableContent", { static: false })
     scrollableContent!: ElementRef<HTMLElement>
+  
+  private injector = inject(EnvironmentInjector);
+
   previousCitationNode: JstreeModel | null = null;
   activeCitation!: CitationExtendedModel;
   editedCitation!: CitationExtendedModel;
@@ -36,97 +53,65 @@ export class EditCitationComponent {
   sectionHeight!:number;
   verseListHeight!:number;
   citationLabel!:string;
-  scriptureRanges!: Signal<CiteScriptureRangeModel[]>;
+  readonly scriptureRanges: WritableSignal<CiteScriptureRangeModel[]> = signal([]);
   editedCitationVerses!: CitationVerseModel[];
   activeScriptureRange?: CiteScriptureRangeModel;
   selectedEntry:any = [];
   scriptureRangeEditorIsActive:boolean = false;
 
-   constructor(
+  constructor (
     private actRoute: ActivatedRoute,
     private router: Router,
     private service: BibleService
-  ) {
-      effect(()=>{
-      console.log("edit-citation: in effect");
-      this.activeRoute = this.actRoute.snapshot.routeConfig?.path ?? "edit/citation";
-      console.log(`activeRoute: ${this.activeRoute}`);
-      console.log("activeCitationNode:");
-      console.log(this.activeCitationNode());
-      if (this.activeCitationNode()) {
-        let id = <number><unknown>this.activeCitationNode().li_attr.citationId;
-        console.log(`citation id: ${id}`);
-        console.log(`previous citation exists? ${EditCitationComponent.previousCitation ? true : false}`);
-        if (EditCitationComponent.previousCitation?.id == id) {
-          this.activeCitation = <CitationExtendedModel>{
-            id: EditCitationComponent.previousCitation.id,
-            description: EditCitationComponent.previousCitation.description,
-            citationLabel: EditCitationComponent.previousCitation.citationLabel,
-            bibleOrder: EditCitationComponent.previousCitation.bibleOrder,
-            verses: EditCitationComponent.previousCitation.verses
-          };
-        }
-        else if (this.activeRoute.toLowerCase() != "edit/citation") {
-          router.navigate(["edit/citation"]);
-        }
-        else {
-          service.getCitation(id)
-            .then(citation => {
-              this.activeCitation = citation;
-              $("#description").val(this.activeCitation.description).show(500);
-              $("div.citation.selected").removeClass("missing").text(this.activeCitation.citationLabel).show(500);
+  ) { }
 
-              this.activeCitation = {
-                id: citation.id,
-                description: citation.description,
-                citationLabel: citation.citationLabel,
-                bibleOrder: citation.bibleOrder,
-                verses: citation.verses
-              };
 
-              EditCitationComponent.previousCitation = {
-                id: citation.id,
-                description: citation.description,
-                citationLabel: citation.citationLabel,
-                bibleOrder: citation.bibleOrder,
-                verses: citation.verses
-              };
-          });
-        }
+  refreshCitationEditor(citation: CitationExtendedModel) {
+    this.activeCitation = citation;
+    $("#citationDescription").val(this.activeCitation.description).show(500);
+    $("div.citation.selected").removeClass("missing").text(this.activeCitation.citationLabel).show(500);
 
-        this.editedCitation =  {
-          id: this.activeCitation.id,
-          description: this.activeCitation.description,
-          citationLabel: this.activeCitation.citationLabel,
-          bibleOrder: this.activeCitation.bibleOrder,
-          verses: this.activeCitation.verses
-        };
+    console.log("Freshly-queried citation:");
+    console.log(citation);
 
-        WorkbenchComponent.setScriptureRanges(this.activeCitation);
-        this.scriptureRanges = signal(WorkbenchComponent.scriptureRanges.map(sr => 
-          <CiteScriptureRangeModel>{
-            citation: sr.citation,
-            verses: sr.verses,
-            scriptures: sr.scriptures,
-            isOpen: false
-          }));
-      
-      }
-      else {
-        $("#description").val("").show(500);
-        $("div.citation.selected")
-          .removeClass("missing")
-          .addClass("missing")
-          .html("Please select the <b>Citation</b> from the <b>Bible Theme Tree</b>")
-          .show(500);
-        
-        this.activeCitation = this.nullCitation;
-        this.editedCitation = this.nullCitation;
-        this.scriptureRanges = signal([]);
-      }
-    });
+    this.activeCitation = {
+      id: citation.id,
+      description: citation.description,
+      citationLabel: citation.citationLabel,
+      bibleOrder: citation.bibleOrder,
+      verses: citation.verses
+    };
+
+    EditCitationComponent.previousCitation = {
+      id: citation.id,
+      description: citation.description,
+      citationLabel: citation.citationLabel,
+      bibleOrder: citation.bibleOrder,
+      verses: citation.verses
+    };
+
+    this.editedCitation =  {
+      id: this.activeCitation.id,
+      description: this.activeCitation.description,
+      citationLabel: this.activeCitation.citationLabel,
+      bibleOrder: this.activeCitation.bibleOrder,
+      verses: this.activeCitation.verses
+    };
+
+    WorkbenchComponent.setScriptureRanges(this.editedCitation);
+    const newScriptureRanges = WorkbenchComponent.scriptureRanges.map(sr => 
+      <CiteScriptureRangeModel>{
+        citation: sr.citation,
+        verses: sr.verses,
+        scriptures: sr.scriptures,
+        isOpen: false
+      });
+
+    console.log("newScriptureRanges:");
+    console.log(newScriptureRanges);
+
+    this.scriptureRanges.set(newScriptureRanges);
   }
-
   paths = ["edit", "edit/theme", "edit/citation", "edit/citation/range", "edit/citation/verse", "edit/citation/verse/markup"];
 
   workbenchDomRect(rect:DOMRectReadOnly) {
@@ -136,11 +121,6 @@ export class EditCitationComponent {
 
   static isActive = false;
   static isSubscribed = false;
-
-  @Input()
-    activeType = 2;
-
-  path = this.paths[this.activeType];
 
   OpenCloseScriptureRange(e:MouseEvent, i:number) {
     console.log(`OpenCloseScriptureRange(${i})`)
@@ -162,34 +142,15 @@ export class EditCitationComponent {
 
   onRangeAdded(id:number) {
     (async () => {
-      let service = new BibleService;
-      this.editedCitation = await service.getCitation(id);
+      this.editedCitation = await this.service.getCitation(id);
     })();
   }
-
-  // ShowModalContextMenu(e:MouseEvent, scriptureRangeIndex: number) {
-  //   e.preventDefault();
-  //   console.log("ShowModalContextMenu");
-  //   console.log(e);
-  //   console.log(`show context menu for scriptureRange[${scriptureRangeIndex}]`);
-  //   $("app-edit-scripture-range-context-menu").removeClass("hidden");
-  //   console.log("returning from ShowModalContextMenu");
-  // } 
-
-  // callbacks = {
-  //   canEditScriptureRange() { return true; },
-  //   editScriptureRange(range: CiteScriptureRangeModel) {
-  //     console.log("edit scripture range:");
-  //     console.log(range);
-  //   }
-  // }
 
   EditCitationDescription() {
     if (!this.editedCitation.description || this.editedCitation.description.trim() != ($("#citationDiscription").val() ?? "")) {
       this.editedCitation.description = <string>$("#citationDescription").val() ?? "";
-      let service = new BibleService;
       (async (obj) => {
-        let edited = await service.editCitation(<CitationModel> {
+        let edited = await this.service.editCitation(<CitationModel> {
           id: obj.editedCitation.id,
           description: obj.editedCitation.description
         });
@@ -231,7 +192,9 @@ export class EditCitationComponent {
   }
 
   ngOnInit() {
+    console.log("ON INIT");
     console.log("initializing edit citation component");
+    console.log("Child received signal identity:", this.activeCitationNode());
     EditCitationComponent.isActive = true;
     let rect = WorkbenchComponent.getWorkbenchSize();
 
@@ -239,239 +202,70 @@ export class EditCitationComponent {
     this.sectionWidth = rect.width;
     this.activeScriptureRange = undefined;
     $("app-edit-theme").width(rect.width);
-    $("#citationDescription").width(rect.width - 70);
+    $("#citationDescription").width(rect.width - 60);
 
-    if (WorkbenchComponent.activeCitation) {
-      this.activeCitationNode = signal(WorkbenchComponent.activeCitation);
-    }
-  
-    // EditCitationComponent.isPreviousCitation = false;
-    // if (WorkbenchComponent.activeCitation) {
-    //   // Check for previous edited citation still in memory
-    //   if (EditCitationComponent.previousCitation &&
-    //     WorkbenchComponent.activeCitation.id == `citation${(<any>EditCitationComponent.previousCitation).id}`) {
-    //       this.activeCitation = <CitationExtendedModel>{
-    //         id: EditCitationComponent.previousCitation.id,
-    //         description: EditCitationComponent.previousCitation.description,
-    //         citationLabel: EditCitationComponent.previousCitation.citationLabel,
-    //         bibleOrder: EditCitationComponent.previousCitation.bibleOrder,
-    //         verses: EditCitationComponent.previousCitation.verses
-    //       };
-
-    //       this.editedCitation = <CitationExtendedModel>{
-    //         id: EditCitationComponent.previousCitation.id,
-    //         description: EditCitationComponent.previousCitation.description,
-    //         citationLabel: EditCitationComponent.previousCitation.citationLabel,
-    //         bibleOrder: EditCitationComponent.previousCitation.bibleOrder,
-    //         verses: EditCitationComponent.previousCitation.verses
-    //       };
-
-    //       WorkbenchComponent.setScriptureRanges(this.activeCitation);
-    //       const newRanges = WorkbenchComponent.scriptureRanges.map(sr => 
-    //         <CiteScriptureRangeModel>{
-    //           citation: sr.citation,
-    //           verses: sr.verses,
-    //           scriptures: sr.scriptures,
-    //           isOpen: false
-    //         });
-
-    //       this.scriptureRanges = newRanges;
-
-    //       EditCitationComponent.isPreviousCitation = true;
-    //       console.log("previous citation found!");
-    //       console.log(this.editedCitation);
-    //   }
-    //   else {
-    //     EditCitationComponent.previousCitation = undefined;
-    //     this.activePath = 2;
-    //   }
-    // }
-    // else {
-    //   this.isActiveCitation = false;
-    //   this.activePath = 2;
-    // }
+    this.updateScrollingHeight();
   }
 
   ngAfterViewInit() {
+    console.log("AFTER VIEW INIT");
     console.log("afterViewInit - edit-citation component");
     if (!EditCitationComponent.isSubscribed) {
       WorkbenchComponent.WorkbenchResizeBroadcaster
         .subscribe((rect:DOMRectReadOnly) => {
-          if (EditCitationComponent.isActive) {
-            $("#citationDescription").css('width', (rect.width - 70) + "px");
-            let viewTop  = <number>$("as-split-area.workbench").offset()!.top;
-            let viewHeight = <number>$("as-split-area.workbench").innerHeight();
-            let viewBottom = viewTop + viewHeight;
-            let scrollingTop = <number>$("div.scrolling").offset()!.top;
-            this.verseListHeight = viewBottom - scrollingTop;
-            $("div.scrolling").css("height", this.verseListHeight + "px");            
+          if(EditCitationComponent.isActive) {
+            this.workbenchDomRect(rect);
+            this.sectionWidth - rect.width - 4;
+            $("app-edit-theme").width(rect.width);
+            $("#citationDescription").width(rect.width - 60);
+
+            this.updateScrollingHeight();
           }
         });
-      
-      // (async (obj:EditCitationComponent) => {
-      //   console.log("subscribing to active citation selector");
-      //   BibleThemeTreeComponent.ActiveCitationSelector
-      //     .subscribe((node: JstreeModel) => {
-      //       // Whenever the active citation changes while this component is active
-      //       console.log(`EditCitationComponent.isActive? ${EditCitationComponent.isActive}`);
-      //       if (EditCitationComponent.isActive) {
-      //         console.log("activeCitationSelector - edit-citation-component");
+      }
 
-      //         let service = new BibleService;
-      //         let id = <number><unknown>node.id.replace("citation", "");
-      //         console.log(`getCitation(${id})`);
-      //         service.getCitation(id)
-      //           .then(citation => {
-      //             console.log("citation returned");
-      //             console.log(citation);
-      //             this.activeCitation = <CitationExtendedModel>{
-      //               id: citation.id,
-      //               description: citation.description,
-      //               citationLabel: citation.citationLabel,
-      //               bibleOrder: citation.bibleOrder,
-      //               verses: citation.verses
-      //             };
+    EditCitationComponent.isSubscribed = true;
 
-      //             this.editedCitation = <CitationExtendedModel>{
-      //               id: citation.id,
-      //               description: citation.description,
-      //               citationLabel: citation.citationLabel,
-      //               bibleOrder: citation.bibleOrder,
-      //               verses: citation.verses
-      //             };
+    runInInjectionContext(this.injector, () => {
+      effect(() => {
+        const node = this.activeCitationNode(); // 👈 direct signal read
+        console.log('Child effect triggered, node:', node);
 
-      //             EditCitationComponent.previousCitation = <CitationExtendedModel>{
-      //               id: citation.id,
-      //               description: citation.description,
-      //               citationLabel: citation.citationLabel,
-      //               bibleOrder: citation.bibleOrder,
-      //               verses: citation.verses
-      //             };
+        if (node) {
+          const id = Number(node?.li_attr?.citationId);
+          if (!id)
+            return;
 
-                  // $("div.citation.selected")
-                  //   .text(this.activeCitation.citationLabel)
-                  //   .removeClass("missing")
-                  //   .show(500);
-                  // $("#citationDescription").val(this.activeCitation.description);
-                  // this.editedCitation = <CitationExtendedModel>{
-                  //   id: this.activeCitation.id,
-                  //   citationLabel: this.activeCitation.citationLabel,
-                  //   bibleOrder: this.activeCitation.bibleOrder,
-                  //   verses: this.activeCitation.verses
-                  // };
+          this.service.getCitation(id)
+            .then(citation => {
+              WorkbenchComponent.setScriptureRanges(citation);
+              const newRanges = WorkbenchComponent.scriptureRanges.map(sr => 
+                <CiteScriptureRangeModel>{
+                  citation: sr.citation,
+                  verses: sr.verses,
+                  scriptures: sr.scriptures,
+                  isOpen: false
+                });
 
-                  // this.activePath = 2;
-                  // EditCitationComponent.isPreviousCitation = true;
+              this.scriptureRanges.set(newRanges);
+            });
+        }
+      });
+    });
+  }
 
-                  // console.log(`routing to: ${this.paths[this.activePath]}`);
-                  // this.router.navigate([`/${this.paths[this.activePath]}`]);
-                //});
-      //       }
-      //     });
-      // })(this);
+  updateScrollingHeight() {
+    if (this.activeCitationNode()) {
+      const scrollingEl = this.scrollableContent.nativeElement;
+      const areaEl = scrollingEl.closest('as-split-area') as HTMLElement;
 
-      EditCitationComponent.isSubscribed = true;
+      if (areaEl) {
+        const areaRect = areaEl.getBoundingClientRect();
+        const scrollRect = scrollingEl.getBoundingClientRect();
+        const newHeight = areaRect.height - (scrollRect.top - areaRect.top);
+        scrollingEl.style.height = `${newHeight}px`;
+      }
     }
-
-    console.log("initializing");
-    // SETUP - if there is an active citation, the active citation is initialized
-
-    // (async (obj:EditCitationComponent) => {
-    //   if (!EditCitationComponent.isPreviousCitation) {
-    //     let service = new BibleService;
-    //     if (this.activeCitation) {
-    //       console.log(`getting citation, id=${this.activeCitation.id}`);
-    //       service.getCitation(this.activeCitation.id)
-    //         .then(citation => {
-    //           console.log("fetched citation:");
-    //           console.log(citation);
-    //             this.activeCitation = <CitationExtendedModel>{
-    //               id: citation.id,
-    //               description: citation.description,
-    //               citationLabel: citation.citationLabel,
-    //               bibleOrder: citation.bibleOrder,
-    //               verses: citation.verses
-    //             };
-
-    //             this.editedCitation = <CitationExtendedModel>{
-    //               id: citation.id,
-    //               description: citation.description,
-    //               citationLabel: citation.citationLabel,
-    //               bibleOrder: citation.bibleOrder,
-    //               verses: citation.verses
-    //             };
-                
-    //             EditCitationComponent.previousCitation = <CitationExtendedModel>{
-    //               id: this.activeCitation.id,
-    //               citationLabel: this.activeCitation.citationLabel,
-    //               bibleOrder: this.activeCitation.bibleOrder,
-    //               verses: this.activeCitation.verses
-    //             };
-
-    //             WorkbenchComponent.setScriptureRanges(this.activeCitation);
-    //             const newRanges = WorkbenchComponent.scriptureRanges.map(sr => 
-    //               <CiteScriptureRangeModel>{
-    //                 citation: sr.citation,
-    //                 verses: sr.verses,
-    //                 scriptures: sr.scriptures,
-    //                 isOpen: false
-    //               });
-
-    //             this.scriptureRanges = newRanges;
-    //             EditCitationComponent.isPreviousCitation = true;
-
-    //             console.log("scriptureRanges:");
-    //             console.log(this.scriptureRanges);
-    //             console.log("ngAfterViewInit - after getCitation");
-    //         });
-    //     }
-    //   }
-    //   else {
-    //       WorkbenchComponent.setScriptureRanges(this.editedCitation);
-    //       const newRanges = WorkbenchComponent.scriptureRanges.map(sr => 
-    //         <CiteScriptureRangeModel>{
-    //           citation: sr.citation,
-    //           verses: sr.verses,
-    //           scriptures: sr.scriptures,
-    //           isOpen: false
-    //         });
-
-    //       this.scriptureRanges = newRanges;
-    //   }
-    // })(this);
-    
-    // // console.log("setting the active citation");
-    // // console.log(this.activeCitation);
-    // $("div.citation.selected").text(this.editedCitation.citationLabel).removeClass("missing").show(500);
-    // $("#citationDescription").val(this.editedCitation.description);
-    // console.log(`ngAfterViewInit, editedCitation: ${this.editedCitation ? this.editedCitation.id : "undefined"}`);
-    // console.log(this.editedCitation);
-    // this.editedCitation = <CitationExtendedModel>{
-    //     id: this.activeCitation.id,
-    //     citationLabel: this.activeCitation.citationLabel,
-    //     bibleOrder: this.activeCitation.bibleOrder,
-    //     verses: this.activeCitation.verses
-    // };
-
-    // console.log("generating scripture ranges");
-    // WorkbenchComponent.setScriptureRanges(this.editedCitation);
-    // const newRanges = WorkbenchComponent.scriptureRanges.map(sr => 
-    //   <CiteScriptureRangeModel>{
-    //     citation: sr.citation,
-    //     verses: sr.verses,
-    //     scriptures: sr.scriptures,
-    //     isOpen: false
-    //   });
-
-    // this.scriptureRanges = newRanges;
-    // this.cd.detectChanges();
-
-    let viewTop  = <number>$("as-split-area.workbench").offset()!.top;
-    let viewHeight = <number>$("as-split-area.workbench").innerHeight();
-    let viewBottom = viewTop + viewHeight;
-    let scrollingTop = <number>$("div.scrolling").offset()!.top;
-    this.verseListHeight = viewBottom - scrollingTop;
-    $("div.scrolling").css("height", this.verseListHeight + "px");
   }
 
   ngOnDestroy() {
