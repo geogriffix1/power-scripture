@@ -154,6 +154,53 @@ exports.listAll = (req, res) => {
     });
 }
 
+exports.getLabel = (req, res) => {
+    var citationId = Number(req.params.id) ?? -1;
+    if (citationId < 1 || citationId === NaN) {
+        message = `Error: citation id:${citationId} must be the id of a valid citation`;
+        res.status(400).send(errorMessage(
+            400,
+            "Invalid Parameter",
+            req.path,
+            "Query argument must be the numeric citation id",
+            "Usage (e.g. /2000/label) returns the label of the citation whose id equates to 2000.",
+            ""
+        ));
+    }
+
+    getQuery = (query) => {
+        return new Promise((resolve, reject) => {
+            dbAccess.query(query, (err, result) => {
+                if (err) { return reject(err); }
+                return resolve(result);
+            });
+        });
+    }
+
+    addContext = context => {
+        return new Promise(resolve => {
+            resolve({ context: context });
+        });
+    }
+
+    context = {};
+    context.citationId = citationId;
+
+    var tasks = [];
+
+    tasks.push(addContext(context));
+
+    tasks.push(getQuery(`SELECT get_citation_label(${citationId}) as citation_label`));
+
+    Promise.all(tasks)
+        .then(data => {
+            context = data[0].context;
+            citationLabel = data[1][0].citation_label;
+
+            res.send({ citationId: context.citationId, citationLabel: citationLabel });
+        });
+}
+
 exports.create = (req, res) => {
     var obj = null;
     var methodType = null;

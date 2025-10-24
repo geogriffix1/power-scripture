@@ -39,6 +39,7 @@ export class ScriptureRangeEditorComponent {
   }
 
   @Output() edited = new EventEmitter<number>();
+  @Output() rangeAdded = new EventEmitter<CiteScriptureRangeModel|undefined>();
 
   unicodeSuperscriptNumbers = [
     "\u2070",
@@ -68,7 +69,7 @@ export class ScriptureRangeEditorComponent {
   static RangeEditorIsActiveBroadcaster: any; 
 
   activeScriptureRange?: CiteScriptureRangeModel;
-
+  
   createCitation = false;
 
   chapterMasterList:number[] = [];
@@ -105,97 +106,6 @@ export class ScriptureRangeEditorComponent {
   }
 
   CreateCitation() {}
-  // CreateCitation() {
-  //   $("div.command-message").text("").hide(100);    
-  //   console.log("Create Citation Clicked");
-  //   console.log(this.scriptureRanges);
-  //   if (!this.scriptureRanges || this.scriptureRanges.length == 0) {
-  //     $("div.command-message").text("Citation not created - No scriptures have been selected").show(100);
-  //     return;
-  //   }
-
-  //   if (!WorkbenchComponent.activeTheme) {
-  //     $("div.command-message").text("Citation not created - Must select a parent Theme").show(100);
-  //     return;
-  //   }
-
-  //   let description = <string>$("#description").val() ?? "";
-  //   console.log(description);
-  //   console.log(`activeThemeId: ${WorkbenchComponent.activeTheme.id}`);
-  //   let parentThemeId = <number><unknown>WorkbenchComponent.activeTheme.id.replace(/theme(\d+)/, "$1");
-  //   console.log(`parentThemeId: ${parentThemeId}`)
-  //   let service = new BibleService;
-  //   let scriptures:number[] = [];
-  //   for (let i = 0; i < this.scriptureRanges.length; i++) {
-  //     for (let j = 0; j < this.scriptureRanges[i].scriptures.length; j++) {
-  //       let scripture = this.scriptureRanges[i].scriptures[j];
-  //       console.log(`${scripture.id} - ${scripture.book} ${scripture.chapter}:${scripture.verse}`)
-  //       scriptures.push(scripture.id);
-  //     }
-  //   }
-  //   service.createCitation(description, parentThemeId, scriptures);
-  //   $('#theme-tree-full').jstree('refresh');
-
-  //   console.log("activeTheme:");
-  //   console.log(WorkbenchComponent.activeTheme);
-  // }
-
-  // callbacks = {
-  //   canSelectAll() { return true; },
-  //   selectAll() {
-  //     $("tbody > tr[aria-checked=false]").attr('aria-checked', 'true');
-  //   },
-  //   canDeselectAll() { return true; },
-  //   deselectAll() {
-  //     $("tbody > tr[aria-checked=true]").attr('aria-checked', 'false');
-  //   },
-  //   canRemoveSelected() { return true; },
-  //   removeSelected(citations:any[]) {
-  //     let toRemove = <number[]>[];
-  //     let selected = $("tbody > tr[aria-checked=true]");
-  //     for (let i = 0; i < selected.length; i++) {
-  //       let key = +selected[i].id.replace("range_", "");
-  //       toRemove.push(key);
-  //     }
-
-  //     while(toRemove.length > 0) {
-  //       let key = toRemove.pop();
-  //       citations.splice(key!, 1);
-  //     }
-  //   },
-  //   canSaveCitation() { return true; },
-  //   saveCitation(citations:CiteScriptureRangeModel[], router:Router) {
-  //     WorkbenchComponent.scriptureRanges = [];
-  //     for (let i = 0; i < citations.length; i++) {
-  //       WorkbenchComponent.scriptureRanges.push(citations[i]);
-  //     }
-
-  //     citations = [];
-  //     console.log("save citation");
-  //     console.log(`is router null? ${!router}`);
-  //     router.navigate(['/create/citation']);
-  //   },
-  //   canExportSelected(citations:any) { return true; },
-  //   exportSelected(citations:any, context:any) {
-  //     console.log("export selected");
-  //     let selected = $("tbody > tr[aria-checked=true]");
-  //     if (selected.length == 0) {
-  //       console.log(`all ${citations.length} citations selected`);
-  //       context.citations = citations;
-  //     }
-  //     else {
-  //       context.citations = [];
-  //       console.log()
-  //       for (let i=0; i < selected.length; i++) {
-  //         let key = +selected[i].id.replace("range_", "");
-  //         console.log(`selecting citations[${key}]`);
-  //         context.citations.push(citations[key]);
-  //       }
-  //     }
-
-  //     context.showCiteScriptureReport = true;
-  //   }
-  // };
 
   workbenchDomRect(rect:DOMRectReadOnly) {
     this.sectionWidth = rect.width;
@@ -228,58 +138,6 @@ export class ScriptureRangeEditorComponent {
     row.attr('aria-checked', ariaCheckedBool.toString());
     console.log(row);
   }
-
-  // runAdd() {
-  //   console.log("runAdd()");
-  //   if ($("#endVerse.legal").length > 0) {
-  //     $("div.command-message").text('').hide(100);
-  //     (async (obj: ScriptureRangeEditorComponent) => {
-  //       console.log(`book: (innerText=${this.bookField.nativeElement.value})`);
-  //       console.log(this.bookField.nativeElement);
-  //       let range = `${this.bookField.nativeElement.value} ` + 
-  //         `${this.chapterField.nativeElement.value}:` +
-  //         `${this.verseField.nativeElement.value}`;
-        
-  //       if (this.endVerseField.nativeElement.innerText != this.verseField.nativeElement.value) {
-  //         range = `${range}-${this.endVerseField.nativeElement.value}`;
-  //       }
-
-  //       let bibleService = new BibleService;
-  //       let newRangeScriptures = await bibleService.citeScriptures(range);
-  //       //let existing = await bibleService.getCitationVerses((<CitationExtendedModel>this._citation).id);
-
-  //       if (this?.citation) {
-  //         let thisCitation = <CitationExtendedModel>this?.citation;
-  //       console.log(`citation.id: ${this._citation?.id}`);
-  //         let scriptureIds = new Set(thisCitation.verses.map(verse => Number(verse.scriptureId)));
-  //         let newRangeScriptureIds = newRangeScriptures.map(scripture => scripture.id);
-  //         let uniqueScriptureIds = newRangeScriptureIds.filter(scriptureId => !scriptureIds.has(scriptureId));
-
-  //         if (uniqueScriptureIds.length > 0) {
-  //           uniqueScriptureIds.forEach(scriptureId => {
-  //             let verse = bibleService.createCitationVerse(thisCitation.id, scriptureId).then();
-  //             console.log(`verse created for scripture: ${scriptureId}`);
-  //             console.log(verse);
-  //           });
-
-  //           this.edited.emit(this._citation?.id);
-  //         }
-  //         else
-  //         {
-  //           $(".command-message").text("No new scriptures added");
-  //         }
-  //       }
-  //      $(".command input[type=text]").val('').removeClass('legal');
-  //      this.isChapterDisabled = true;
-  //      this.isVerseDisabled = true;
-  //      this.isEndVerseDisabled = true;
-  //     })(this);
-  //   }
-  //   else {
-  //     $("div.command-message").text("Please complete the verse range.").show(100);
-  //     console.log("not legal");
-  //   }
-  // }
 
   runShow() {
     console.log("runShow()");
@@ -322,33 +180,11 @@ export class ScriptureRangeEditorComponent {
           verses: scriptureText,
           scriptures: scriptures
         };
-        //let existing = await bibleService.getCitationVerses((<CitationExtendedModel>this._citation).id);
 
-        // if (this?.citation) {
-        //   let thisCitation = <CitationExtendedModel>this?.citation;
-        // console.log(`citation.id: ${this._citation?.id}`);
-        //   let scriptureIds = new Set(thisCitation.verses.map(verse => Number(verse.scriptureId)));
-        //   let newRangeScriptureIds = newRangeScriptures.map(scripture => scripture.id);
-        //   let uniqueScriptureIds = newRangeScriptureIds.filter(scriptureId => !scriptureIds.has(scriptureId));
-
-        //   if (uniqueScriptureIds.length > 0) {
-        //     // uniqueScriptureIds.forEach(scriptureId => {
-        //     //   let verse = bibleService.createCitationVerse(thisCitation.id, scriptureId).then();
-        //     //   console.log(`verse created for scripture: ${scriptureId}`);
-        //     //   console.log(verse);
-        //     // });
-
-        //     //this.edited.emit(this._citation?.id);
-        //   }
-        //   else
-        //   {
-        //     $(".command-message").text("No new scriptures added");
-        //   }
-        // }
-       $(".command input[type=text]").val('').removeClass('legal');
-       this.isChapterDisabled = true;
-       this.isVerseDisabled = true;
-       this.isEndVerseDisabled = true;
+        $(".command input[type=text]").val('').removeClass('legal');
+        this.isChapterDisabled = true;
+        this.isVerseDisabled = true;
+        this.isEndVerseDisabled = true;
       })();
     }
     else {
@@ -358,11 +194,15 @@ export class ScriptureRangeEditorComponent {
   }
 
   addRange() {
-    if (this.activeScriptureRange) {
+    console.log("addRange");
+    console.log(this.activeScriptureRange);
+   if (this.activeScriptureRange) {
       $("app-scripture-range-editor .command-message").text("").hide(500);
-
+      this.rangeAdded.emit(this.activeScriptureRange);
+      delete this.activeScriptureRange;
     }
     else {
+      console.log("no activeScriptureRange");
       $("app-scripture-range-editor .command-message").text("Add a scripture range after entering the Book, Chapter, and range of Verses.").show(500);
     }
   }

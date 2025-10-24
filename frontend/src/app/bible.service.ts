@@ -415,8 +415,6 @@ async normalizeThemeSequence(parentId:number, callback:any) {
     var url = `${this.ROOT_URL}scriptures/maxverse/book/${book}/chapter/${chapter}`;
     const data = await fetch(url);
     const result = (await data.json() ?? null);
-    console.log("GET SCRIPTURES CHAPTER MAX VERSE");
-    console.log(result.maxVerse);
     return +result.maxVerse;
   }
 
@@ -459,7 +457,7 @@ async normalizeThemeSequence(parentId:number, callback:any) {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ citationId: citationId, scriptureId: scriptureId })
+      body: JSON.stringify({ citationId: citationId, scriptureIds: scriptureId })
     });
 
     const creationResults = (await data.json() ?? null);
@@ -468,5 +466,54 @@ async normalizeThemeSequence(parentId:number, callback:any) {
       console.log(JSON.stringify(creationResults));
 
     return <CitationVerseExtendedModel>creationResults;
+  }
+
+  async addCitationVerses(citationId:number, scriptureIds: number[]): Promise<CitationVerseExtendedModel[]> {
+    console.log("add citation verses");
+    var url = `${this.ROOT_URL}verses/citation/${citationId}/scriptures`;
+
+    const data = await fetch (url, {
+      method: "POST",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ scriptureIds: scriptureIds })
+    });
+
+    const creationResults:any[] = (await data.json() ?? null);
+    let verses:CitationVerseExtendedModel[] = [];
+
+    if (creationResults) {
+      creationResults.forEach(result => {
+        let verse: CitationVerseExtendedModel = {
+          id: result.id,
+          citationId: result.citation_id,
+          scriptureId: result.scripture_id,
+          scripture: {
+            id: result.scripture_id,
+            book: result.book,
+            chapter: result.chapter_number,
+            verse: result.verse_number,
+            text: result.text,
+            bibleOrder: result.bible_order
+          },
+          markups: []
+        };
+
+        verses.push(verse);
+      });
+    }
+
+    return verses;
+  }
+
+  async getCitationLabel(citationId: number) : Promise<string> {
+    var url = `${this.ROOT_URL}citations/${citationId}/label`;
+
+    const data = await fetch(url);
+    const result = (await data.json() ?? null);
+    console.log(result.citationLabel);
+    return <string>result.citationLabel;
   }
 }

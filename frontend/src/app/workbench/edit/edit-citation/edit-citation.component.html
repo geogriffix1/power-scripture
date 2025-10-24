@@ -22,7 +22,7 @@
 </nav>
     @if (activeRoute == "edit/citation") {
 <div class="scripture-range-editor">
-    <app-scripture-range-editor [citation]="editedCitation" (edited)="onRangeAdded($event)"></app-scripture-range-editor>
+    <app-scripture-range-editor [citation]="editedCitation" (rangeAdded)="onRangeAdded($event)"></app-scripture-range-editor>
 </div>
     }
 <section class="scrollable-content">

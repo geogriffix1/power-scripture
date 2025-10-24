@@ -137,7 +137,6 @@ export class EditComponent {
 
       EditComponent.isSubscribed = true;
     }
-
   }
 
   ngOnDestroy() {
