@@ -5,6 +5,7 @@ class BibleCitationMarkupModel {
         this.id = new attr.columnAttribute("bible_citation_markup_id", "INT", true);
         this.citationVerseId = new attr.columnAttribute("bible_citation_verse_id", "INT", false, "bible_citation_verses");
         this.citationId = new attr.columnAttribute("bible_citation_id", "INT", false, "bible_citations");
+        this.isRemoved = new attr.columnAttribute("is_removed", "BOOL")
         this.textIndex = new attr.columnAttribute("text_index", "INT");
         this.textLength = new attr.columnAttribute("text_length", "INT", false, "text_length");
         this.markupText = new attr.columnAttribute("markup_text", "VARCHAR(80)")
@@ -20,6 +21,7 @@ class BibleCitationMarkupModel {
             id: this.id.value,
             citationVerseId: this.citationVerseId.value,
             citationId: this.citationId.value,
+            isRemoved: this.isRemoved.value,
             textIndex: this.textIndex.value,
             textLength: this.textLength.value,
             markupText: this.markupText.value,
@@ -34,6 +36,7 @@ class BibleCitationMarkupModel {
         this.id.value = value.id ? value.id : null;
         this.citationVerseId.value = value.citationVerseId ? value.citationVerseId : null,
         this.citationId.value = value.citationId ? value.citationId : null;
+        this.isRemoved.value = value.isRemoved === true || value.isRemoved === false ? value.isRemoved : null;
         this.textIndex.value = value.textIndex || value.textIndex === 0 ? value.textIndex : null;
         this.textLength.value = value.textLength || value.textLength === 0 ? value.textLength : null;
         this.markupText.value = value.markupText ? value.markupText : null;

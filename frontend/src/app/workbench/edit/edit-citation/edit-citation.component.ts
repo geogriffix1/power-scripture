@@ -68,9 +68,11 @@ export class EditCitationComponent {
 
 
   refreshCitationEditor(citation: CitationExtendedModel) {
-    this.activeCitation = citation;
-    $("#citationDescription").val(this.activeCitation.description).show(500);
-    $("div.citation.selected").removeClass("missing").text(this.activeCitation.citationLabel).show(500);
+    console.log("refreshing the Citation Editor, active citation:");
+    console.log(citation);
+
+    $("#citationDescription").val(citation.description).show(100);
+    $("div.citation.selected").removeClass("missing").text(citation.citationLabel).show(100);
 
     console.log("Freshly-queried citation:");
     console.log(citation);
@@ -83,7 +85,15 @@ export class EditCitationComponent {
       verses: citation.verses
     };
 
-    EditCitationComponent.previousCitation = {
+    // EditCitationComponent.previousCitation = {
+    //   id: citation.id,
+    //   description: citation.description,
+    //   citationLabel: citation.citationLabel,
+    //   bibleOrder: citation.bibleOrder,
+    //   verses: citation.verses
+    // };
+
+    this.editedCitation =  {
       id: citation.id,
       description: citation.description,
       citationLabel: citation.citationLabel,
@@ -91,15 +101,9 @@ export class EditCitationComponent {
       verses: citation.verses
     };
 
-    this.editedCitation =  {
-      id: this.activeCitation.id,
-      description: this.activeCitation.description,
-      citationLabel: this.activeCitation.citationLabel,
-      bibleOrder: this.activeCitation.bibleOrder,
-      verses: this.activeCitation.verses
-    };
-
-    WorkbenchComponent.setScriptureRanges(this.editedCitation);
+    console.log("Calling setScriptureRanges - editedCitation:");
+    console.log(citation);
+    WorkbenchComponent.setScriptureRanges(citation);
     const newScriptureRanges = WorkbenchComponent.scriptureRanges.map(sr => 
       <CiteScriptureRangeModel>{
         citation: sr.citation,
@@ -154,18 +158,19 @@ export class EditCitationComponent {
         console.log("newScriptureRange:");
         console.log(this.newScriptureRange);
         if (this.newScriptureRange) {
+          $("div.citation.selected").text(this.activeCitation.citationLabel);
           let scriptureIds = this.newScriptureRange.scriptures.map(scripture => scripture.id);
           this.editedCitation.id = this.activeCitation.id;
           this.editedCitation.description = this.activeCitation.description;
           this.editedCitation.verses = await this.service.addCitationVerses(this.activeCitation.id, scriptureIds);
 
-          let treeNode = <JstreeModel>this.activeCitationNode();
-          treeNode.li_attr.title = this.editedCitation.description;
-          treeNode.text = this.editedCitation.citationLabel;
+          // let treeNode = <JstreeModel>this.activeCitationNode();
+          // treeNode.li_attr.title = this.editedCitation.description;
+          // treeNode.text = this.editedCitation.citationLabel;
           
-          BibleThemeTreeComponent.updateCitationNode(treeNode);
-          console.log("treeNode for citation:");
-          console.log(treeNode);  
+          // BibleThemeTreeComponent.updateCitationNode(treeNode);
+          // console.log("treeNode for citation:");
+          // console.log(treeNode);  
 
           WorkbenchComponent.setScriptureRanges(this.editedCitation);
           const newScriptureRanges = WorkbenchComponent.scriptureRanges.map(sr => 
@@ -180,6 +185,14 @@ export class EditCitationComponent {
           console.log(newScriptureRanges);
 
           this.scriptureRanges.set(newScriptureRanges);
+          
+          const citationLabel = this.getCitationLabelFromScriptureRanges(newScriptureRanges);
+          this.scriptureRanges.set(newScriptureRanges);
+          const node = this.activeCitationNode()!;
+          node.text = citationLabel;
+          node.li_attr.title = this.activeCitation.description;
+          BibleThemeTreeComponent.updateCitationNode(node);
+          $("div.citation.selected").text(citationLabel);
         }
       }
     })();
@@ -227,13 +240,47 @@ export class EditCitationComponent {
   }
 
   DeleteScriptureRange(id: number) {
-
+    (async () => {
+      $(".await").show(100);
+      console.log(`DeleteScriptureRange(${id})`);
+      let range:CiteScriptureRangeModel = this.scriptureRanges()[id];
+      let scriptureIds = range.scriptures.map(scripture => scripture.id);
+      let verseIds = this.editedCitation.verses
+        .filter(verse => scriptureIds.includes(Number(verse.scriptureId)))
+        .map(verse => verse.id);
+      console.log("verseIds:");
+      console.log(verseIds);
+      this.service.deleteCitationVerses(this.activeCitation.id, verseIds)
+        .then(citation => {
+          console.log("after deleteCitationVerses:");
+          console.log(citation);
+          $("div.citation.selected").text(citation.citationLabel);
+          WorkbenchComponent.setScriptureRanges(citation);
+          console.log("scriptureRanges:");
+          console.log(WorkbenchComponent.scriptureRanges);
+          const newScriptureRanges = WorkbenchComponent.scriptureRanges.map(sr => 
+            <CiteScriptureRangeModel>{
+              citation: sr.citation,
+              verses: sr.verses,
+              scriptures: sr.scriptures,
+              isOpen: false
+            });
+          
+          const citationLabel = this.getCitationLabelFromScriptureRanges(newScriptureRanges);
+          this.scriptureRanges.set(newScriptureRanges);
+          const node = this.activeCitationNode()!;
+          node.text = citationLabel;
+          node.li_attr.title = citation.description;
+          BibleThemeTreeComponent.updateCitationNode(node);
+          $("div.citation.selected").text(citationLabel);
+          $(".await").hide(100);
+        });
+    })();
   }
 
   ngOnInit() {
     console.log("ON INIT");
     console.log("initializing edit citation component");
-    console.log("Child received signal identity:", this.activeCitationNode());
     EditCitationComponent.isActive = true;
     let rect = WorkbenchComponent.getWorkbenchSize();
 
@@ -279,14 +326,51 @@ export class EditCitationComponent {
           const id = Number(node?.li_attr?.citationId);
           if (!id)
             return;
-
+          
+          $(".await").show(100);
+          console.log(`citationId: ${id}`);
           this.service.getCitation(id)
             .then(citation => {
+              console.log("citation refreshed:");
+              console.log(citation);
               this.refreshCitationEditor(citation);
+              $(".await").hide(100);
            });
         }
       });
     });
+  }
+
+  getCitationLabelFromScriptureRanges(scriptureRanges: CiteScriptureRangeModel[]): string {
+    let label = "";
+    const singleChapterBooks = ["Philemon", "Obadiah", "2 John", "3 John", "Jude"];
+
+    if (scriptureRanges) {
+      scriptureRanges.forEach(range => {
+        let lastIndex = null;
+        if (range.scriptures && range.scriptures.length > 0) {
+          let firstIndex = 0;
+          lastIndex = range.scriptures.length > 1 ? range.scriptures.length - 1 : null;
+          if (singleChapterBooks.includes(range.scriptures[0].book)) {
+            label = `${label}, ${range.scriptures[0].book} ${range.scriptures[firstIndex].verse}`;
+          }
+          else {
+            label = `${label}, ${range.scriptures[0].book} ${range.scriptures[firstIndex].chapter}:${range.scriptures[firstIndex].verse}`;
+          }
+
+          if (lastIndex !== null) {
+            label = `${label}-${range.scriptures[Number(lastIndex)].verse}`;
+          }
+        }
+      });
+
+      label = label.substring(2);
+      if (label.length > 100) {
+        label = label.substring(0, 97) + "...";
+      }
+    }
+
+    return label;
   }
 
   updateScrollingHeight() {

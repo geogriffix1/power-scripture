@@ -58,7 +58,11 @@ export class WorkbenchComponent {
     }
 
     WorkbenchComponent.scriptureRanges = [];
-    let forCitations = <CitationVerseExtendedModel[]>citation.verses;
+    console.log("WorkbenchComponent.citation");
+    console.log(citation);
+    console.log("WorkbenchComponent.citation.verses:");
+    console.log(citation.verses);
+    const forCitations = <CitationVerseExtendedModel[]>citation?.verses ?? [];
     forCitations.sort((a,b) => a.scripture.bibleOrder - b.scripture.bibleOrder);
 
     let book = "";

@@ -702,3 +702,117 @@ exports.update = (req, res) => {
         });
 }
 
+exports.removeVerses = async (req, res) => {
+    var citationId = null;
+    var verseIds = [];
+    var message = null;
+
+    console.log("put: citations/id/remove-verses initiated");
+
+    if (!req.params.id || Number(req.params.id) === NaN) {
+        message = "Error, citation id is missing or invalid";
+    }
+
+    if (!message && (!req.body || !req.body.verseIds || !Array.isArray(req.body.verseIds))) {
+        message = "Error, verseIds array is invalid or missing from message body";
+    }
+
+    if (!message) {
+        citationId = Number(req.params.id);
+        verseIds = req.body.verseIds;
+        if (!verseIds.every(vid => Number(vid) !== NaN)) {
+            message = "Error, verseIds array contains one or more non-numeric values";
+        }
+    }
+
+    if (message) {
+        console.log(`message: ${message}`);
+        res.status(500).send(errorMessage(
+            500,
+            "Server Error",
+            req.path,
+            message,
+            ""
+        ));
+
+        return;
+    }
+
+    citationId = Number(req.params.id);
+    verseIds = req.body.verseIds;
+    const citation = new bibleCitation;
+    citation.values = { id: citationId };
+
+    console.log("Query:");
+    console.log(citation.getChildrenSelectString());
+    let results = await dbAccess.query(citation.getChildrenSelectString(), (err, results) => {
+        if (err) {
+            res.status(500).send(errorMessage(
+                500,
+                "Server Error",
+                req.path,
+                err.message,
+                ""
+            ));
+        }
+        else {
+            console.log("remove verses - citation results:");
+            console.log(results);
+
+            const verseIdList = `(${verseIds.join(",")})`;
+
+            const delete1 = `DELETE FROM bible_citation_markups WHERE bible_citation_verse_id in ${verseIdList}`;
+            const delete2 = `DELETE FROM bible_citation_verses WHERE bible_citation_verse_id in ${verseIdList}`;
+
+            dbAccess.delete(delete1, (err, res) => { });
+
+            dbAccess.delete(delete2, (err, res) => { });
+
+            var citation = null;
+            for (var i = 0; i < results.length; i++) {
+                var result = results[i];
+                if (citation === null) {
+                    citation = tools.getObjectFromResult(result, 1);
+                    citation.verses = [];
+                }
+
+                var newVerse = tools.getObjectFromResult(result, 2);
+                if (newVerse) {
+                    var activeVerse = citation.verses.find(v => v.id == newVerse.id);
+
+                    if (!activeVerse && newVerse.id) {
+                        activeVerse = newVerse;
+                        var newScripture = tools.getObjectFromResult(result, 3);
+                        if (newScripture) {
+                            activeVerse.scripture = newScripture;
+                        }
+
+                        activeVerse.markups = [];
+                        citation.verses.push(activeVerse);
+                    }
+
+                    var newMarkup = tools.getObjectFromResult(result, 4);
+                    if (newMarkup && newMarkup.id) {
+                        activeVerse.markups.push(newMarkup);
+                        activeVerse.markups.sort((a, b) => { a.textIndex = b.textIndex });
+                    }
+                }
+
+                citation.verses.sort((a, b) => {
+                    a.scripture.bibleOrder - b.scripture.bibleOrder
+                });
+            }
+
+            let versesToKeep = [];
+            citation.verses.forEach(verse => {
+                if (!verseIds.includes(verse.id)) {
+                    versesToKeep.push(verse);
+                }
+            });
+
+            citation.verses = versesToKeep;
+
+            res.send({ citation: citation });
+        }
+    });
+};

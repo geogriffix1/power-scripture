@@ -35,10 +35,11 @@ export class ScriptureRangeEditorComponent {
     console.log(this._citation);
   }
   get citation(): CitationExtendedModel | undefined {
+    console.log("returning this._citation from scripture-range-editor");
     return this._citation;
   }
 
-  @Output() edited = new EventEmitter<number>();
+  //@Output() edited = new EventEmitter<number>();
   @Output() rangeAdded = new EventEmitter<CiteScriptureRangeModel|undefined>();
 
   unicodeSuperscriptNumbers = [

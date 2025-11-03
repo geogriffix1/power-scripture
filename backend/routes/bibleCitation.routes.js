@@ -9,6 +9,7 @@ module.exports = app => {
     router.get("/:id/label", bibleCitation.getLabel);
     router.post("/", bibleCitation.create);
     router.put("/", bibleCitation.update);
+    router.put("/:id/remove-verses", bibleCitation.removeVerses);
     //router.delete("/:citationId/themeToCitation/:themeToCitationId")  // deletes theme to citation link
     //router.delete("/:id/verse/:id2")
     //router.post("/:id/verses", bibleCitationVerse.create);

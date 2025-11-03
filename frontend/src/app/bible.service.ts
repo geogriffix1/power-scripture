@@ -508,6 +508,24 @@ async normalizeThemeSequence(parentId:number, callback:any) {
     return verses;
   }
 
+  async deleteCitationVerses(citationId: number, verseIds: number[]) : Promise<CitationExtendedModel> {
+    var url = `${this.ROOT_URL}citations/${citationId}/remove-verses`;
+    const data = await fetch (url, {
+      method: "PUT",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ verseIds: verseIds })
+    });
+
+    console.log(`deleteCitationVerses citationId: ${citationId}`);
+    console.log(verseIds);
+    const result = (await data.json() ?? null);
+    console.log(result);
+    return result.citation;
+  }
+
   async getCitationLabel(citationId: number) : Promise<string> {
     var url = `${this.ROOT_URL}citations/${citationId}/label`;
 

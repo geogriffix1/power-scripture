@@ -25,7 +25,10 @@
     <app-scripture-range-editor [citation]="editedCitation" (rangeAdded)="onRangeAdded($event)"></app-scripture-range-editor>
 </div>
     }
+}
 <section class="scrollable-content">
+    <div class="await"></div>
+@if (activeCitationNode()) {
     <div class="scrolling" #scrollableContent>
     @if (scriptureRanges() && scriptureRanges().length > 0) {
         @for (range of scriptureRanges(); track range.citation; let i = $index) {
@@ -45,8 +48,8 @@
         }
     }
     </div>
-</section>
 }
+</section>
 <!-- @else {
 <section class="scrollable-content">
     <div class="scrolling" #scrollableContent></div>

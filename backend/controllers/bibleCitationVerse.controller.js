@@ -576,95 +576,21 @@ exports.edit = (req, res) => {
     }
 }
 
-exports.delete = (req, res) => {
-    var id = eval(req.params.id);
-    if (!typeof id == "number") {
-        res.status(400).send(errorMessage(
-            400,
-            "Invalid Parameter",
-            req.path,
-            "Delete argument must be the numeric citation Verse id",
-            "Usage (e.g. /verse/2000) deletes the verse whose id equates to 2000 from its citation."
-        ));
+exports.delete = async (req, res) => {
+    const verseId = req.params.id;
 
-        return;
-    }
-
-    addContext = (context) => {
-        return new Promise(resolve => {
-            resolve({ context: context });
-        });
-    }
-
-    getQuery = (selectString) => {
-        return new Promise((resolve, reject) => {
-            dbAccess.query(selectString, (err, results) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(results);
-                }
+    try {
+        const results = await new Promise((resolve, reject) => {
+            dbAccess.execute(`CALL delete_bible_citation_verse(${verseId})`, (err, results) => {
+                if (err) return reject(err);
+                resolve(results);
             });
         });
+
+        res.json({ deleted: verseId, results });
     }
-
-    deleteCitationVerse = (deleteString) => {
-        return new Promise((resolve, reject) => {
-            dbAccess.delete(deleteString, (err, result) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(result);
-                }
-            });
-        });
+    catch (err) {
+        console.error("Error deleting verse from citation:", err);
+        res.status(500).send(`Error attempting to delete verse from citation: ${err.message}`);
     }
-
-    var context = { idToDelete: id };
-    tasks = [];
-
-    tasks.push(addContext(context));
-
-    var citationVerse = new bibleCitationVerse;
-    citationVerse.values = { id: context.idToDelete };
-
-    tasks.push(getQuery(citationVerse.getSelectString()));
-    Promise.all(tasks)
-        .then(data => {
-            var context = data[0].context;
-            var citationVerseValues = data[1].length == 1 ? data[1][0] : null;
-
-            if (!citationVerseValues) {
-                res.status(400).send(new errorMessage(
-                    400,
-                    "Not Found",
-                    req.path,
-                    `CitationVerse: ${context.idToDelete} was not found.`,
-                    "No action was taken"
-                ));
-
-                return;
-            }
-
-            context.citationVerseValues = citationVerseValues;
-
-            tasks = []
-
-            tasks.push(addContext(context));
-
-            var citationVerse = new bibleCitationVerse;
-            citationVerse.values = { id: context.idToDelete };
-
-            tasks.push(deleteCitationVerse(citationVerse.getDeleteString()));
-
-            Promise.all(tasks)
-                .then(data => {
-                    var context = data[0].context;
-                    var deleteResults = data[1];
-
-                    res.send({ deleted: context.citationVerseValues });
-                })
-        });
 }

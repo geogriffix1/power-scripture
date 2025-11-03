@@ -60,7 +60,7 @@ class TableAttribute {
         for (var colIndex in instance) {
             var col = instance[colIndex];
             if (ColumnAttribute.prototype.isPrototypeOf(col)) {
-                if (col.value || col.value === 0) {
+                if (col.value || col.value === 0 || col.value === false) {
                     columnsWithValues.push(col);
                 }
             }
@@ -285,7 +285,7 @@ class TableAttribute {
             for (var colIndex in table) {
                 var col = table[colIndex];
                 if (ColumnAttribute.prototype.isPrototypeOf(col)) {
-                    if (col.value || col.value === 0) {
+                    if (col.value || col.value === 0 || col.value === false) {
                         col.tableAlias = table.alias;
                         tableColumnsWithValues.push(col);
                     }
@@ -330,7 +330,7 @@ class TableAttribute {
         var columnValues = "VALUES (";
         for (var i = 0; i < properties.length; i++) {
             var prop = properties[i];
-            var value = this.getQueryValue(prop.columnType, prop.value);;
+            var value = this.getQueryValue(prop.columnType, prop.value);
 
             columnNames = `${columnNames}${comma}${prop.columnName}`;
             columnValues = `${columnValues}${comma}${value}`;
@@ -389,7 +389,7 @@ class TableAttribute {
             }
             else if (prop && ColumnAttribute.prototype.isPrototypeOf(prop) && prop.isKey) {
                 keyColumn = prop;
-                if (!keyColumn.value) {
+                if (!keyColumn.value && keyColumn.value !== 0 && keyColumn.value !== false) {
                     throw new Error(`Error in method getDeleteString, key column "${keyColumn.columnName}" has no value specified`);
                 }
             }
@@ -416,6 +416,9 @@ class TableAttribute {
                 val = val.replace(datePattern, '$1 $2');
                 qVal = `'${val}'`;
             }
+        }
+        else if (typ.toUpperCase() == "BOOL") {
+            return val === true ? "'T'" : "'F'";
         }
         else {
             qVal = val;

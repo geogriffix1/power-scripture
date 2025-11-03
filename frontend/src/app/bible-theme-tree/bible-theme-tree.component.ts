@@ -244,6 +244,7 @@ export class BibleThemeTreeComponent implements OnInit {
 
   public static updateCitationNode(citation: JstreeModel) {
     if (citation && citation.li_attr && citation.li_attr.citationId) {
+      const citationLabel = citation.text;
       const citationId = citation.li_attr.citationId;
       const tree = $("#theme-tree-full").jstree(true);
       const duplicates: JstreeModel[] = tree
@@ -253,7 +254,7 @@ export class BibleThemeTreeComponent implements OnInit {
         );
 
       (async () => {
-        const citationLabel = await this.service.getCitationLabel(citationId);
+        //const citationLabel = await this.service.getCitationLabel(citationId);
         const tree = $('#theme-tree-full').jstree(true) as any;
         if(!tree){ console.error('jsTree instance not found at selector #theme-tree-full'); return; }
 
