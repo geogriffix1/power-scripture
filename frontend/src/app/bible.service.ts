@@ -534,4 +534,14 @@ async normalizeThemeSequence(parentId:number, callback:any) {
     console.log(result.citationLabel);
     return <string>result.citationLabel;
   }
+
+  async getVersesByCitationAndScriptures(citationId: number, scriptureIds: number[]): Promise<CitationVerseExtendedModel[]> {
+    var url = `${this.ROOT_URL}verses/citation/${citationId}/scriptures/[`;
+    scriptureIds.forEach(id => url += id + ",");
+    url = url.substring(0, url.length - 1) + "]";
+    console.log(url);
+    const data = await fetch (url);
+    const result = await data.json();
+    return <CitationVerseExtendedModel[]> result;
+  }
 }

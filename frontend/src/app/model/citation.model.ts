@@ -2,9 +2,9 @@ import { CitationVerseModel } from './citationVerse.model';
 
 export interface CitationModel {
     id: number,
-    citationLabel: string,
+    citationLabel?: string,
     description: string,
-    bibleOrder: number
+    bibleOrder?: number
 }
 
 export interface CitationExtendedModel extends CitationModel {

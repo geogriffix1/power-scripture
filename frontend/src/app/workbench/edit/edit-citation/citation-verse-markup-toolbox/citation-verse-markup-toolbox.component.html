@@ -1,0 +1,48 @@
+<div class="toolbox-container">
+
+  <!-- Highlight -->
+  <button class="toolbox-btn" (click)="onHighlight()" title="Highlight the substringed range of the scripture">
+    Highlight
+  </button>
+  <hr>
+  <!-- Suppress -->
+  <button class="toolbox-btn" (click)="onSuppress()" title="Suppress the substringed range of the scripture">
+    Suppress
+  </button>
+  <hr>
+  <!-- Replace -->
+  <input
+    class="replacement-input"
+    [value]="replacementDraft"
+    (input)="replacementDraft = $event.target.value"
+    placeholder="Replacement Text"
+    type="text"
+    title="Enter the text to replace the substring of scripture"
+  />
+
+  <button class="toolbox-btn" (click)="onReplace()" title="Replace the substringed range of the scripture with text">
+    Replace
+  </button>
+  <hr>
+  <!-- Paragraph -->
+  <button class="toolbox-btn" (click)="onParagraphBreak()" title="Force a paragraph break at the position of the caret in the scripture text">
+    Paragraph Break
+  </button>
+  <hr>
+  <!-- Undo / Redo -->
+  <button class="toolbox-btn" (click)="onUndo()" [disabled]="!canUndo" title="Undo the most recent change">
+    Undo
+  </button>
+  <button class="toolbox-btn" (click)="onRedo()" [disabled]="!canRedo" title="Redo the most recently undone change">
+    Redo
+  </button>
+
+  <!-- Save / Cancel -->
+  <button class="toolbox-btn primary" (click)="onSave()">
+    Save
+  </button>
+
+  <button class="toolbox-btn danger" (click)="onCancel()">
+    Cancel
+  </button>
+</div>

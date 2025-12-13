@@ -286,8 +286,13 @@ nav.command-line {background-color: black; padding: 4px;}
 i.search-icon {background: url("assets/images/Search.png")  center center no-repeat; display:inline-block; width: 32px; height: 32px; cursor:pointer; }
 i.save-icon {background: url("assets/images/Save.png") center  center no-repeat; display: inline-block; width: 32px; height: 32px; cursor: pointer; }
 i.edit-icon {background: url("assets/images/Edit page.png") center center no-repeat; display: inline-block; width :32px; height: 32px; cursor: pointer; }
+i.pencil-icon {background: url("assets/images/Pencil.png") center center no-repeat; display: inline-block; width :32px; height: 32px; cursor: pointer; }
 i.delete-icon {background: url("assets/images/Delete.png") center center no-repeat; display: inline-block; width :32px; height: 32px; cursor: pointer; }
+i.close-icon {background: url("assets/images/Close.png") center center no-repeat; display: inline-block; width :32px; height: 32px; cursor: pointer; }
 i.spin-arrow-icon {background: url("assets/images/SpinArrow.png") center center no-repeat; display: inline-block; width: 32px; height: 32px; cursor: pointer; }
+i.unchecked-circle-icon {background: url("assets/images/Circle unchecked.png") center center no-repeat; display: inline-block; width: 32px; height:32px; cursor: pointer; }
+i.checked-circle-icon {background: url("assets/images/Circle checked.png") center center no-repeat; display: inline-block; width: 32px; height:32px; cursor: pointer; }
+i.nopointer { cursor: auto; }
 .command-line input[type=text] {display: inline-block; height: 32px;}
 .command-suggest li {background-color: lightgray; color: black; }
 div.command-message {background-color: darkslategray; color: red; font-weight: bold;}

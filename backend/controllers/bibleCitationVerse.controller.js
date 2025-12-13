@@ -188,6 +188,94 @@ exports.citationId = (req, res) => {
     });
 }
 
+exports.listByCitationAndScriptures = async (req, res) => {
+    var citationId = Number(req.params.id);
+    var scriptureIds = JSON.parse(req.params.array);
+    var message = "";
+    if (!typeof id == NaN) {
+        message = "Query argument must be the numeric citation id of the verses";
+    }
+
+    if (!message && (!scriptureIds || !Array.isArray(scriptureIds))) {
+        message = "Message body should contain scriptureIds, an array of numeric ids. eg. {scriptureIds: [1,2,3]}";
+    }
+
+    if (!message) {
+        scriptureIds.forEach(value => {
+            if (!message && Number(value) === NaN) {
+                message = `Invalid numeric value for scripture Id: ${value}`;
+            }
+        })
+    }
+
+    if (message) {
+        res.status(400).send(errorMessage(
+            400,
+            "Invalid Parameter",
+            req.path,
+            message,
+            "Usage (e.g. /verses/citation/2000/scriptures) body: {scriptureIds: [1,2,3] } returns 3 citation verses by scripture ID whose parent citation id equates to 2000."
+        ));
+    }
+
+    var bibleVerse = new bibleCitationVerse;
+    bibleVerse.values = { citationId: citationId };
+
+    if (scriptureIds.length > 0) {
+        let selectString = `${bibleVerse.getJoinSelectString()} AND t1.bible_scripture_niv_id IN (`;
+        scriptureIds.forEach(value => selectString += value + ",");
+        selectString = selectString.substring(0, selectString.length - 1) + ")";
+        console.log(selectString);
+        dbAccess.query(selectString, (err, results) => {
+            if (err) {
+                res.status(500).send(errorMessage(
+                    500,
+                    "Server Error",
+                    req.path,
+                    err.message,
+                    ""
+                ));
+            }
+            else {
+                var verses = [];
+
+                console.log(results);
+                var citationVerse = null;
+                for (var i = 0; i < results.length; i++) {
+                    var result = results[i];
+                    if (citationVerse === null || citationVerse.id != tools.getObjectFromResult(result, 1).id) {
+                        if (citationVerse !== null) {
+                            verses.push(citationVerse);
+                        }
+
+                        citationVerse = tools.getObjectFromResult(result, 1);
+                        citationVerse.scripture = tools.getObjectFromResult(result, 2);
+                        let markup = tools.getObjectFromResult(result, 3);
+                        if (markup.id === null) {
+                            citationVerse.markups = [];
+                        }
+                        else {
+                            citationVerse.markups = [markup];
+                        }
+                    }
+                    else {
+                        citationVerse.markups.push(tools.getObjectFromResult(result, 3));
+                    }
+                }
+
+                if (citationVerse !== null) {
+                    verses.push(citationVerse);
+                }
+
+                res.send(verses);
+            }
+        });
+    }
+    else {
+        res.send([]);
+    }
+}
+
 exports.create = (req, res) => {
     var obj = null;
     var methodType = null;

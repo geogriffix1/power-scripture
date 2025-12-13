@@ -1,0 +1,45 @@
+<div class="container-fluid mt-2">
+
+  @for (v of verses(); track v.id) {
+
+    <div class="ps-row">
+
+      <!-- LEFT COLUMN -->
+      <div class="ps-left">
+
+        <div class="form-check">
+          <input 
+            class="form-check-input" 
+            type="checkbox"
+            [checked]="v.hide"
+            (change)="onHideChanged(v, $event.target.checked)"
+            id="hide-{{v.id}}"
+          >
+          <label class="form-check-label" for="hide-{{v.id}}">
+            Hide
+          </label>
+        </div>
+
+        <button class="ps-btn ps-btn-blue" (click)="onMarkupClicked(v)">
+          Markup
+        </button>
+
+        <button class="ps-btn">
+          Other
+        </button>
+      </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="ps-text">
+        @if(v.hide) {
+            ...
+        }
+        @else {
+        <sup>{{v.scripture.verse}} </sup>{{ renderVerse(v) }}
+        }
+      </div>
+
+    </div>
+
+  }
+</div>

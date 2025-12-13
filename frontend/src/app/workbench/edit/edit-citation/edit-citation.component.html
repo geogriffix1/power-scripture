@@ -1,3 +1,4 @@
+<!-- Edit Citation header and warning message -->
 <div class="workbench-edit">
     <div class="header">Edit Citation</div>
     <div class="citation citation-icon"><img src="/assets/images/Script.png" title="Navigate by Theme Tree to the target citation"></div>
@@ -6,6 +7,9 @@
     </div>
 </div>
 @if (activeCitationNode()) {
+    <!-- A citation has been selected -->
+    @if (!activeScriptureRange().citationId) {
+        <!-- Discription Editor -->
 <nav class="cite-scripture">
     <div class="workbench-settings">
         <i class="citation save-icon" (click)="EditCitationDescription()" title="Click to Save changes to the Citation Description"></i>
@@ -20,18 +24,85 @@
     </div>
     <div class="command-message"></div>
 </nav>
-    @if (activeRoute == "edit/citation") {
+        <!-- Range List Editor (adds new ranges to the citation) -->
 <div class="scripture-range-editor">
     <app-scripture-range-editor [citation]="editedCitation" (rangeAdded)="onRangeAdded($event)"></app-scripture-range-editor>
 </div>
     }
+    @else if (activeScriptureRange().citationId == editedCitation.id && activeVerse().id == 0) {
+        <!-- Markup Selector header -->
+<div id="activeScriptureRange" class="scripture-range container">
+    <div class="text">Markup Selector - {{activeScriptureRange().citation}}</div>
+    <div class="right-icons">
+        <i class="close-icon" (click)="OnCloseSelectedRange()" title="Close Scripture Range"></i>
+    </div>
+</div>
+    }
+    @else {
+        <!-- Markup Editor mode -->
+<div id="activeVerse" class="citation-verse container">
+    <div class="text">{{activeVerse().verseCitation}}</div>
+    <div class="right-icons">
+        <i class="save-icon" (click)="OnSaveMarkups()" title="Save Citation Verse Markups"></i>
+        <i class="close-icon" (click)="OnCancelMarkups()" title="Cancel Citation Verse Markup Editor"></i>
+    </div>
+</div>
+    }
 }
+<!-- Markup Selector/Editor body (content is scrollable) -->
 <section class="scrollable-content">
     <div class="await"></div>
-@if (activeCitationNode()) {
     <div class="scrolling" #scrollableContent>
+@if (activeCitationNode()) {
+    <!-- A citation is active for editing -->
     @if (scriptureRanges() && scriptureRanges().length > 0) {
-        @for (range of scriptureRanges(); track range.citation; let i = $index) {
+        <!-- A range of consecutive scriptures in the active citation has been selected -->
+        @if (activeScriptureRange().citationId && activeScriptureRange().citationId == editedCitation.id && activeVerse().id == 0) {
+            <!-- Display consecutive scripture verses in a range for hiding/unhiding or marking up -->
+            <!-- @for (verse of activeVerses(); track verse.id; let v = $index) {
+        <div id="verse_{{v}}_title" class="scripture-range container" aria-checked="false">
+            <div class="left-icon">
+                <i class="spin-arrow-icon" (click)="OpenCloseVerse($event,v)" title="View scripture"></i> 
+            </div>
+            <div class="text">Verse {{verse.scripture.verse}}</div>
+            <div class="right-icons">
+                <div id="Markup_{{verse.id}}" (click)=OnMarkupVerse(v) title="Mark-up Verse"><i class="pencil-icon"></i></div>
+                @if (verse.markups && verse.markups.length > 0) {
+                <div><span>Marked-Up </span><i class="checked-circle-icon nopointer"></i></div>
+                }
+                @else {
+                <div><span>Marked-Up </span><i class="unchecked-circle-icon nopointer"></i></div>
+                }
+            </div>
+        </div>
+        <div id="verse_{{v}}_content" class="scripture-text" style="display:none;">
+            {{verse.scripture.text}}
+        </div>
+            } -->
+                <app-citation-verse-select [verses]="activeVerses()" (markupClicked)="onVerseSelected($event)")></app-citation-verse-select>
+        }
+        @else if (activeScriptureRange().citationId && 
+            activeScriptureRange().citationId == editedCitation.id &&
+            activeVerse().id > 0) {
+        <!-- Active Scripture Range selected for Markup Editing -->
+        <div class="header" title="Highlight sections of text to markup">Citation Scripture Verse Markup</div>
+        <!-- <div class="header">Highlight Sections of Scripture Above to Mark-Up</div>
+        <div class="header"><button class="">Hello!</button></div> -->
+        <div class="scrolling" #scrollableContent>
+            <div class="markup-editor">
+                <div class="top-row">
+                    <app-citation-verse-markup-workarea
+                        [activeVerses]="activeVerses()"
+                        [activeVerse]="activeVerse()"
+                        (verseSessionEnded)="onVerseSessionEnded($event)">
+                    </app-citation-verse-markup-workarea>
+                </div>
+            </div>
+        </div>
+        }
+        @else {
+    <!-- Scripture Range List Selector (selects ranges for markup or deletion from citation) -->
+            @for (range of scriptureRanges(); track range.citation; let i = $index) {
         <div id="range_{{i}}_title" class="scripture-range container" aria-checked="false">
             <div class="left-icon">
                 <i class="spin-arrow-icon" (click)="OpenCloseScriptureRange($event,i)" title="Expand to view scriptures"></i>
@@ -45,10 +116,11 @@
         <div id="range_{{i}}_content" class="scripture-text" style="display: none;">
             {{range.verses}}
         </div>
+            }
         }
     }
-    </div>
 }
+    </div>
 </section>
 <!-- @else {
 <section class="scrollable-content">

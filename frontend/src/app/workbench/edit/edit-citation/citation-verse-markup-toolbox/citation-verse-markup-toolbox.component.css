@@ -1,0 +1,58 @@
+.toolbox-container {
+  width: 120px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+hr {
+  width: 80%;
+  margin-top: 0;
+  margin-bottom: 0;
+  border: 1px solid #333;
+  margin-left: 10%;
+}
+
+.toolbox-btn {
+  width: 100%;
+  padding: 4px 5px;
+  border-radius: 10px;
+  border: 1px solid black;
+  cursor: pointer;
+  background: linear-gradient(180deg, #d9eaff, #a8cfff);
+  color: #033366;
+  font-weight: 400;
+  transition: filter 0.1s ease-in-out;
+}
+
+.toolbox-btn:hover:not(:disabled) {
+  filter: brightness(1.1);
+}
+
+.toolbox-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
+.toolbox-btn.primary {
+  background: linear-gradient(180deg, #b4e0b4, #5fb65f);
+  color: #003300;
+}
+
+.toolbox-btn.danger {
+  background: linear-gradient(180deg, #ffd4d4, #ff8f8f);
+  color: #660000;
+}
+
+.toolbox-label {
+  font-size: 12px;
+  margin-top: 6px;
+}
+
+.replacement-input {
+  width: 100%;
+  padding: 6px;
+  border-radius: 8px;
+  border: 1px solid #99bbee;
+  font-size: 12px;
+}

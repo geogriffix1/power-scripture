@@ -1,0 +1,38 @@
+.active-verse-wrapper {
+  position: relative;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-size: 15px;
+  line-height: 1.4;
+}
+
+/* Overlay with highlights, non-interactive */
+.overlay-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;   /* let mouse events hit the editor */
+  white-space: pre-wrap;
+}
+
+/* The actual contenteditable text */
+.pristine-editor {
+  position: relative;
+  white-space: pre-wrap;
+  background: transparent;
+  outline: none;
+  /* Make sure overlay and editor align */
+}
+
+/* Overlay coloring for different markup kinds */
+.markup-highlight {
+  background-color: rgba(255, 255, 0, 0.35);
+}
+
+.markup-suppress {
+  background-color: rgba(255, 0, 0, 0.18);
+}
+
+.markup-replace {
+  background-color: rgba(0, 128, 255, 0.2);
+}
+
+/* You can tune these colors to your liking */

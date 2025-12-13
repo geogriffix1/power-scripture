@@ -74,6 +74,7 @@ export class WorkbenchComponent {
     let scriptures: ScriptureModel[] = [];
 
     for (let i=0; i<forCitations.length; i++) {
+      let citationId = forCitations[i].citationId;
       let result = forCitations[i].scripture;
       if (
         result.book == book &&
@@ -100,7 +101,8 @@ export class WorkbenchComponent {
             citation: citation,
             verses: verses,
             isOpen: false,
-            scriptures: scriptures
+            scriptures: scriptures,
+            citationId: citationId
           };
 
           WorkbenchComponent.scriptureRanges.push(scriptureRange)

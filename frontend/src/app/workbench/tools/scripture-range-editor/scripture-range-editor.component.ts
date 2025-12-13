@@ -3,7 +3,7 @@ import { Subscription, Subject, fromEvent, map, filter } from 'rxjs';
 import { NgStyle } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BibleService } from '../../../bible.service';
-import { ScriptureModel, ScriptureSearchResultModel } from '../../../model/scripture.model';
+import { ScriptureModel } from '../../../model/scripture.model';
 import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel';
 import { CiteContextMenuComponent } from '../../../context-menu/cite-context-menu.component';
 import { CiteScriptureReportComponent } from '../../../reports/cite-scripture-report/cite-scripture-report.component';

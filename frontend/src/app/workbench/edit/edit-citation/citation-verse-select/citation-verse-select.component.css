@@ -1,0 +1,53 @@
+.ps-row {
+  background: white;
+  border: 1px solid #dcdcdc;
+  border-radius: 4px;
+  padding: 8px 12px;
+  margin-bottom: 6px;
+  display: flex;
+  align-items: flex-start;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+}
+
+.ps-left {
+  width: 100px;
+  min-width: 100px;
+  margin-right: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ps-text {
+  flex: 1;
+  font-size: 14px;
+  line-height: 1.35rem;
+  color: #333;
+  padding-top: 2px;
+}
+
+.form-check-label {
+  font-weight: 500;
+  color: #444;
+}
+
+.ps-btn {
+  padding: 2px 10px;
+  font-size: 13px;
+  border-radius: 4px;
+  border: 1px solid #bfc7d1;
+  cursor: pointer;
+  background: #e8eef5;
+}
+.ps-btn:hover {
+  background: #dce6f2;
+}
+
+.ps-btn-blue {
+  background: #337ab7;
+  color: white;
+  border-color: #2e6da4;
+}
+.ps-btn-blue:hover {
+  background: #286090;
+}

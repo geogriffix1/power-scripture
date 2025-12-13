@@ -1,0 +1,21 @@
+<div class="active-verse-wrapper">
+  <!-- Highlight/markup overlay (non-interactive) -->
+  <div
+    class="overlay-layer"
+    [innerHTML]="overlayHtml()">
+  </div>
+
+  <!-- Pristine, contentEditable verse text (selection + caret only) -->
+  <div
+    #pristineEditor
+    class="pristine-editor"
+    contenteditable="true"
+    spellcheck="false"
+    [textContent]="activeVerse.scripture.text || ''"
+    (keydown)="onKeydown($event)"
+    (mouseup)="onMouseUp()"
+    (keyup)="onKeyUp()"
+    (blur)="onBlur()"
+    (focus)="onFocus()">
+  </div>
+</div>

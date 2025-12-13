@@ -1,13 +1,33 @@
 import { ScriptureModel } from './scripture.model';
-import { CitationMarkupModel } from './CitationMarkup.model';
+import { CitationMarkupService } from '../citation-markup.service';
+import { CitationVerseMarkup, CitationVerseMarkupKind } from './citationVerseMarkup.model';
 
 export interface CitationVerseModel {
     id: number,
     citationId: number,
-    scriptureId: string
+    scriptureId: number
 }
 
 export interface CitationVerseExtendedModel extends CitationVerseModel {
     scripture: ScriptureModel,
-    markups: CitationMarkupModel[];
+    markups: CitationVerseMarkup[];
+    hide?: boolean,
+    isOpen?: boolean;
+    verseCitation?: string;
+    text?: string;
+}
+
+export class NullCitationVerse implements CitationVerseExtendedModel {
+    id = 0;
+    citationId = 0;
+    scriptureId = 0;
+    scripture = {
+        id: 0,
+        book: "",
+        chapter: 0,
+        verse: 0,
+        text: "",
+        bibleOrder: 0
+    };
+    markups = [];
 }

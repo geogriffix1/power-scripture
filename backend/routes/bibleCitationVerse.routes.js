@@ -6,6 +6,7 @@ module.exports = app => {
     router.get("/:id/full", bibleCitationVerse.listOne);
     router.get("/", bibleCitationVerse.listAll);
     router.get("/citation/:id", bibleCitationVerse.citationId);
+    router.get("/citation/:id/scriptures/:array", bibleCitationVerse.listByCitationAndScriptures);
     router.post("/", bibleCitationVerse.create);
     router.post("/citation/:id/scriptures", bibleCitationVerse.addToCitation);
     router.put("/", bibleCitationVerse.edit);

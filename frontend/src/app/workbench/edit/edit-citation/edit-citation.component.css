@@ -1,3 +1,15 @@
+.static {
+    position: relative;
+    background: rgba(255, 255, 255, 0.76);
+    border-radius: 8px;
+    border: 4px solid gold;
+    box-shadow: inset 0 0 0 3px black;
+    outline: 1px black;
+    padding: 20px;
+    font-weight: bold;
+    font: verdana;
+}
+
 .workbench-edit {
     background-color: black;
     color:white;
@@ -22,16 +34,25 @@
     background-color: black;
     color:white;
 }
+
 .workbench-edit .header {
     margin-left: 36px;
     font-weight: bold;
+}
+
+
+.scrollable-content .header {
+    padding-left: 36px;
+    font-weight: bold;
+    background-color: black;
+    color: white;
 }
 
 .workbench-edit div.selected.missing {
     color: red;
     background-color: black;
 }
-.theme-member , .scripture-range {
+.theme-member , .scripture-range, .citation-verse {
     border: 2px solid darkslategray;
     background-color:field;
     color: black;
@@ -220,19 +241,19 @@ th.scripture-label {
     text-align:center;
 }
 
-div.scripture-range {
+div.scripture-range, div.citation-verse {
     display: flex;
     height: 32px;
     background-color: field;
     align-items: center;
 }
 
-div.scripture-range span {
+div.scripture-range span, div.citation-verse span {
     margin-left: 6px;
     font-weight: bold;
 }
 
-.scripture-range.container {
+.scripture-range.container, .citation-verse.container {
     display: flex;
     align-items: center;
     justify-content: space-between;
@@ -242,19 +263,19 @@ div.scripture-range span {
     border-radius: 5px;
 }
 
-.scripture-range .left-icon {
+.scripture-range .left-icon, .citation-verse .left-icon {
     flex-shrink: 0;
     margin-top: 4px;
     margin-right: 10px;
 }
 
-.scripure-range .text {
+.scripure-range .text, .citation-verse .text {
     flex-grow: 1;
     margin-right: 10px;
     word-wrap: break-word;
 }
 
-.scripture-range .right-icons {
+.scripture-range .right-icons, .citation-verse .right-icons {
     display: flex;
     gap: 5px;
     flex-shrink: 0;
@@ -309,4 +330,30 @@ nav.cite-scripture {
 
 .hidden {
     display: none;
+}
+
+.markup-editor {
+    display: flex;
+    flex-direction: column;    
+}
+
+.top-row {
+    display: flex;
+    flex: 1 1 auto;
+    overflow: hidden;
+}
+
+app-citation-verse-markup-toolbox {
+    width:200px;
+    flex: 0 0 auto;
+    padding: 2px;
+    box-sizing: border-box;
+    overflow-y: auto;
+}
+
+app-citation-verse-workarea {
+    flex: 1 1 auto;
+    overflow-y: auto;
+    padding: 10px;
+    box-sizing: border-box;
 }
