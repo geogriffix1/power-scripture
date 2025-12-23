@@ -5,10 +5,10 @@ class BibleCitationMarkupModel {
         this.id = new attr.columnAttribute("bible_citation_markup_id", "INT", true);
         this.citationVerseId = new attr.columnAttribute("bible_citation_verse_id", "INT", false, "bible_citation_verses");
         this.citationId = new attr.columnAttribute("bible_citation_id", "INT", false, "bible_citations");
-        this.isRemoved = new attr.columnAttribute("is_removed", "BOOL")
-        this.textIndex = new attr.columnAttribute("text_index", "INT");
-        this.textLength = new attr.columnAttribute("text_length", "INT", false, "text_length");
-        this.markupText = new attr.columnAttribute("markup_text", "VARCHAR(80)")
+        this.startIndex = new attr.columnAttribute("start_index", "INT")
+        this.endIndex = new attr.columnAttribute("end_index", "INT");
+        this.replacementText = new attr.columnAttribute("replacement_text", "VARCHAR(200)");
+        this.kind = new attr.columnAttribute("kind", "VARCHAR(10)");
         this.createdAt = new attr.columnAttribute("created_at", "DATETIME");
         this.updatedAt = new attr.columnAttribute("updated_at", "DATETIME");
         this.citation = null;
@@ -21,10 +21,10 @@ class BibleCitationMarkupModel {
             id: this.id.value,
             citationVerseId: this.citationVerseId.value,
             citationId: this.citationId.value,
-            isRemoved: this.isRemoved.value,
-            textIndex: this.textIndex.value,
-            textLength: this.textLength.value,
-            markupText: this.markupText.value,
+            startIndex: this.startIndex.value,
+            endIndex: this.endIndex.value,
+            replacementText: this.replacementText.value,
+            kind: this.kind.value,
             createdAt: this.createdAt.value,
             updatedAt: this.updatedAt.value,
             citation: this.citation,
@@ -36,10 +36,10 @@ class BibleCitationMarkupModel {
         this.id.value = value.id ? value.id : null;
         this.citationVerseId.value = value.citationVerseId ? value.citationVerseId : null,
         this.citationId.value = value.citationId ? value.citationId : null;
-        this.isRemoved.value = value.isRemoved === true || value.isRemoved === false ? value.isRemoved : null;
-        this.textIndex.value = value.textIndex || value.textIndex === 0 ? value.textIndex : null;
-        this.textLength.value = value.textLength || value.textLength === 0 ? value.textLength : null;
-        this.markupText.value = value.markupText ? value.markupText : null;
+        this.startIndex.value = value.startIndex ? value.startIndex : null;
+        this.endIndex.value = value.endIndex ? value.endIndex : null;
+        this.replacementText.value = value.replacementText ? value.replacementText : null;
+        this.kind = value.kind ? value.kind : null;
         this.createdAt.value = value.createdAt ? value.createdAt : null;
         this.updatedAt.value = value.updatedAt ? value.updatedAt : null;
         this.citation = value.citation ? value.citation : null;

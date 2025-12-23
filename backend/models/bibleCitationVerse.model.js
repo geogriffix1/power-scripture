@@ -5,6 +5,7 @@ class BibleCitationVerseModel {
         this.id = new attr.columnAttribute("bible_citation_verse_id", "INT", true);
         this.citationId = new attr.columnAttribute("bible_citation_id", "INT", false, "bible_citations");
         this.scriptureId = new attr.columnAttribute("bible_scripture_niv_id", "INT", false, "bible_scriptures_niv");
+        this.hide = new attr.columnAttribute("hide", "VARCHAR(1)");
         this.createdAt = new attr.columnAttribute("created_at", "DATETIME");
         this.updatedAt = new attr.columnAttribute("updated_at", "DATETIME");
         this.scripture = null;
@@ -17,6 +18,7 @@ class BibleCitationVerseModel {
             id: this.id.value,
             citationId: this.citationId.value,
             scriptureId: this.scriptureId.value,
+            hide: this.hide,
             createdAt: this.createdAt.value,
             updatedAt: this.updatedAt.value,
             scripture: this.scripture,
@@ -28,10 +30,11 @@ class BibleCitationVerseModel {
         this.id.value = value.id ? value.id : null;
         this.citationId.value = value.citationId ? value.citationId : null;
         this.scriptureId.value = value.scriptureId ? value.scriptureId : null;
-        this.createdAt.value = value.createdAt ? value.createdAt : null;
-        this.updatedAt.value = value.updatedAt ? value.updatedAt : null;
+        this.hide = /Y|N/.test(this.hide) ? value.hide : null;
         this.scripture = value.scripture ? value.scripture : null;
         this.markups = value.markups ? value.markups : [];
+        this.createdAt.value = value.createdAt ? value.createdAt : null;
+        this.updatedAt.value = value.updatedAt ? value.updatedAt : null;
     }
 
     getSelectString = () => {

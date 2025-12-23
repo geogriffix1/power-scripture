@@ -1,21 +1,23 @@
-<div class="active-verse-wrapper">
-  <!-- Highlight/markup overlay (non-interactive) -->
-  <div
-    class="overlay-layer"
-    [innerHTML]="overlayHtml()">
+<div class="active-verse">
+
+  <div class="pristine-wrap">
+    <!-- Overlay (visible) -->
+    <div class="overlay" [innerHTML]="overlayHtml()"></div>
+
+    <!-- Pristine editor (invisible text but selectable) -->
+    <div
+      #pristine
+      class="pristine"
+      contenteditable="true"
+      spellcheck="false"
+      (mouseup)="onMouseUpOrKeyUp()"
+      (keyup)="onMouseUpOrKeyUp()"
+      (blur)="onBlur()">
+    </div>
   </div>
 
-  <!-- Pristine, contentEditable verse text (selection + caret only) -->
-  <div
-    #pristineEditor
-    class="pristine-editor"
-    contenteditable="true"
-    spellcheck="false"
-    [textContent]="activeVerse.scripture.text || ''"
-    (keydown)="onKeydown($event)"
-    (mouseup)="onMouseUp()"
-    (keyup)="onKeyUp()"
-    (blur)="onBlur()"
-    (focus)="onFocus()">
-  </div>
+  @if (hasAnyMarkups()) {
+    <div class="rendered-active-verse" [innerHTML]="renderedActiveVerseHtml()"></div>
+  }
+
 </div>

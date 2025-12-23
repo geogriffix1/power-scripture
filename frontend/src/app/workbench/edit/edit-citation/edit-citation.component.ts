@@ -253,10 +253,10 @@ export class EditCitationComponent {
     console.log(this.activeVerses()[index]);
     let verse = this.activeVerses()[index];
     if (verse.scripture.book.match(/Obadiah|Philemon|2 John|3 John|Jude/)) {
-      verse.verseCitation = `${verse.scripture.book} ${verse.scripture.verse}`;
+      verse.verseCitationLabel = `${verse.scripture.book} ${verse.scripture.verse}`;
     }
     else {
-      verse.verseCitation = `${verse.scripture.book} ${verse.scripture.chapter}:${verse.scripture.verse}`;
+      verse.verseCitationLabel = `${verse.scripture.book} ${verse.scripture.chapter}:${verse.scripture.verse}`;
     }
 
     this.activeVerse.set(verse);
@@ -321,7 +321,13 @@ export class EditCitationComponent {
     console.log("Verse Selected for Markup!");
     console.log(selectedVerse);
     this.activeVerse.set(selectedVerse);
+    console.log(`citationId:${this.activeScriptureRange().citationId} == ${this.editedCitation.id}?`);
+    console.log("activeScriptureRange:");
+    console.log(this.activeScriptureRange());
+    console.log("activeVerse");
+    console.log(this.activeVerse());
   }
+
   ngOnInit() {
     console.log("ON INIT");
     console.log("initializing edit citation component");

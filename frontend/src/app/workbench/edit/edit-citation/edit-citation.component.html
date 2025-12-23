@@ -41,7 +41,7 @@
     @else {
         <!-- Markup Editor mode -->
 <div id="activeVerse" class="citation-verse container">
-    <div class="text">{{activeVerse().verseCitation}}</div>
+    <div class="text">Markup Editor - {{activeVerse().verseCitationLabel}}</div>
     <div class="right-icons">
         <i class="save-icon" (click)="OnSaveMarkups()" title="Save Citation Verse Markups"></i>
         <i class="close-icon" (click)="OnCancelMarkups()" title="Cancel Citation Verse Markup Editor"></i>
@@ -92,8 +92,8 @@
             <div class="markup-editor">
                 <div class="top-row">
                     <app-citation-verse-markup-workarea
-                        [activeVerses]="activeVerses()"
-                        [activeVerse]="activeVerse()"
+                        [activeVerses]="activeVerses"
+                        [activeVerse]="activeVerse"
                         (verseSessionEnded)="onVerseSessionEnded($event)">
                     </app-citation-verse-markup-workarea>
                 </div>

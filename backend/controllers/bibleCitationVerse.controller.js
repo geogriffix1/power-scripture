@@ -46,6 +46,7 @@ exports.listOne = (req, res) => {
                         verse = tools.getObjectFromResult(result, 1);
                         var newScripture = tools.getObjectFromResult(result, 2);
                         verse.scripture = newScripture;
+                        verse.verseCitationLabel = getCitationLabel(verse.scripture.book, verse.scripture.chapter, verse.scripture.verse);
                         verse.markups = [];
                     }
 
@@ -104,6 +105,7 @@ exports.listAll = (req, res) => {
 
                     citationVerse = tools.getObjectFromResult(result, 1);
                     citationVerse.scripture = tools.getObjectFromResult(result, 2);
+                    citationVerse.verseCitationLabel = getCitationLabel(citationVerse.scripture.book, citationVerse.scripture.chapter, citationVerse.scripture.verse);
                     let markup = tools.getObjectFromResult(result, 3);
                     if (markup.id === null) {
                         citationVerse.markups = [];
@@ -161,6 +163,7 @@ exports.citationId = (req, res) => {
                 var result = results[i];
                 if (citationVerse === null || citationVerse.id != tools.getObjectFromResult(result, 1).id) {
                     if (citationVerse !== null) {
+                        citationVerse.verseCitationLabel = getCitationLabel(citationVerse.book, citationVerse.chapter, citationVerse.verse);
                         verses.push(citationVerse);
                     }
 
@@ -180,6 +183,7 @@ exports.citationId = (req, res) => {
             }
 
             if (citationVerse !== null) {
+                citationVerse.verseCitationLabel = getCitationLabel(citationVerse.scripture.book, citationVerse.scripture.chapter, citationVerse.scripture.verse);
                 verses.push(citationVerse);
             }
 
@@ -245,6 +249,7 @@ exports.listByCitationAndScriptures = async (req, res) => {
                     var result = results[i];
                     if (citationVerse === null || citationVerse.id != tools.getObjectFromResult(result, 1).id) {
                         if (citationVerse !== null) {
+                            citationVerse.verseCitationLabel = getCitationLabel(citationVerse.scripture.book, citationVerse.scripture.chapter, citationVerse.scripture.verse);
                             verses.push(citationVerse);
                         }
 
@@ -264,6 +269,7 @@ exports.listByCitationAndScriptures = async (req, res) => {
                 }
 
                 if (citationVerse !== null) {
+                    citationVerse.verseCitationLabel = getCitationLabel(citationVerse.scripture.book, citationVerse.scripture.chapter, citationVerse.scripture.verse);
                     verses.push(citationVerse);
                 }
 
@@ -412,6 +418,7 @@ exports.create = (req, res) => {
 
                                 citationVerse.citation = tools.getObjectFromResult(result, 2);
                                 citationVerse.scripture = tools.getObjectFromResult(result, 3);
+                                citationVerse.verseCitationLabel = getCitationLabel(citationVerse.scripture.book, citationVerse.scripture.chapter, citationVerse.scripture.verse);
 
                                 res.send({ created: citationVerse });
                             });
@@ -647,7 +654,7 @@ exports.edit = (req, res) => {
 
                                 citationVerse.citation = tools.getObjectFromResult(result, 2);
                                 citationVerse.scripture = tools.getObjectFromResult(result, 3);
-
+                                citationVerse.verseCitationLabel = getCitationLabel(citationVerse.scripture.book, citationVerse.scripture.chapter, citationVerse.scripture.verse);
                                 res.send({ created: citationVerse });
                             });
                     })
@@ -682,3 +689,12 @@ exports.delete = async (req, res) => {
         res.status(500).send(`Error attempting to delete verse from citation: ${err.message}`);
     }
 }
+
+getCitationLabel = (book, chapter, verse) => {
+    if (book.match(/Obadiah|Philemon|2 John|3 John|Jude/)) {
+        return `${book} ${verse}`;
+    }
+    
+    return `${book} ${chapter}:${verse}`;
+}
+

@@ -498,6 +498,7 @@ async normalizeThemeSequence(parentId:number, callback:any) {
             text: result.text,
             bibleOrder: result.bible_order
           },
+          verseCitationLabel: result.verseCitationLabel,
           markups: []
         };
 

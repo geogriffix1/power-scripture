@@ -1,58 +1,54 @@
-.toolbox-container {
-  width: 120px;
+.toolbox {
+  width: 220px;
+  padding: 10px;
+  background: #f7fbff;
+  border-right: 1px solid #cfe3ff;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
-hr {
-  width: 80%;
-  margin-top: 0;
-  margin-bottom: 0;
-  border: 1px solid #333;
-  margin-left: 10%;
+.tool-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
 }
 
-.toolbox-btn {
-  width: 100%;
-  padding: 4px 5px;
-  border-radius: 10px;
-  border: 1px solid black;
+.tool-label {
+  font-size: 12px;
+  color: #375a7f;
+}
+
+.tool-btn {
+  border-radius: 8px;
+  padding: 6px 10px;
+  font-size: 13px;
   cursor: pointer;
-  background: linear-gradient(180deg, #d9eaff, #a8cfff);
-  color: #033366;
-  font-weight: 400;
-  transition: filter 0.1s ease-in-out;
+  border: 1px solid #9ec5fe;
+  background: linear-gradient(#e7f1ff, #cfe3ff);
 }
 
-.toolbox-btn:hover:not(:disabled) {
-  filter: brightness(1.1);
+.tool-btn.full {
+  width: 100%;
 }
 
-.toolbox-btn:disabled {
+.tool-btn:hover {
+  background: linear-gradient(#d0e3ff, #b6d4fe);
+}
+
+.tool-btn:disabled {
   opacity: 0.5;
   cursor: default;
 }
 
-.toolbox-btn.primary {
-  background: linear-gradient(180deg, #b4e0b4, #5fb65f);
-  color: #003300;
-}
-
-.toolbox-btn.danger {
-  background: linear-gradient(180deg, #ffd4d4, #ff8f8f);
-  color: #660000;
-}
-
-.toolbox-label {
-  font-size: 12px;
-  margin-top: 6px;
-}
-
 .replacement-input {
-  width: 100%;
-  padding: 6px;
-  border-radius: 8px;
-  border: 1px solid #99bbee;
-  font-size: 12px;
+  border-radius: 6px;
+  border: 1px solid #9ec5fe;
+  padding: 5px;
+  font-size: 13px;
+}
+
+.tool-group.danger .tool-btn {
+  background: linear-gradient(#ffe7e7, #ffc9c9);
+  border-color: #f5a3a3;
 }

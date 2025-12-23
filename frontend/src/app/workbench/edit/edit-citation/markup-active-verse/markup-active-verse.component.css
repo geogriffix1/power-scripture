@@ -1,38 +1,56 @@
-.active-verse-wrapper {
+.active-verse { display: flex; flex-direction: column; gap: 10px; }
+
+.pristine-wrap{
   position: relative;
-  font-family: Georgia, 'Times New Roman', serif;
-  font-size: 15px;
-  line-height: 1.4;
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.65);
+  border: 1px solid rgba(0,0,0,0.15);
+  min-height: 110px;
 }
 
-/* Overlay with highlights, non-interactive */
-.overlay-layer {
+/* Both layers must match font metrics EXACTLY */
+.overlay, .pristine{
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 18px;
+  line-height: 1.35;
+  white-space: pre-wrap;
+  word-break: break-word;
+  letter-spacing: 0;
+}
+
+/* Overlay is visible */
+.overlay{
   position: absolute;
-  inset: 0;
-  pointer-events: none;   /* let mouse events hit the editor */
-  white-space: pre-wrap;
+  inset: 10px;         /* match padding effect */
+  pointer-events: none;
 }
 
-/* The actual contenteditable text */
-.pristine-editor {
+/* Pristine is selectable, caret visible, but text invisible */
+.pristine{
   position: relative;
-  white-space: pre-wrap;
+  z-index: 2;
+  color: transparent;          /* hides text */
+  caret-color: #000;           /* shows caret */
   background: transparent;
   outline: none;
-  /* Make sure overlay and editor align */
 }
 
-/* Overlay coloring for different markup kinds */
-.markup-highlight {
-  background-color: rgba(255, 255, 0, 0.35);
+/* Selection highlight still visible even though text is transparent */
+.pristine::selection{
+  background: rgba(80,120,255,0.30);
 }
 
-.markup-suppress {
-  background-color: rgba(255, 0, 0, 0.18);
-}
+/* Overlay colors: subtle background shades */
+:host ::ng-deep .overlay-none { background: transparent; }
+:host ::ng-deep .overlay-highlight { background: rgba(255, 235, 59, 0.35); border-radius: 4px; }
+:host ::ng-deep .overlay-suppress  { background: rgba(244, 67, 54, 0.20); border-radius: 4px; }
+:host ::ng-deep .overlay-replace   { background: rgba(33, 150, 243, 0.20); border-radius: 4px; }
+:host ::ng-deep .overlay-paragraph-marker { opacity: 0.35; padding: 0 2px; }
 
-.markup-replace {
-  background-color: rgba(0, 128, 255, 0.2);
+.rendered-active-verse{
+  padding: 10px;
+  border-radius: 10px;
+  background: rgba(255,255,255,0.45);
+  border: 1px solid rgba(0,0,0,0.12);
 }
-
-/* You can tune these colors to your liking */

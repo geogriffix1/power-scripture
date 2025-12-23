@@ -1,229 +1,134 @@
 import {
-  Component,
-  ElementRef,
-  Input,
-  ViewChild,
-  computed,
-  effect,
-  inject,
+  Component, ElementRef, HostListener, Input, Signal, computed, inject, viewChild
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
 import { CitationVerseExtendedModel } from '../../../../model/citationVerse.model';
-import {
-  CitationVerseMarkup,
-  CitationVerseMarkupKind,
-  PristineSelection
-} from '../../../../model/citationVerseMarkup.model';
 import { CitationMarkupService } from '../../../../citation-markup.service';
+import { PristineSelection } from '../../../../model/citationVerseMarkup.model';
 
 @Component({
   selector: 'app-markup-active-verse',
   standalone: true,
-  imports: [CommonModule],
   templateUrl: './markup-active-verse.component.html',
   styleUrls: ['./markup-active-verse.component.css']
 })
 export class MarkupActiveVerseComponent {
-  private markupService = inject(CitationMarkupService);
+  private markup = inject(CitationMarkupService);
 
-  @Input({ required: true })
-  activeVerse!: CitationVerseExtendedModel;
+  @Input({ required: true }) activeVerse!: Signal<CitationVerseExtendedModel>;
 
-  @ViewChild('pristineEditor', { static: true })
-  pristineEditorRef!: ElementRef<HTMLDivElement>;
+  private pristineElRef = viewChild.required<ElementRef<HTMLDivElement>>('pristine');
 
-  // Overlay HTML computed from the active verse + its markups
-  readonly overlayHtml = computed(() => {
-    if (!this.activeVerse?.scripture?.text) {
-      return '';
-    }
-    return this.buildOverlayHtml(
-      this.activeVerse.scripture.text,
-      this.markupService.getMarkupsForVerse(this.activeVerse.id)
-    );
+  // overlay html depends on markupsVersion so it refreshes immediately after toolbox actions
+  overlayHtml = computed(() => {
+    this.markup.markupsVersion();
+    return this.markup.renderActiveVerseOverlay(this.activeVerse());
   });
 
-  constructor() {
-    // You can keep an effect here if later you want to react
-    // when activeVerse changes, but right now we don't need extra logic.
-    effect(() => {
-      const v = this.activeVerse;
-      // just to subscribe to changes; no-op body
-      void v;
-    });
-  }
+  // rendered verse under pristine (only if any markups exist on active verse)
+  renderedActiveVerseHtml = computed(() => {
+    this.markup.markupsVersion();
+    const v = this.activeVerse();
+    const mk = this.markup.getMarkupsForVerse(v.id);
+    if (!mk.length) return '';
+    return this.markup.renderVerse(v);
+  });
 
-  // --------------------------------------------------------
-  // Overlay rendering logic (uses escapeHtml helper)
-  // --------------------------------------------------------
-  private buildOverlayHtml(
-    text: string,
-    markups: CitationVerseMarkup[]
-  ): string {
-    if (!markups?.length) {
-      // No markups: overlay is just raw escaped text
-      return this.escapeHtml(text);
-    }
+  hasAnyMarkups = computed(() => {
+    this.markup.markupsVersion();
+    return this.markup.getMarkupsForVerse(this.activeVerse().id).length > 0;
+  });
 
-    // Sort by startIndex; if same index, Paragraph first
-    const sorted = [...markups].sort((a, b) => {
-      if (a.startIndex === b.startIndex) {
-        if (a.kind === CitationVerseMarkupKind.Paragraph &&
-            b.kind !== CitationVerseMarkupKind.Paragraph) {
-          return -1;
-        }
-        if (b.kind === CitationVerseMarkupKind.Paragraph &&
-            a.kind !== CitationVerseMarkupKind.Paragraph) {
-          return 1;
-        }
-        return 0;
-      }
-      return a.startIndex - b.startIndex;
-    });
-
-    let html = '';
-    let idx = 0;
-
-    for (const m of sorted) {
-      // text before markup
-      if (m.startIndex > idx) {
-        html += this.escapeHtml(text.slice(idx, m.startIndex));
-      }
-
-      // Paragraph markups don't color spans; they are structural.
-      // For the overlay we just leave underlying text as-is.
-      if (m.kind === CitationVerseMarkupKind.Paragraph) {
-        // no visible span for the paragraph itself here
-        // (paragraph breaks handled when rendering the range)
-      } else {
-        const seg = text.slice(m.startIndex, m.endIndex);
-        const escapedSeg = this.escapeHtml(seg);
-        const cssClass = this.classForMarkup(m.kind);
-        html += `<span class="${cssClass}">${escapedSeg}</span>`;
-      }
-
-      idx = Math.max(idx, m.endIndex);
-    }
-
-    // trailing text after last markup
-    if (idx < text.length) {
-      html += this.escapeHtml(text.slice(idx));
-    }
-
-    return html;
-  }
-
-  private classForMarkup(kind: CitationVerseMarkupKind): string {
-    switch (kind) {
-      case CitationVerseMarkupKind.Highlight:
-        return 'markup-highlight';
-      case CitationVerseMarkupKind.Suppress:
-        return 'markup-suppress';
-      case CitationVerseMarkupKind.Replace:
-        return 'markup-replace';
-      case CitationVerseMarkupKind.Paragraph:
-        // paragraphs are structural; no color span in overlay
-        return '';
-      default:
-        return '';
-    }
-  }
-
-  // ✅ Missing helper: escape function
-  private escapeHtml(value: string): string {
-    return value
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;')
-      .replace(/"/g, '&quot;')
-      .replace(/'/g, '&#39;');
-  }
-
-  // --------------------------------------------------------
-  // Pristine editor: block text changes, allow caret & selection
-  // --------------------------------------------------------
-
-  onKeydown(event: KeyboardEvent): void {
-    // Allow navigation keys and modifiers (no text change)
-    const navKeys = [
-      'ArrowLeft', 'ArrowRight', 'ArrowUp', 'ArrowDown',
-      'Home', 'End', 'PageUp', 'PageDown',
-      'Shift', 'Control', 'Alt', 'Meta', 'Tab'
+  // Disallow edits but allow navigation keys
+  @HostListener('keydown', ['$event'])
+  onKeyDown(e: KeyboardEvent) {
+    const allowed = [
+      'ArrowLeft','ArrowRight','ArrowUp','ArrowDown',
+      'Home','End','PageUp','PageDown',
+      'Shift','Control','Alt','Meta'
     ];
 
-    // F-keys
-    if (event.key.startsWith('F')) {
-      return;
-    }
+    const ctrlCombo = e.ctrlKey || e.metaKey;
 
-    // Allow Ctrl/Meta + arrows (word navigation, etc.)
-    if ((event.ctrlKey || event.metaKey) &&
-        (event.key.startsWith('Arrow') || navKeys.includes(event.key))) {
-      return;
-    }
+    // allow copy/select combos
+    if (ctrlCombo && (e.key.toLowerCase() === 'a' || e.key.toLowerCase() === 'c')) return;
 
-    if (navKeys.includes(event.key)) {
-      return;
-    }
+    // allow navigation
+    if (allowed.includes(e.key)) return;
 
-    // Block everything that could mutate text:
-    // - character keys
-    // - Backspace, Delete, Enter, etc.
-    event.preventDefault();
+    // block anything that would modify text
+    e.preventDefault();
   }
 
-  onMouseUp(): void {
+  // Keep the pristine text exactly equal to scripture text (no HTML escaping here)
+  ngAfterViewInit() {
+    this.syncPristineText();
+  }
+
+  ngOnChanges() {
+    // active verse changed
+    queueMicrotask(() => this.syncPristineText());
+  }
+
+  private syncPristineText() {
+    const el = this.pristineElRef().nativeElement;
+    const text = this.activeVerse().scripture.text ?? '';
+    // textContent preserves backslashes exactly; no HTML interpretation
+    if (el.textContent !== text) {
+      el.textContent = text;
+    }
+  }
+
+  onMouseUpOrKeyUp() {
     this.updateSelectionFromDom();
   }
 
-  onKeyUp(): void {
+  onBlur() {
+    // when losing focus, preserve caret location using current selection
     this.updateSelectionFromDom();
   }
 
-  onBlur(): void {
-    // We don't move the caret in the service here;
-    // the service keeps the last caretIndex from updateSelectionFromDom().
-    // You may later add a fake-caret in an overlay using that index.
-  }
-
-  onFocus(): void {
-    // When regaining focus, you can restore caret from service if needed.
-    // For now we'll let the browser keep where it was if possible.
-  }
-
-  private updateSelectionFromDom(): void {
-    const verse = this.activeVerse;
-    if (!verse) {
-      return;
-    }
-
-    const editor = this.pristineEditorRef?.nativeElement;
-    if (!editor) {
-      return;
-    }
+  private updateSelectionFromDom() {
+    const verse = this.activeVerse();
+    const root = this.pristineElRef().nativeElement;
 
     const sel = window.getSelection();
     if (!sel || sel.rangeCount === 0) {
+      this.markup.setPristineSelection(null);
       return;
     }
 
     const range = sel.getRangeAt(0);
 
-    // Ensure the selection is inside our editor
-    if (!editor.contains(range.startContainer) ||
-        !editor.contains(range.endContainer)) {
-      return;
+    // compute offsets based on text nodes inside the contenteditable root
+    const startIndex = this.getOffsetWithin(root, range.startContainer, range.startOffset);
+    const endIndex   = this.getOffsetWithin(root, range.endContainer, range.endOffset);
+
+    const caretIndex = endIndex; // caret at end of selection; service decides paragraph index rule
+
+    const selection: PristineSelection = {
+      verseId: verse.id,
+      startIndex: Math.min(startIndex, endIndex),
+      endIndex: Math.max(startIndex, endIndex),
+      caretIndex
+    };
+
+    this.markup.setPristineSelection(selection);
+  }
+
+  // Robust offset calculator: counts characters in text nodes (backslashes included correctly)
+  private getOffsetWithin(root: HTMLElement, node: Node, nodeOffset: number): number {
+    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+    let offset = 0;
+
+    while (walker.nextNode()) {
+      const textNode = walker.currentNode as Text;
+      if (textNode === node) {
+        return offset + nodeOffset;
+      }
+      offset += (textNode.nodeValue?.length ?? 0);
     }
 
-    // Because the editor's content is plain text (no spans), we can
-    // use the range offsets directly as indices into scripture.text.
-    const pristineSelection = {
-      verseId: this.activeVerse.id,
-      startIndex: range.startOffset,
-      endIndex: range.endOffset,
-      caretIndex: 0
-    }
-
-    this.markupService.setPristineSelection(pristineSelection);
+    // If selection container isn't a text node (e.g. root), best-effort fallback
+    return offset;
   }
 }

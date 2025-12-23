@@ -13,7 +13,7 @@ export interface CitationVerseExtendedModel extends CitationVerseModel {
     markups: CitationVerseMarkup[];
     hide?: boolean,
     isOpen?: boolean;
-    verseCitation?: string;
+    verseCitationLabel?: string;
     text?: string;
 }
 

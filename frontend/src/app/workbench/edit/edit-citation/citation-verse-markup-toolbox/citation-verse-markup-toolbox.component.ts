@@ -1,84 +1,70 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
-import { CitationVerseExtendedModel } from '../../../../model/citationVerse.model';
+// src/app/workbench/edit/edit-citation/citation-verse-markup-toolbox/citation-verse-markup-toolbox.component.ts
+
+import { Component, Input, Signal, inject } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
 import { CitationMarkupService } from '../../../../citation-markup.service';
+import { CitationVerseExtendedModel } from '../../../../model/citationVerse.model';
 
 @Component({
   selector: 'app-citation-verse-markup-toolbox',
   standalone: true,
-  imports: [],
+  imports: [CommonModule],
   templateUrl: './citation-verse-markup-toolbox.component.html',
   styleUrls: ['./citation-verse-markup-toolbox.component.css']
 })
 export class CitationVerseMarkupToolboxComponent {
 
-  @Input() activeVerse!: CitationVerseExtendedModel;
-  @Input() activeVerses!: CitationVerseExtendedModel[];
+  private markup = inject(CitationMarkupService);
 
-  @Output() save = new EventEmitter<void>();
-  @Output() cancel = new EventEmitter<void>();
+  /** Active verse (already selected elsewhere) */
+  @Input({ required: true }) activeVerse!: Signal<CitationVerseExtendedModel>;
 
-  /** Replacement textbox content */
-  replacementDraft: string = '';
+  /** Replacement text draft (NOT a signal — simple string is correct) */
+  replacementDraft = '';
 
-  constructor(private markupService: CitationMarkupService) {}
+  // --- Button handlers --------------------------------------------------
 
-  // ---- Undo / Redo ----
-  get canUndo(): boolean {
-    return this.markupService.canUndo();
+  highlight(): void {
+    this.markup.applyMarkupHighlightToActiveVerse(this.activeVerse().id);
   }
 
-  get canRedo(): boolean {
-    return this.markupService.canRedo();
+  suppress(): void {
+    this.markup.applyMarkupSuppressToActiveVerse(this.activeVerse().id);
   }
 
-  // ---- Highlight ----
-  onHighlight(): void {
-    const sel = this.markupService.getPristineSelection();
-    if (!sel) return;
-    this.markupService.applyMarkupHighlightToActiveVerse(this.activeVerse.id);
-  }
-
-  // ---- Suppress ----
-  onSuppress(): void {
-    const sel = this.markupService.getPristineSelection();
-    if (!sel) return;
-    this.markupService.applyMarkupSuppressToActiveVerse(this.activeVerse.id);
-  }
-
-  // ---- Replace ----
-  onReplace(): void {
-    const sel = this.markupService.getPristineSelection();
-    if (!sel) return;
-
-    this.markupService.applyMarkupReplaceToActiveVerse(
-      this.activeVerse.id,
+  replace(): void {
+    if (!this.replacementDraft.trim()) return;
+    this.markup.applyMarkupReplaceToActiveVerse(
+      this.activeVerse().id,
       this.replacementDraft
     );
+    this.replacementDraft = '';
   }
 
-  // ---- Paragraph break ----
-  onParagraphBreak(): void {
-    const sel = this.markupService.getPristineSelection();
-    if (!sel) return;
-
-    this.markupService.applyParagraphMarkupToActiveVerse(this.activeVerse.id);
+  paragraph(): void {
+    this.markup.applyParagraphMarkupToActiveVerse(this.activeVerse().id);
   }
 
-  // ---- Undo / Redo buttons ----
-  onUndo(): void {
-    this.markupService.undo();
+  deleteAll(): void {
+    this.markup.deleteAllMarkupsForVerse(this.activeVerse().id);
   }
 
-  onRedo(): void {
-    this.markupService.redo();
+  undo(): void {
+    this.markup.undo();
   }
 
-  // ---- Save & Cancel ----
-  onSave(): void {
-    this.save.emit();
+  redo(): void {
+    this.markup.redo();
   }
 
-  onCancel(): void {
-    this.cancel.emit();
+  // --- State helpers ----------------------------------------------------
+
+  canUndo(): boolean {
+    return this.markup.canUndo();
+  }
+
+  canRedo(): boolean {
+    return this.markup.canRedo();
   }
 }
