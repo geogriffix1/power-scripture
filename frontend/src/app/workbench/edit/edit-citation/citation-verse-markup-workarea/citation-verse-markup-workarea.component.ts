@@ -1,4 +1,4 @@
-import { Component, Input, Signal, computed, effect, inject } from '@angular/core';
+import { Component, Input, Signal, computed, inject, effect } from '@angular/core';
 
 import { CitationVerseExtendedModel } from '../../../../model/citationVerse.model';
 import { CitationMarkupService } from '../../../../citation-markup.service';
@@ -22,36 +22,39 @@ export class CitationVerseMarkupWorkareaComponent {
   @Input({ required: true }) activeVerse!: Signal<CitationVerseExtendedModel>;
   @Input({ required: true }) activeVerses!: Signal<CitationVerseExtendedModel[]>;
 
-  // bottom preview panel (collapsible)
-  previewOpen = true;
-
   constructor() {
-    /**
-     * 🔑 CRITICAL FIX
-     * Start a new markup session whenever the active verse range changes.
-     * This guarantees toolbox buttons work on FIRST entry.
-     */
     effect(() => {
-      const verses = this.activeVerses?.();
+      const verses = this.activeVerses();
       if (!verses || verses.length === 0) return;
 
+      // 🔑 ALWAYS initialize session before any selection can occur
       this.markup.beginSessionSnapshot(verses);
-
-      // Also clear undo/redo for the newly active verse
-      const active = this.activeVerse?.();
-      if (active) {
-        this.markup.resetUndoRedoForVerse(active.id);
-      }
     });
   }
 
+  previewOpen = true;
+
   renderedRangeHtml = computed(() => {
-    // depend on service version bump so it refreshes
     this.markup.markupsVersion();
     return this.markup.renderRange(this.activeVerses());
   });
 
   togglePreview() {
     this.previewOpen = !this.previewOpen;
+  }
+
+  beginSession() {
+    this.markup.beginSessionSnapshot(this.activeVerses());
+    console.log("beginSession - citationVerseMarkupWorkarea");
+    console.log(this.activeVerse());
+
+    // 🔑 Seed an initial pristine selection for the active verse
+    const v = this.activeVerse();
+    this.markup.setPristineSelection({
+      verseId: v.id,
+      startIndex: 0,
+      endIndex: 0,
+      caretIndex: 0
+    });
   }
 }

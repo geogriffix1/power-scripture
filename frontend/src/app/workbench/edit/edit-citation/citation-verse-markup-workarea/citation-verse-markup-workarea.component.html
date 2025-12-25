@@ -1,28 +1,21 @@
 <div class="markup-workarea">
-
   <div class="editor-row">
-    <app-citation-verse-markup-toolbox
-      class="toolbox-pane"
-      [activeVerse]="activeVerse"></app-citation-verse-markup-toolbox>
-      <!-- [activeVerses]="activeVerses">
-    </app-citation-verse-markup-toolbox> -->
+    <div class="toolbox-pane">
+      <app-citation-verse-markup-toolbox [activeVerse]="activeVerse" />
+    </div>
 
-    <app-markup-active-verse
-      class="active-verse-pane"
-      [activeVerse]="activeVerse">
-    </app-markup-active-verse>
+    <div class="active-verse-pane">
+      <app-markup-active-verse [activeVerse]="activeVerse" />
+    </div>
   </div>
 
   <div class="preview-pane">
-    <div class="preview-header">
-      <button class="preview-toggle" type="button" (click)="togglePreview()">
-        {{ previewOpen ? 'Hide Preview' : 'Show Preview' }}
-      </button>
-    </div>
+    <button class="preview-toggle" (click)="togglePreview()">
+      {{ previewOpen ? 'Hide Preview' : 'Show Preview' }}
+    </button>
 
     @if (previewOpen) {
-      <div class="preview-body" [innerHTML]="renderedRangeHtml()"></div>
+      <div class="preview-content" [innerHTML]="renderedRangeHtml()"></div>
     }
   </div>
-
 </div>

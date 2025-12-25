@@ -1,10 +1,8 @@
-// src/app/workbench/edit/edit-citation/citation-verse-markup-toolbox/citation-verse-markup-toolbox.component.ts
-
 import { Component, Input, Signal, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 
-import { CitationMarkupService } from '../../../../citation-markup.service';
 import { CitationVerseExtendedModel } from '../../../../model/citationVerse.model';
+import { CitationMarkupService } from '../../../../citation-markup.service';
 
 @Component({
   selector: 'app-citation-verse-markup-toolbox',
@@ -14,57 +12,50 @@ import { CitationVerseExtendedModel } from '../../../../model/citationVerse.mode
   styleUrls: ['./citation-verse-markup-toolbox.component.css']
 })
 export class CitationVerseMarkupToolboxComponent {
+  public markupService = inject(CitationMarkupService);
 
-  private markup = inject(CitationMarkupService);
-
-  /** Active verse (already selected elsewhere) */
   @Input({ required: true }) activeVerse!: Signal<CitationVerseExtendedModel>;
 
-  /** Replacement text draft (NOT a signal — simple string is correct) */
   replacementDraft = '';
 
-  // --- Button handlers --------------------------------------------------
-
-  highlight(): void {
-    this.markup.applyMarkupHighlightToActiveVerse(this.activeVerse().id);
+  highlight() {
+    const verseId = this.activeVerse().id;
+    this.markupService.applyMarkupHighlightToActiveVerse(verseId);
+    this.markupService.clearPristineSelection(); // rule: clear when toolbox button clicked
   }
 
-  suppress(): void {
-    this.markup.applyMarkupSuppressToActiveVerse(this.activeVerse().id);
+  suppress() {
+    const verseId = this.activeVerse().id;
+    this.markupService.applyMarkupSuppressToActiveVerse(verseId);
+    this.markupService.clearPristineSelection();
   }
 
-  replace(): void {
-    if (!this.replacementDraft.trim()) return;
-    this.markup.applyMarkupReplaceToActiveVerse(
-      this.activeVerse().id,
-      this.replacementDraft
-    );
-    this.replacementDraft = '';
+  paragraph() {
+    const verseId = this.activeVerse().id;
+    this.markupService.applyParagraphMarkupToActiveVerse(verseId);
+    this.markupService.clearPristineSelection();
   }
 
-  paragraph(): void {
-    this.markup.applyParagraphMarkupToActiveVerse(this.activeVerse().id);
+  replace() {
+    const verseId = this.activeVerse().id;
+    if (!this.replacementDraft?.length) return;
+    this.markupService.applyMarkupReplaceToActiveVerse(verseId, this.replacementDraft);
+    this.markupService.clearPristineSelection();
   }
 
-  deleteAll(): void {
-    this.markup.deleteAllMarkupsForVerse(this.activeVerse().id);
+  deleteAllMarkups() {
+    const verseId = this.activeVerse().id;
+    this.markupService.deleteAllMarkupsForVerse(verseId);
+    this.markupService.clearPristineSelection();
   }
 
-  undo(): void {
-    this.markup.undo();
+  undo() {
+    this.markupService.undo();
+    this.markupService.clearPristineSelection();
   }
 
-  redo(): void {
-    this.markup.redo();
-  }
-
-  // --- State helpers ----------------------------------------------------
-
-  canUndo(): boolean {
-    return this.markup.canUndo();
-  }
-
-  canRedo(): boolean {
-    return this.markup.canRedo();
+  redo() {
+    this.markupService.redo();
+    this.markupService.clearPristineSelection();
   }
 }

@@ -1,56 +1,73 @@
-.active-verse { display: flex; flex-direction: column; gap: 10px; }
-
-.pristine-wrap{
-  position: relative;
-  padding: 10px;
-  border-radius: 10px;
-  background: rgba(255,255,255,0.65);
-  border: 1px solid rgba(0,0,0,0.15);
-  min-height: 110px;
+.active-verse-wrapper {
+  padding: 8px;
 }
 
-/* Both layers must match font metrics EXACTLY */
-.overlay, .pristine{
-  font-family: Georgia, "Times New Roman", serif;
+.active-verse-title,
+.rendered-verse-title {
+  font-weight: 700;
+  margin: 4px 0 8px;
+}
+
+.pristine-shell {
+  position: relative;
+  border-radius: 10px;
+  padding: 10px;
+  background: rgba(255,255,255,0.35);
+}
+
+.pristine-overlay,
+.pristine-editor {
+  /* MUST MATCH EXACTLY */
+  font-family: inherit;
   font-size: 18px;
   line-height: 1.35;
   white-space: pre-wrap;
-  word-break: break-word;
-  letter-spacing: 0;
+  overflow-wrap: anywhere;
+  word-break: normal;
+
+  padding: 0;      /* overlay/editor share padding via shell */
+  margin: 0;
 }
 
-/* Overlay is visible */
-.overlay{
+.pristine-overlay {
   position: absolute;
-  inset: 10px;         /* match padding effect */
-  pointer-events: none;
+  inset: 10px;           /* match shell padding */
+  pointer-events: none;  /* clicks go to editor */
+  color: transparent;    /* prevent double text */
 }
 
-/* Pristine is selectable, caret visible, but text invisible */
-.pristine{
+.pristine-editor {
   position: relative;
-  z-index: 2;
-  color: transparent;          /* hides text */
-  caret-color: #000;           /* shows caret */
-  background: transparent;
+  z-index: 1;
   outline: none;
+  background: transparent;
+  user-select: text;
 }
 
-/* Selection highlight still visible even though text is transparent */
-.pristine::selection{
-  background: rgba(80,120,255,0.30);
+/* Overlay span classes (background only) */
+:host ::ng-deep .ov {
+  color: transparent;
 }
 
-/* Overlay colors: subtle background shades */
-:host ::ng-deep .overlay-none { background: transparent; }
-:host ::ng-deep .overlay-highlight { background: rgba(255, 235, 59, 0.35); border-radius: 4px; }
-:host ::ng-deep .overlay-suppress  { background: rgba(244, 67, 54, 0.20); border-radius: 4px; }
-:host ::ng-deep .overlay-replace   { background: rgba(33, 150, 243, 0.20); border-radius: 4px; }
-:host ::ng-deep .overlay-paragraph-marker { opacity: 0.35; padding: 0 2px; }
+:host ::ng-deep .ov-none {
+  background: transparent;
+}
 
-.rendered-active-verse{
+:host ::ng-deep .ov-marked {
+  background: rgba(80, 140, 255, 0.18); /* subtle "already marked" */
+  border-radius: 3px;
+}
+
+:host ::ng-deep .ov-selection {
+  background: rgba(80, 140, 255, 0.42); /* stronger persistent selection */
+  border-radius: 3px;
+}
+
+/* Rendered verse is NON-selectable (per your rule) */
+.rendered-verse {
+  margin-top: 8px;
   padding: 10px;
   border-radius: 10px;
-  background: rgba(255,255,255,0.45);
-  border: 1px solid rgba(0,0,0,0.12);
+  background: rgba(255,255,255,0.25);
+  user-select: none;
 }

@@ -1,35 +1,29 @@
 <div class="toolbox">
+  <div class="toolbox-title">Citation Scripture Verse Markup</div>
+
+  <button class="tool-btn" (click)="highlight()">Highlight</button>
+  <button class="tool-btn" (click)="suppress()">Suppress</button>
+  <button class="tool-btn" (click)="paragraph()">Paragraph</button>
 
   <div class="tool-group">
-    <button class="tool-btn" (click)="highlight()">Highlight</button>
-    <button class="tool-btn" (click)="suppress()">Suppress</button>
-    <button class="tool-btn" (click)="paragraph()">Paragraph</button>
-  </div>
-
-  <div class="tool-group">
-    <label class="tool-label">Replacement</label>
+    <div class="tool-label">Replacement</div>
     <input
       class="replacement-input"
-      type="text"
       [value]="replacementDraft"
-      (input)="replacementDraft = $event.target.value"
+      (input)="replacementDraft = $any($event.target).value"
+      type="text"
     />
-    <button class="tool-btn full" (click)="replace()">Replace</button>
-  </div>
-
-  <div class="tool-group danger">
-    <button class="tool-btn danger" (click)="deleteAll()">
-      Delete All Markups
+    <button
+      class="tool-btn replace-btn"
+      (click)="replace()"
+      [disabled]="!replacementDraft?.length"
+    >
+      Replace
     </button>
   </div>
 
-  <div class="tool-group">
-    <button class="tool-btn" (click)="undo()" [disabled]="!canUndo()">
-      Undo
-    </button>
-    <button class="tool-btn" (click)="redo()" [disabled]="!canRedo()">
-      Redo
-    </button>
-  </div>
+  <button class="tool-btn danger" (click)="deleteAllMarkups()">Delete All Markups</button>
 
+  <button class="tool-btn" (click)="undo()" [disabled]="!markupService.canUndo()">Undo</button>
+  <button class="tool-btn" (click)="redo()" [disabled]="!markupService.canRedo()">Redo</button>
 </div>

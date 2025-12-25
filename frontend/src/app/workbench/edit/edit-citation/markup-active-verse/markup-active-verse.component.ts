@@ -1,6 +1,15 @@
 import {
-  Component, ElementRef, HostListener, Input, Signal, computed, inject, viewChild
+  Component,
+  ElementRef,
+  Input,
+  Signal,
+  ViewChild,
+  computed,
+  effect,
+  inject
 } from '@angular/core';
+import { CommonModule } from '@angular/common';
+
 import { CitationVerseExtendedModel } from '../../../../model/citationVerse.model';
 import { CitationMarkupService } from '../../../../citation-markup.service';
 import { PristineSelection } from '../../../../model/citationVerseMarkup.model';
@@ -8,6 +17,7 @@ import { PristineSelection } from '../../../../model/citationVerseMarkup.model';
 @Component({
   selector: 'app-markup-active-verse',
   standalone: true,
+  imports: [CommonModule],
   templateUrl: './markup-active-verse.component.html',
   styleUrls: ['./markup-active-verse.component.css']
 })
@@ -16,119 +26,123 @@ export class MarkupActiveVerseComponent {
 
   @Input({ required: true }) activeVerse!: Signal<CitationVerseExtendedModel>;
 
-  private pristineElRef = viewChild.required<ElementRef<HTMLDivElement>>('pristine');
+  @ViewChild('editor', { static: true }) editorRef!: ElementRef<HTMLDivElement>;
 
-  // overlay html depends on markupsVersion so it refreshes immediately after toolbox actions
   overlayHtml = computed(() => {
+    // force refresh on version changes
     this.markup.markupsVersion();
     return this.markup.renderActiveVerseOverlay(this.activeVerse());
   });
 
-  // rendered verse under pristine (only if any markups exist on active verse)
-  renderedActiveVerseHtml = computed(() => {
+  renderedVerseHtml = computed(() => {
     this.markup.markupsVersion();
     const v = this.activeVerse();
-    const mk = this.markup.getMarkupsForVerse(v.id);
-    if (!mk.length) return '';
-    return this.markup.renderVerse(v);
+    const hasMarkups = (this.markup.getMarkupsForVerse(v.id)?.length ?? 0) > 0;
+    return hasMarkups ? this.markup.renderVerse(v) : '';
   });
 
-  hasAnyMarkups = computed(() => {
-    this.markup.markupsVersion();
-    return this.markup.getMarkupsForVerse(this.activeVerse().id).length > 0;
-  });
+  constructor() {
+    // Ensure service has a verseId ready so toolbox works immediately on first entry.
+    effect(() => {
+      const v = this.activeVerse();
+      if (!v?.id) return;
 
-  // Disallow edits but allow navigation keys
-  @HostListener('keydown', ['$event'])
-  onKeyDown(e: KeyboardEvent) {
-    const allowed = [
-      'ArrowLeft','ArrowRight','ArrowUp','ArrowDown',
-      'Home','End','PageUp','PageDown',
-      'Shift','Control','Alt','Meta'
-    ];
+      // set editor text
+      const el = this.editorRef?.nativeElement;
+      if (el && el.textContent !== v.scripture.text) {
+        el.textContent = v.scripture.text;
+      }
 
-    const ctrlCombo = e.ctrlKey || e.metaKey;
-
-    // allow copy/select combos
-    if (ctrlCombo && (e.key.toLowerCase() === 'a' || e.key.toLowerCase() === 'c')) return;
-
-    // allow navigation
-    if (allowed.includes(e.key)) return;
-
-    // block anything that would modify text
-    e.preventDefault();
+      this.markup.ensureActiveVerseSelection(v.id);
+    });
   }
 
-  // Keep the pristine text exactly equal to scripture text (no HTML escaping here)
-  ngAfterViewInit() {
-    this.syncPristineText();
+  // --- Selection tracking ------------------------------------------------
+
+  onEditorMouseUp() {
+    this.captureSelection();
   }
 
-  ngOnChanges() {
-    // active verse changed
-    queueMicrotask(() => this.syncPristineText());
+  onEditorKeyUp() {
+    this.captureSelection();
   }
 
-  private syncPristineText() {
-    const el = this.pristineElRef().nativeElement;
-    const text = this.activeVerse().scripture.text ?? '';
-    // textContent preserves backslashes exactly; no HTML interpretation
-    if (el.textContent !== text) {
-      el.textContent = text;
-    }
+  onEditorFocus() {
+    this.captureSelection();
   }
 
-  onMouseUpOrKeyUp() {
-    this.updateSelectionFromDom();
+  /** Rule: selection clears when user clicks inside pristine editor. */
+  onEditorMouseDown() {
+    this.markup.clearPristineSelection();
   }
 
-  onBlur() {
-    // when losing focus, preserve caret location using current selection
-    this.updateSelectionFromDom();
-  }
-
-  private updateSelectionFromDom() {
-    const verse = this.activeVerse();
-    const root = this.pristineElRef().nativeElement;
-
+  private captureSelection() {
+    const root = this.editorRef.nativeElement;
     const sel = window.getSelection();
-    if (!sel || sel.rangeCount === 0) {
-      this.markup.setPristineSelection(null);
+    if (!sel || sel.rangeCount === 0) return;
+
+    const range = sel.getRangeAt(0);
+    if (!root.contains(range.startContainer) || !root.contains(range.endContainer)) {
       return;
     }
 
-    const range = sel.getRangeAt(0);
+    const startIndex = this.offsetFromStart(root, range.startContainer, range.startOffset);
+    const endIndex = this.offsetFromStart(root, range.endContainer, range.endOffset);
 
-    // compute offsets based on text nodes inside the contenteditable root
-    const startIndex = this.getOffsetWithin(root, range.startContainer, range.startOffset);
-    const endIndex   = this.getOffsetWithin(root, range.endContainer, range.endOffset);
+    const s = Math.max(0, Math.min(startIndex, endIndex));
+    const e = Math.max(0, Math.max(startIndex, endIndex));
 
-    const caretIndex = endIndex; // caret at end of selection; service decides paragraph index rule
+    // caretIndex: if collapsed use caret, else caretIndex = start of selection (your rule)
+    const caretIndex = (s === e) ? s : s;
+
+    const verseId = this.activeVerse().id;
 
     const selection: PristineSelection = {
-      verseId: verse.id,
-      startIndex: Math.min(startIndex, endIndex),
-      endIndex: Math.max(startIndex, endIndex),
+      verseId,
+      startIndex: s,
+      endIndex: e,
       caretIndex
     };
 
     this.markup.setPristineSelection(selection);
   }
 
-  // Robust offset calculator: counts characters in text nodes (backslashes included correctly)
-  private getOffsetWithin(root: HTMLElement, node: Node, nodeOffset: number): number {
-    const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
-    let offset = 0;
+  /**
+   * Compute offset from start of root to (node, nodeOffset) using Range text length.
+   * This avoids "backslash throws count off" issues caused by HTML escaping.
+   */
+  private offsetFromStart(root: HTMLElement, node: Node, nodeOffset: number): number {
+    const r = document.createRange();
+    r.setStart(root, 0);
+    r.setEnd(node, nodeOffset);
+    return r.toString().length;
+  }
 
-    while (walker.nextNode()) {
-      const textNode = walker.currentNode as Text;
-      if (textNode === node) {
-        return offset + nodeOffset;
-      }
-      offset += (textNode.nodeValue?.length ?? 0);
+  // --- Read-only contenteditable behavior --------------------------------
+
+  onBeforeInput(e: InputEvent) {
+    // Prevent edits but allow selection & caret movement
+    if (e.inputType.startsWith('insert') || e.inputType.startsWith('delete')) {
+      e.preventDefault();
     }
+  }
 
-    // If selection container isn't a text node (e.g. root), best-effort fallback
-    return offset;
+  onKeyDown(e: KeyboardEvent) {
+    // Allow navigation + selection keys
+    const allowed =
+      e.key.startsWith('Arrow') ||
+      e.key === 'Home' ||
+      e.key === 'End' ||
+      e.key === 'PageUp' ||
+      e.key === 'PageDown' ||
+      e.key === 'Shift' ||
+      e.key === 'Control' ||
+      e.key === 'Alt' ||
+      (e.ctrlKey && (e.key === 'a' || e.key === 'A')); // Ctrl+A select all
+
+    if (allowed) return;
+
+    // Block character input, backspace/delete, etc.
+    e.preventDefault();
   }
 }
