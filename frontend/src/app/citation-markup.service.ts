@@ -16,33 +16,34 @@ export class CitationMarkupService {
   private originalMarkupsByVerse = new Map<number, CitationVerseMarkup[]>();
   private workingMarkupsByVerse = new Map<number, CitationVerseMarkup[]>();
 
+  // Persisted selection (so highlight can survive focus leaving the editor)
   private pristineSelection: PristineSelection | null = null;
 
   private undoStacks = new Map<number, CitationVerseMarkup[][]>();
   private redoStacks = new Map<number, CitationVerseMarkup[][]>();
+  private activeVerseId: number | null = null;
 
   private nextTempId = -1;
 
-  /** Bump this whenever markups change so UIs can refresh via computed(). */
+  /** Bump this whenever markups/selection change so UIs can refresh via computed(). */
   readonly markupsVersion = signal(0);
 
   // --- Session lifecycle -------------------------------------------------
 
   beginSessionSnapshot(verses: CitationVerseExtendedModel[]): void {
     this.sessionVerses = verses.slice();
+
     this.originalMarkupsByVerse.clear();
     this.workingMarkupsByVerse.clear();
     this.undoStacks.clear();
     this.redoStacks.clear();
     this.pristineSelection = null;
+    this.activeVerseId = verses.length > 0 ? this.sessionVerses[0].id : null;
 
     for (const v of verses) {
       const cloned = (v.markups ?? []).map(m => ({ ...m }));
       this.originalMarkupsByVerse.set(v.id, cloned.map(m => ({ ...m })));
       this.workingMarkupsByVerse.set(v.id, cloned);
-
-      // keep the verse objects aligned with working state
-      v.markups = this.getMarkupsForVerse(v.id);
     }
 
     this.bump();
@@ -51,8 +52,8 @@ export class CitationMarkupService {
   rollbackSession(): void {
     this.workingMarkupsByVerse.clear();
 
-    for (const [verseId, originalMarkups] of this.originalMarkupsByVerse.entries()) {
-      this.workingMarkupsByVerse.set(verseId, originalMarkups.map(m => ({ ...m })));
+    for (const [verseId, original] of this.originalMarkupsByVerse.entries()) {
+      this.workingMarkupsByVerse.set(verseId, original.map(m => ({ ...m })));
       const verse = this.findSessionVerse(verseId);
       if (verse) verse.markups = this.getMarkupsForVerse(verseId);
     }
@@ -102,10 +103,32 @@ export class CitationMarkupService {
 
   setPristineSelection(selection: PristineSelection | null): void {
     this.pristineSelection = selection;
+    console.log(`setPristineSelection verseId: ${this.pristineSelection?.verseId}`);
+    this.bump();
   }
 
   getPristineSelection(): PristineSelection | null {
     return this.pristineSelection;
+  }
+
+  /** Called by toolbox after any tool action (per your rule). */
+  clearPristineSelection(): void {
+    console.log("clearPristineSelection");
+    this.pristineSelection = null;
+    this.bump();
+  }
+
+  /** Ensure verseId is set even before user selects (fixes "buttons don't work first time"). */
+  ensureActiveVerseSelection(verseId: number): void {
+    if (!this.pristineSelection || this.pristineSelection.verseId !== verseId) {
+      this.pristineSelection = {
+        verseId,
+        startIndex: 0,
+        endIndex: 0,
+        caretIndex: 0
+      };
+      this.bump();
+    }
   }
 
   // --- Working markups access -------------------------------------------
@@ -131,14 +154,14 @@ export class CitationMarkupService {
   // --- Undo/Redo (per verse) --------------------------------------------
 
   canUndo(): boolean {
-    const verseId = this.pristineSelection?.verseId;
+    const verseId = this.activeVerseId;
     if (!verseId) return false;
     const stack = this.undoStacks.get(verseId);
     return !!stack && stack.length > 0;
   }
 
   canRedo(): boolean {
-    const verseId = this.pristineSelection?.verseId;
+    const verseId = this.activeVerseId;
     if (!verseId) return false;
     const stack = this.redoStacks.get(verseId);
     return !!stack && stack.length > 0;
@@ -147,6 +170,7 @@ export class CitationMarkupService {
   resetUndoRedoForVerse(verseId: number): void {
     this.undoStacks.delete(verseId);
     this.redoStacks.delete(verseId);
+    this.bump();
   }
 
   private pushUndoSnapshot(verseId: number): void {
@@ -159,19 +183,25 @@ export class CitationMarkupService {
   }
 
   undo(): void {
-    const verseId = this.pristineSelection?.verseId;
+    const verseId = this.activeVerseId;
     if (!verseId) return;
 
     const undoStack = this.undoStacks.get(verseId);
     if (!undoStack || undoStack.length === 0) return;
 
-    const current = this.workingMarkupsByVerse.get(verseId) ?? [];
+    const current = undoStack.pop()!;
     const redoStack = this.redoStacks.get(verseId) ?? [];
     redoStack.push(current.map(m => ({ ...m })));
     this.redoStacks.set(verseId, redoStack);
 
-    const prev = undoStack.pop()!;
-    this.workingMarkupsByVerse.set(verseId, prev.map(m => ({ ...m })));
+    if (undoStack.length > 0) {
+      const prev = undoStack.at(-1);
+      this.workingMarkupsByVerse.set(verseId, prev!.map(m => ({ ...m })));
+    }
+    else {
+      const prev = this.originalMarkupsByVerse.get(verseId);
+      this.workingMarkupsByVerse.set(verseId, prev!.map(m => ({ ...m })));
+    }
 
     const verse = this.findSessionVerse(verseId);
     if (verse) verse.markups = this.getMarkupsForVerse(verseId);
@@ -180,18 +210,17 @@ export class CitationMarkupService {
   }
 
   redo(): void {
-    const verseId = this.pristineSelection?.verseId;
+    const verseId = this.activeVerseId;
     if (!verseId) return;
 
     const redoStack = this.redoStacks.get(verseId);
     if (!redoStack || redoStack.length === 0) return;
 
-    const current = this.workingMarkupsByVerse.get(verseId) ?? [];
     const undoStack = this.undoStacks.get(verseId) ?? [];
-    undoStack.push(current.map(m => ({ ...m })));
+    const next = redoStack.pop()!;
+    undoStack.push(next.map(m => ({ ...m })));
     this.undoStacks.set(verseId, undoStack);
 
-    const next = redoStack.pop()!;
     this.workingMarkupsByVerse.set(verseId, next.map(m => ({ ...m })));
 
     const verse = this.findSessionVerse(verseId);
@@ -224,10 +253,6 @@ export class CitationMarkupService {
 
   // --- Internal helpers --------------------------------------------------
 
-  private bump(): void {
-    this.markupsVersion.update(x => x + 1);
-  }
-
   private findSessionVerse(verseId: number): CitationVerseExtendedModel | undefined {
     return this.sessionVerses.find(v => v.id === verseId);
   }
@@ -251,19 +276,17 @@ export class CitationMarkupService {
 
     let arr = this.workingMarkupsByVerse.get(verseId) ?? [];
 
-    // no overlap with other span markups (paragraphs allowed at same index)
+    // non-overlap rule for span markups (paragraph allowed at same index)
     for (const m of arr) {
       if (m.kind === CitationVerseMarkupKind.Paragraph) continue;
       const overlap = clampedStart < m.endIndex && m.startIndex < clampedEnd;
       if (overlap) return;
     }
 
-    this.pushUndoSnapshot(verseId);
-
     const newMarkup: CitationVerseMarkup = {
       id: this.nextTempId--,
       citationId: verse.citationId,
-      verseId,
+      verseId: verseId,
       startIndex: clampedStart,
       endIndex: clampedEnd,
       kind,
@@ -273,6 +296,10 @@ export class CitationMarkupService {
     arr = this.sortMarkups(arr.concat(newMarkup));
     this.workingMarkupsByVerse.set(verseId, arr);
     verse.markups = this.getMarkupsForVerse(verseId);
+
+    console.log("pushing new markup:");
+    console.log(newMarkup);
+    this.pushUndoSnapshot(verseId);
 
     this.bump();
   }
@@ -299,7 +326,7 @@ export class CitationMarkupService {
     const newMarkup: CitationVerseMarkup = {
       id: this.nextTempId--,
       citationId: verse.citationId,
-      verseId,
+      verseId: verseId,
       startIndex: pos,
       endIndex: pos,
       kind: CitationVerseMarkupKind.Paragraph
@@ -322,9 +349,14 @@ export class CitationMarkupService {
     });
   }
 
+  private bump(): void {
+    this.markupsVersion.update(x => x + 1);
+  }
+
   // --- Rendering helpers -------------------------------------------------
 
   private escapeHtml(text: string): string {
+    // IMPORTANT: This is correct for [innerHTML]. "&" will display as "&".
     return text
       .replace(/&/g, '&amp;')
       .replace(/</g, '&lt;')
@@ -334,13 +366,124 @@ export class CitationMarkupService {
   }
 
   /**
-   * PUBLIC on purpose: components can use the same canonical renderer.
+   * FINAL verse render semantics:
    * - highlight → <mark>text</mark>
    * - suppress  → …
    * - replace   → [replacementText]
-   * - paragraph → (handled in caller with <br/><br/>)
+   * - paragraph → <br/><br/>
+   *
+   * NOTE: hide is handled at range level by merging hidden verses.
    */
-  renderTextWithMarkups(text: string, markups: CitationVerseMarkup[]): string {
+  renderVerse(verse: CitationVerseExtendedModel): string {
+    const text = verse.scripture.text;
+    const markups = this.getMarkupsForVerse(verse.id);
+    return this.renderTextWithMarkups(text, markups);
+  }
+
+  /**
+   * Render a full range as ONE paragraph-ish HTML string:
+   * - Consecutive hidden verses merged into ONE ellipsis
+   * - Superscript verse numbers for verses after hidden-block or after first visible verse
+   * - First visible verse has no superscript
+   * - Hidden verses have no superscript
+   */
+  renderRange(verses: CitationVerseExtendedModel[]): string {
+    if (!verses?.length) return '';
+
+    let html = '';
+    let firstVisibleRendered = false;
+    let lastWasHiddenBlock = false;
+
+    for (const v of verses) {
+      const isHidden = !!v.hide;
+
+      if (isHidden) {
+        if (!lastWasHiddenBlock) {
+          if (html.length > 0 && !html.endsWith(' ')) html += ' ';
+          html += '…';
+          lastWasHiddenBlock = true;
+        }
+        continue;
+      }
+
+      const verseHtml = this.renderVerse(v);
+      if (!verseHtml) continue;
+
+      if (html.length > 0 && !html.endsWith(' ')) html += ' ';
+
+      if (!firstVisibleRendered) {
+        html += verseHtml; // first visible verse: no superscript
+        firstVisibleRendered = true;
+      } else {
+        // if we just came out of a hidden-block, this verse MUST have superscript (your rule)
+        const verseNumber = v.scripture.verse;
+        html += `<sup>${this.escapeHtml(String(verseNumber))}</sup>${verseHtml}`;
+      }
+
+      lastWasHiddenBlock = false;
+    }
+
+    return html;
+  }
+
+  /**
+   * Overlay renderer for pristine editor:
+   * - shows subtle background for already-marked spans
+   * - shows stronger background for the current selection (persisted in service)
+   * - text itself is transparent so you don't see double-text (editor provides visible text)
+   */
+  renderActiveVerseOverlay(verse: CitationVerseExtendedModel): string {
+    // depend on version so computed() refreshes
+    this.markupsVersion();
+
+    const text = verse.scripture.text ?? '';
+    const markups = this.getMarkupsForVerse(verse.id);
+    const sel = (this.pristineSelection?.verseId === verse.id) ? this.pristineSelection : null;
+
+    // Build boundaries from markups + selection
+    type Boundary = { i: number };
+    const boundaries: Boundary[] = [{ i: 0 }, { i: text.length }];
+
+    for (const m of markups) {
+      if (m.kind === CitationVerseMarkupKind.Paragraph) continue;
+      boundaries.push({ i: m.startIndex }, { i: m.endIndex });
+    }
+    if (sel && sel.startIndex !== sel.endIndex) {
+      boundaries.push({ i: sel.startIndex }, { i: sel.endIndex });
+    }
+
+    // unique + sort
+    const uniq = Array.from(new Set(boundaries.map(b => Math.max(0, Math.min(b.i, text.length))))).sort((a, b) => a - b);
+
+    let html = '';
+    for (let k = 0; k < uniq.length - 1; k++) {
+      const a = uniq[k];
+      const b = uniq[k + 1];
+      if (a === b) continue;
+
+      const slice = text.slice(a, b);
+      const esc = this.escapeHtml(slice);
+
+      const inSelection = !!(sel && sel.startIndex !== sel.endIndex && a >= sel.startIndex && b <= sel.endIndex);
+      const inMarkedSpan = markups.some(m =>
+        m.kind !== CitationVerseMarkupKind.Paragraph &&
+        a >= m.startIndex &&
+        b <= m.endIndex
+      );
+
+      const cls = inSelection
+        ? 'ov ov-selection'
+        : inMarkedSpan
+          ? 'ov ov-marked'
+          : 'ov ov-none';
+
+      html += `<span class="${cls}">${esc}</span>`;
+    }
+
+    return html;
+  }
+
+  private renderTextWithMarkups(text: string, markups: CitationVerseMarkup[]): string {
     if (!markups.length) return this.escapeHtml(text);
 
     const sorted = this.sortMarkups(markups);
@@ -355,7 +498,7 @@ export class CitationMarkupService {
       switch (m.kind) {
         case CitationVerseMarkupKind.Paragraph: {
           html += '<br/><br/>';
-          idx = m.endIndex; // same as startIndex
+          idx = m.endIndex;
           break;
         }
         case CitationVerseMarkupKind.Suppress: {
@@ -378,109 +521,6 @@ export class CitationMarkupService {
     }
 
     if (idx < text.length) html += this.escapeHtml(text.slice(idx));
-    return html;
-  }
-
-  /**
-   * Render a single verse (NO verse-number prefix here).
-   * Hide verses render as '…' (range merge is handled by renderRange()).
-   */
-  renderVerse(verse: CitationVerseExtendedModel): string {
-    this.markupsVersion(); // dependency for computed() consumers
-    if (verse.hide) return '…';
-    return this.renderTextWithMarkups(
-      verse.scripture.text,
-      this.getMarkupsForVerse(verse.id)
-    );
-  }
-
-  /**
-   * Render an entire range of verses as ONE paragraph:
-   * - merged consecutive hidden verses into one ellipsis
-   * - superscript verse numbers except:
-   *    - first visible verse
-   *    - hidden verses (never show number)
-   */
-  renderRange(verses: CitationVerseExtendedModel[]): string {
-    this.markupsVersion(); // dependency
-    if (!verses.length) return '';
-
-    let html = '';
-    let firstVisibleRendered = false;
-    let lastWasHiddenBlock = false;
-
-    for (const verse of verses) {
-      if (verse.hide) {
-        if (!lastWasHiddenBlock) {
-          if (html.length > 0 && !html.endsWith(' ')) html += ' ';
-          html += '…';
-          lastWasHiddenBlock = true;
-        }
-        continue;
-      }
-
-      const verseHtml = this.renderVerse(verse);
-      if (!verseHtml) continue;
-
-      if (html.length > 0 && !html.endsWith(' ')) html += ' ';
-
-      if (!firstVisibleRendered) {
-        html += verseHtml; // first visible verse: no superscript
-        firstVisibleRendered = true;
-      } else {
-        html += `<sup>${this.escapeHtml(String(verse.scripture.verse))}</sup>${verseHtml}`;
-      }
-
-      lastWasHiddenBlock = false;
-    }
-
-    return html;
-  }
-
-  /**
-   * Overlay HTML for the pristine active verse editor:
-   * Colors existing marked-up spans differently from unmarked text.
-   * Paragraph marks show as a subtle "¶" marker.
-   */
-  renderActiveVerseOverlay(verse: CitationVerseExtendedModel): string {
-    this.markupsVersion(); // dependency
-    const text = verse.scripture.text;
-    const markups = this.getMarkupsForVerse(verse.id);
-
-    if (!markups.length) {
-      return `<span class="overlay-none">${this.escapeHtml(text)}</span>`;
-    }
-
-    const sorted = this.sortMarkups(markups);
-    let html = '';
-    let idx = 0;
-
-    for (const m of sorted) {
-      if (m.startIndex > idx) {
-        html += `<span class="overlay-none">${this.escapeHtml(text.slice(idx, m.startIndex))}</span>`;
-      }
-
-      if (m.kind === CitationVerseMarkupKind.Paragraph) {
-        html += `<span class="overlay-paragraph-marker">¶</span>`;
-        idx = m.endIndex;
-        continue;
-      }
-
-      const rawSpan = text.slice(m.startIndex, m.endIndex);
-      const esc = this.escapeHtml(rawSpan);
-
-      let cls = 'overlay-highlight';
-      if (m.kind === CitationVerseMarkupKind.Suppress) cls = 'overlay-suppress';
-      if (m.kind === CitationVerseMarkupKind.Replace) cls = 'overlay-replace';
-
-      html += `<span class="${cls}">${esc}</span>`;
-      idx = m.endIndex;
-    }
-
-    if (idx < text.length) {
-      html += `<span class="overlay-none">${this.escapeHtml(text.slice(idx))}</span>`;
-    }
-
     return html;
   }
 }
