@@ -18,7 +18,7 @@ class BibleCitationVerseModel {
             id: this.id.value,
             citationId: this.citationId.value,
             scriptureId: this.scriptureId.value,
-            hide: this.hide,
+            hide: this.hide.value,
             createdAt: this.createdAt.value,
             updatedAt: this.updatedAt.value,
             scripture: this.scripture,
@@ -30,7 +30,7 @@ class BibleCitationVerseModel {
         this.id.value = value.id ? value.id : null;
         this.citationId.value = value.citationId ? value.citationId : null;
         this.scriptureId.value = value.scriptureId ? value.scriptureId : null;
-        this.hide = /Y|N/.test(this.hide) ? value.hide : null;
+        this.hide.value = /Y|N/.test(value.hide) ? value.hide : null;
         this.scripture = value.scripture ? value.scripture : null;
         this.markups = value.markups ? value.markups : [];
         this.createdAt.value = value.createdAt ? value.createdAt : null;

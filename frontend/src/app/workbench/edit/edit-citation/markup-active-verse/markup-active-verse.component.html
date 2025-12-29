@@ -13,6 +13,7 @@
       class="pristine-editor"
       contenteditable="true"
       spellcheck="false"
+      title="Highlight sections of scripture for markup actions"
       (mousedown)="onEditorMouseDown()"
       (mouseup)="onEditorMouseUp()"
       (keyup)="onEditorKeyUp()"
@@ -23,6 +24,6 @@
 
   @if (renderedVerseHtml()) {
     <div class="rendered-verse-title">Rendered Verse</div>
-    <div class="rendered-verse" [innerHTML]="renderedVerseHtml()"></div>
+    <div class="rendered-verse" [innerHTML]="renderedVerseHtml()" title="View scripture as rendered with markups applied"></div>
   }
 </div>

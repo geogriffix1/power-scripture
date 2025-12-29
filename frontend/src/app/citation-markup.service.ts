@@ -89,7 +89,7 @@ export class CitationMarkupService {
       if (
         x.id !== y.id ||
         x.citationId !== y.citationId ||
-        x.verseId !== y.verseId ||
+        x.citationVerseId !== y.citationVerseId ||
         x.startIndex !== y.startIndex ||
         x.endIndex !== y.endIndex ||
         x.kind !== y.kind ||
@@ -103,7 +103,6 @@ export class CitationMarkupService {
 
   setPristineSelection(selection: PristineSelection | null): void {
     this.pristineSelection = selection;
-    console.log(`setPristineSelection verseId: ${this.pristineSelection?.verseId}`);
     this.bump();
   }
 
@@ -113,7 +112,6 @@ export class CitationMarkupService {
 
   /** Called by toolbox after any tool action (per your rule). */
   clearPristineSelection(): void {
-    console.log("clearPristineSelection");
     this.pristineSelection = null;
     this.bump();
   }
@@ -136,6 +134,11 @@ export class CitationMarkupService {
   getMarkupsForVerse(verseId: number): CitationVerseMarkup[] {
     const arr = this.workingMarkupsByVerse.get(verseId) ?? [];
     return arr.map(m => ({ ...m }));
+  }
+
+  getOriginalMarkupsForVerse(verseId: number): CitationVerseMarkup[] {
+    const arr = this.originalMarkupsByVerse.get(verseId) ?? [];
+    return arr.map(m => ({ ...m}));
   }
 
   deleteAllMarkupsForVerse(verseId: number): void {
@@ -286,7 +289,7 @@ export class CitationMarkupService {
     const newMarkup: CitationVerseMarkup = {
       id: this.nextTempId--,
       citationId: verse.citationId,
-      verseId: verseId,
+      citationVerseId: verseId,
       startIndex: clampedStart,
       endIndex: clampedEnd,
       kind,
@@ -326,7 +329,7 @@ export class CitationMarkupService {
     const newMarkup: CitationVerseMarkup = {
       id: this.nextTempId--,
       citationId: verse.citationId,
-      verseId: verseId,
+      citationVerseId: verseId,
       startIndex: pos,
       endIndex: pos,
       kind: CitationVerseMarkupKind.Paragraph
@@ -395,7 +398,7 @@ export class CitationMarkupService {
     let lastWasHiddenBlock = false;
 
     for (const v of verses) {
-      const isHidden = !!v.hide;
+      const isHidden = v.hide == "Y";
 
       if (isHidden) {
         if (!lastWasHiddenBlock) {

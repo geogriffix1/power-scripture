@@ -11,7 +11,7 @@
           <input 
             class="form-check-input" 
             type="checkbox"
-            [checked]="v.hide"
+            [checked]="v.hide && v.hide == 'Y'"
             (change)="onHideChanged(v, $event.target.checked)"
             id="hide-{{v.id}}"
           >
@@ -20,22 +20,18 @@
           </label>
         </div>
 
-        <button class="ps-btn ps-btn-blue" (click)="onMarkupClicked(v)">
+        <button class="ps-btn ps-btn-blue" (click)="onMarkupClicked(v)" [disabled]="v.hide && v.hide == 'Y'">
           Markup
-        </button>
-
-        <button class="ps-btn">
-          Other
         </button>
       </div>
 
       <!-- RIGHT COLUMN -->
       <div class="ps-text">
-        @if(v.hide) {
+        @if(v.hide == "Y") {
             ...
         }
         @else {
-        <sup>{{v.scripture.verse}} </sup>{{ renderVerse(v) }}
+        <sup>{{v.scripture.verse}} </sup><span [innerHTML]=renderVerse(v)></span>
         }
       </div>
 

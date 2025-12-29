@@ -1,28 +1,28 @@
 <div class="toolbox">
-  <div class="toolbox-title">Citation Scripture Verse Markup</div>
-
-  <button class="tool-btn" (click)="highlight()">Highlight</button>
-  <button class="tool-btn" (click)="suppress()">Suppress</button>
-  <button class="tool-btn" (click)="paragraph()">Paragraph</button>
+  <button class="tool-btn" (click)="highlight()" title="Highlight a substring of the pristine verse">Highlight</button>
+  <button class="tool-btn" (click)="suppress()" title="Suppress a substring of the pristine verse">Suppress</button>
+  <button class="tool-btn" (click)="paragraph()" title="Add a line break at the cursor position in the pristine verse">Paragraph</button>
 
   <div class="tool-group">
-    <div class="tool-label">Replacement</div>
+    <div class="tool-label">Replacement Text</div>
     <input
       class="replacement-input"
       [value]="replacementDraft"
       (input)="replacementDraft = $any($event.target).value"
       type="text"
+      title="Replacement string for a substring of the pristine verse"
     />
     <button
       class="tool-btn replace-btn"
       (click)="replace()"
       [disabled]="!replacementDraft?.length"
+      title="Replace a substring of the pristine verse with the replacement text"
     >
       Replace
     </button>
   </div>
 
-  <button class="tool-btn danger" (click)="deleteAllMarkups()">Delete All Markups</button>
+  <button class="tool-btn danger" (click)="deleteAllMarkups()" title="Removes all markup actions applied to this verse">Delete All</button>
 
   <button class="tool-btn" (click)="undo()" [disabled]="!markupService.canUndo()">Undo</button>
   <button class="tool-btn" (click)="redo()" [disabled]="!markupService.canRedo()">Redo</button>

@@ -32,7 +32,7 @@
     @else if (activeScriptureRange().citationId == editedCitation.id && activeVerse().id == 0) {
         <!-- Markup Selector header -->
 <div id="activeScriptureRange" class="scripture-range container">
-    <div class="text">Markup Selector - {{activeScriptureRange().citation}}</div>
+    <div class="text">Select Verse for Markup - {{activeScriptureRange().citation}}</div>
     <div class="right-icons">
         <i class="close-icon" (click)="OnCloseSelectedRange()" title="Close Scripture Range"></i>
     </div>
@@ -58,47 +58,26 @@
     @if (scriptureRanges() && scriptureRanges().length > 0) {
         <!-- A range of consecutive scriptures in the active citation has been selected -->
         @if (activeScriptureRange().citationId && activeScriptureRange().citationId == editedCitation.id && activeVerse().id == 0) {
-            <!-- Display consecutive scripture verses in a range for hiding/unhiding or marking up -->
-            <!-- @for (verse of activeVerses(); track verse.id; let v = $index) {
-        <div id="verse_{{v}}_title" class="scripture-range container" aria-checked="false">
-            <div class="left-icon">
-                <i class="spin-arrow-icon" (click)="OpenCloseVerse($event,v)" title="View scripture"></i> 
-            </div>
-            <div class="text">Verse {{verse.scripture.verse}}</div>
-            <div class="right-icons">
-                <div id="Markup_{{verse.id}}" (click)=OnMarkupVerse(v) title="Mark-up Verse"><i class="pencil-icon"></i></div>
-                @if (verse.markups && verse.markups.length > 0) {
-                <div><span>Marked-Up </span><i class="checked-circle-icon nopointer"></i></div>
-                }
-                @else {
-                <div><span>Marked-Up </span><i class="unchecked-circle-icon nopointer"></i></div>
-                }
-            </div>
-        </div>
-        <div id="verse_{{v}}_content" class="scripture-text" style="display:none;">
-            {{verse.scripture.text}}
-        </div>
-            } -->
-                <app-citation-verse-select [verses]="activeVerses()" (markupClicked)="onVerseSelected($event)")></app-citation-verse-select>
+        <app-citation-verse-select
+            [verses]="activeVerses()"
+            (markupClicked)="onVerseSelected($event)"
+            (hideChanged)="onHideVerseChanged($event)"
+        ></app-citation-verse-select>
         }
         @else if (activeScriptureRange().citationId && 
             activeScriptureRange().citationId == editedCitation.id &&
             activeVerse().id > 0) {
         <!-- Active Scripture Range selected for Markup Editing -->
         <div class="header" title="Highlight sections of text to markup">Citation Scripture Verse Markup</div>
-        <!-- <div class="header">Highlight Sections of Scripture Above to Mark-Up</div>
-        <div class="header"><button class="">Hello!</button></div> -->
-        <!-- <div class="scrolling" #scrollableContent> -->
-            <div class="markup-editor">
-                <div class="top-row">
-                    <app-citation-verse-markup-workarea
-                        [activeVerses]="activeVerses"
-                        [activeVerse]="activeVerse"
-                        (verseSessionEnded)="onVerseSessionEnded($event)">
-                    </app-citation-verse-markup-workarea>
-                </div>
+        <div class="markup-editor">
+            <div class="top-row">
+                <app-citation-verse-markup-workarea
+                    [activeVerses]="activeVerses"
+                    [activeVerse]="activeVerse"
+                    (verseSessionEnded)="onVerseSessionEnded($event)">
+                </app-citation-verse-markup-workarea>
             </div>
-        <!-- </div> -->
+        </div>
         }
         @else {
     <!-- Scripture Range List Selector (selects ranges for markup or deletion from citation) -->
@@ -122,8 +101,3 @@
 }
     </div>
 </section>
-<!-- @else {
-<section class="scrollable-content">
-    <div class="scrolling" #scrollableContent></div>
-</section>
-} -->

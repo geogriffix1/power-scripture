@@ -20,7 +20,7 @@ exports.listOne = (req, res) => {
         ));
     }
 
-    var bibleVerseMarkup = new BibleCitationMarkup;
+    var bibleVerseMarkup = new bibleCitationMarkup;
     bibleVerseMarkup.values = { id: id };
     dbAccess.query(bibleVerseMarkup.getSelectString(), (err, result) => {
         if (err) {
@@ -39,7 +39,7 @@ exports.listOne = (req, res) => {
 }
 
 exports.listAll = (req, res) => {
-    var citationVerseMarkup = new BibleCitationMarkup;
+    var citationVerseMarkup = new bibleCitationMarkup;
     dbAccess.query(citationVerseMarkup.getJoinSelectString(), (err, results) => {
         if (err) {
             res.status(500).send(errorMessage(
@@ -78,13 +78,14 @@ exports.create = (req, res) => {
     var obj = null;
     var message = null;
     var citationVerseId = null;
-    var textIndex = null;
-    var textLength = null;
-    var markupText = null;
+    var startIndex = null;
+    var endIndex = null;
+    var kind = null;
+    var replacementText = null;
     if (req.body) {
         obj = req.body;
 
-        if (!(message)) {
+        if (!message) {
             if (obj.citationVerseId && typeof obj.citationVerseId == "number" && obj.citationVerseId > 0) {
                 citationVerseId = eval(obj.citationVerseId);
             }
@@ -94,29 +95,38 @@ exports.create = (req, res) => {
         }
 
         if (!message) {
-            if (typeof obj.textIndex == "number" && obj.textIndex >= 0) {
-                textIndex = obj.textIndex;
+            if (typeof obj.startIndex == "number" && obj.startIndex >= 0) {
+                startIndex = obj.startIndex;
             }
             else {
-                message = `Error: textIndex is missing or invalid`;
+                message = `Error: startIndex is missing or invalid`;
             }
         }
 
         if (!message) {
-            if (typeof obj.textLength == "number" && obj.textLength >= 0) {
-                textLength = obj.textLength;
+            if (typeof obj.endIndex == "number" && obj.endIndex >= 0) {
+                endIndex = obj.endIndex;
             }
             else {
-                message = `Error: textLength is missing or invalid`;
+                message = `Error: endIndex is missing or invalid`;
             }
         }
 
         if (!message) {
-            if (obj.markupText && typeof obj.markupText == "string") {
-                markupText = obj.markupText;
+            if (typeof obj.kind != "string" || (typeof obj.kind == "string" && /highlight|suppress|paragraph|replace/.test(obj.kind.toLowerCase()))) {
+                kind = obj.kind.toLowerCase();
             }
             else {
-                message = `Error: markupText is missing or invalid`;
+                message = `Error: kind is missing or invalid (highlight, suppress, paragraph, or replace)`;
+            }
+        }
+
+        if (!message && obj.kind.toLowerCase() == "replace") {
+            if (obj.replacementText) {
+                replacementText = obj.replacementText;
+            }
+            else {
+                message = `Error: replacementText is required when kind = "replace"`;
             }
         }
 
@@ -126,7 +136,7 @@ exports.create = (req, res) => {
                 "Invalid Parameter",
                 req.path,
                 message,
-                `Usage: Object in the form: { "citationVerseId": citationVerseId, "textIndex": 5, "textLength": 22, "markupText": "hello!" } must be supplied.`
+                `Usage: Object in the form: { "citationVerseId": 3, "kind": "highlight", "startText": 5, "endText": 12, "replacementText": "optional" } must be supplied.`
             ));
 
             return;
@@ -135,10 +145,10 @@ exports.create = (req, res) => {
     else {
         res.status(400).send(errorMessage(
             400,
-            "Invalid Parameter",
+            "citation_verse_markup object is missing from the package body",
             req.path,
             `Error: CitationVerseMarkup definition is missing from the message body.`,
-            `Usage: Object in the form: { "citationVerseId": citationVerseId, "textIndex": 5, "textLength": 22, "markupText": "hello!" } must be supplied.`
+            `Usage: Object in the form: { "citationId": 2, "citationVerseId": 3, "kind": "highlight", "startText": 5, "endText": 12, "replacementText": "optional" } must be supplied.`
         ));
 
         return;
@@ -194,17 +204,29 @@ exports.create = (req, res) => {
         }
 
         if (citationVerse.markups.length > 1) {
-            citationVerse.markups.sort((a, b) => { a.textIndex - b.textIndex });
+            citationVerse.markups = citationVerse.markups.slice().sort((a, b) => {
+                if (a.startIndex !== b.startIndex) return a.startIndex - b.startIndex;
+                if (a.kind === "paragraph" && b.kind !== "paragraph") return -1;
+                if (b.kind === "paragraph" && a.kind !== "paragraph") return 1;
+                return 0;
+            });
         }
 
         return citationVerse;
     }
 
+    if (endIndex < startIndex) {
+        let start = endIndex;
+        endIndex = startIndex;
+        startIndex = start;
+    }
+
     var context = {
         citationVerseId: citationVerseId,
-        textIndex: textIndex,
-        textLength: textLength,
-        markupText: markupText
+        startIndex: startIndex,
+        endIndex: endIndex,
+        kind: kind,
+        replacementText: replacementText
     };
 
     tasks = [];
@@ -233,20 +255,35 @@ exports.create = (req, res) => {
                 return;
             }
 
+            context.citationId = citationVerseTemplate.citationId;
             var citationVerse = getCitationVerseFromTemplate(citationVerseTemplate);
             var isError = false;
             for (var i = 0; i < citationVerse.markups.length; i++) {
                 var existingMarkup = citationVerse.markups[i];
 
-                var rangeLow = existingMarkup.textIndex;
-                var rangeHigh = rangeLow + existingMarkup.textLength - 1;
+                var rangeLow = existingMarkup.startText;
+                var rangeHigh = rangeLow + existingMarkup.endText;
 
-                if (context.textIndex <= rangeLow && context.textIndex + context.textLength - 1 >= rangeLow) {
+                // overlap low end not allowed
+                if (context.kind != "paragraph" && context.startIndex <= rangeLow && context.endIndex >= rangeLow) {
                     isError = true;
                     break;
                 }
 
-                if (context.textIndex <= rangeHigh && context.textIndex + context.textLength - 1 >= rangeHigh) {
+                // overlap high end not allowed
+                if (context.kind != "paragraph" && context.startIndex <= rangeHigh && context.endIndex >= rangeHigh) {
+                    isError = true;
+                    break;
+                }
+
+                // overlap within a range not allowed
+                if (context.kind != "paragraph" && context.startIndex >= rangeLow && context.endIndex <= rangeHigh) {
+                    isError = true;
+                    break;
+                }
+
+                // paragraphs are allowed at the start index but not within a range or on the last character of the range
+                if (context.kind == "paragraph" && context.startIndex > rangeLow && context.endIndex <= rangeHigh) {
                     isError = true;
                     break;
                 }
@@ -258,7 +295,7 @@ exports.create = (req, res) => {
                     "Invalid Parameter",
                     req.path,
                     `Error: The markup definition overlaps an existing markup definition for the textIndex, textLength range of the original verse. This is not allowed.`,
-                    `Usage: Object in the form: { "citationVerseId": citationVerseId, "textIndex": 5, "textLength": 22, "markupText": "hello!" } must be supplied.`
+                    `Usage: Object in the form: { "citationVerseId": citationVerseId, "startIndex": 5, "endIndex": 22, "replacementText": "optional" } must be supplied.`
                 ));
 
                 return;
@@ -270,13 +307,14 @@ exports.create = (req, res) => {
 
             tasks.push(addContext(context));
 
-            var markup = new BibleCitationMarkup;
+            var markup = new bibleCitationMarkup;
             markup.values = {
                 citationVerseId: context.citationVerse.id,
                 citationId: context.citationVerse.citationId,
-                textIndex: context.textIndex,
-                textLength: context.textLength,
-                markupText: context.markupText
+                startIndex: context.startIndex,
+                endIndex: context.endIndex,
+                kind: context.kind,
+                replacementText: context.replacementText ?? ""
             };
 
             tasks.push(createCitationVerseMarkup(markup.getInsertString()));
@@ -292,7 +330,7 @@ exports.create = (req, res) => {
 
                     tasks.push(addContext(context));
 
-                    var markup = new BibleCitationMarkup;
+                    var markup = new bibleCitationMarkup;
                     markup.values = { id: context.citationVerseMarkupId };
 
                     tasks.push(getQuery(markup.getSelectString()));
@@ -308,7 +346,7 @@ exports.create = (req, res) => {
                                     "Server Error",
                                     req.path,
                                     `Error: Attempt create markup failed.`,
-                                    `Usage: Object in the form: { "citationVerseId": citationVerseId, "textIndex": 5, "textLength": 22, "markupText": "hello!" } must be supplied.`
+                                    `Usage: Object in the form: { "citationVerseId": citationVerseId, "startIndex": 5, "endIndex": 22, kind="highlight", "replacementText": "optional" } must be supplied.`
                                 ));
 
                                 return;
@@ -329,194 +367,15 @@ exports.create = (req, res) => {
         });
 }
 
-exports.edit = (req, res) => {
-    var obj = null;
-    var message = null;
-
-    var citationVerseId = null;
-    var citationId = null;
-    var scriptureId = null;
-
-    if (req.body) {
-        obj = req.body;
-        if (!message && obj.id && typeof eval(obj.id) == "number" && eval(obj.id) > 0) {
-            citationVerseId = eval(obj.id);
-        }
-        else {
-            message = `Error: id is missing or invalid`;
-        }
-
-        if (!message && eval(obj.citationId) && typeof obj.citationId == "number" && obj.citationId > 0) {
-            citationId = eval(obj.citationId);
-        }
-        else {
-            message = `Error: citationId is missing or invalid`;
-        }
-
-        if (!message && obj.scriptureId && typeof obj.scriptureId == "number" && obj.scriptureId > 0) {
-            scriptureId = eval(obj.scriptureId);
-        }
-        else {
-            message = `Error: scriptureId is missing or invalid`;
-        }
-
-        if (message) {
-            res.status(400).send(errorMessage(
-                400,
-                "Invalid Parameter",
-                req.path,
-                message,
-                `Usage: Object in the form: { "id: citationVerseId, "citationId": citationId, "scriptureId": scriptureId } must be supplied.`
-            ));
-
-            return;
-        }
-
-        addContext = (context) => {
-            return new Promise(resolve => {
-                resolve({ context: context });
-            });
-        }
-
-        getQuery = (selectString) => {
-            return new Promise((resolve, reject) => {
-                dbAccess.query(selectString, (err, results) => {
-                    if (err) {
-                        reject(err);
-                    }
-                    else {
-                        resolve(results);
-                    }
-                });
-            });
-        }
-
-        updateCitationVerse = (updateString) => {
-            return new Promise((resolve, reject) => {
-                dbAccess.delete(updateString, (err, result) => {
-                    if (err) {
-                        reject(err);
-                    }
-                    else {
-                        resolve(result);
-                    }
-                });
-            });
-        }
-
-        context = {};
-        context.citationVerseId = citationVerseId;
-        context.citationId = citationId;
-        context.scriptureId = scriptureId;
-
-        tasks = [];
-
-        tasks.push(addContext(context));
-
-        var citationVerse = new bibleCitationVerse;
-        citationVerse.values = { id: context.citationVerseId };
-
-        tasks.push(getQuery(citationVerse.getSelectString()));
-
-        var citation = new bibleCitation;
-        citation.values = { id: context.citationId };
-
-        tasks.push(getQuery(citation.getSelectString()));
-
-        var scripture = new bibleScripture;
-        scripture.values = { id: context.scriptureId };
-
-        tasks.push(getQuery(citation.getSelectString()));
-
-        Promise.all(tasks)
-            .then(data => {
-                var context = data[0].context;
-                var originalCitationVerse = data[1].length == 1 ? data[1][0] : null;
-                var citation = data[2].length == 1 ? data[2][0] : null;
-                var scripture = data[3].length == 1 ? data[3][0] : null;
-
-                var message = "";
-                if (!originalCitationVerse) {
-                    message = `Error: CitationVerse id: ${context.citationVerseId} not found`;
-                }
-
-                if (!message && !citation) {
-                    message = `Error: Citation id: ${context.citationId} not found`;
-                }
-
-                if (!message && !scripture) {
-                    message = `Error: Scripture id: ${context.scriptureId} not found`;
-                }
-
-                if (message) {
-                    res.status(400).send(errorMessage(
-                        400,
-                        "Invalid Parameter",
-                        req.path,
-                        message,
-                        `Usage: Object in the form: { "id: citationVerseId, "citationId": citationId, "scriptureId": scriptureId } must be supplied.`
-                    ));
-
-                    return;
-                }
-
-                var tasks = [];
-
-                tasks.push(addContext(context));
-
-                var citationVerse = new bibleCitationVerse;
-                citationVerse.values = {
-                    id: context.citationVerseId,
-                    citationId: context.citationId,
-                    scriptureId: context.scriptureId
-                };
-
-                tasks.push(updateCitationVerse(citationVerse.getUpdateString()));
-
-                Promise.all(tasks)
-                    .then(data => {
-                        var context = data[0].context;
-                        var result = data[1];
-
-                        var citationVerse = new bibleCitationVerse;
-                        citationVerse.values = { id: context.citationVerseId };
-                        getQuery(citationVerse.getJoinSelectString())
-                            .then(results => {
-
-                                var citationVerse = null;
-                                var result = results[0];
-                                if (citationVerse === null) {
-                                    citationVerse = tools.getObjectFromResult(result, 1);
-                                }
-
-                                citationVerse.citation = tools.getObjectFromResult(result, 2);
-                                citationVerse.scripture = tools.getObjectFromResult(result, 3);
-
-                                res.send({ created: citationVerse });
-                            });
-                    })
-            });
-    }
-    else {
-        res.status(400).send(errorMessage(
-            400,
-            "Invalid Parameter",
-            req.path,
-            `Error: CitationVerse definition is missing from the message body.`,
-            `Usage: Object in the form: { "id": citationVerseId, "citationId": citationId, "scriptureId": scriptureId } must be supplied.`
-        ));
-    }
-}
-
 exports.delete = (req, res) => {
-    var id = eval(req.params.id);
-    if (!typeof id == "number") {
+    var id = Number(req.params.id);
+    if (id === NaN) {
         res.status(400).send(errorMessage(
             400,
             "Invalid Parameter",
             req.path,
-            "Delete argument must be the numeric citation Verse id",
-            "Usage (e.g. /verse/2000) deletes the verse whose id equates to 2000 from its citation."
+            "Delete argument must be the numeric citation markup id",
+            "Usage (e.g. /2000) deletes the markup whose id equates to 2000 from its citation."
         ));
 
         return;
@@ -541,7 +400,7 @@ exports.delete = (req, res) => {
         });
     }
 
-    deleteCitationVerse = (deleteString) => {
+    deleteCitationMarkup = (deleteString) => {
         return new Promise((resolve, reject) => {
             dbAccess.delete(deleteString, (err, result) => {
                 if (err) {
@@ -559,44 +418,93 @@ exports.delete = (req, res) => {
 
     tasks.push(addContext(context));
 
-    var citationVerse = new bibleCitationVerse;
-    citationVerse.values = { id: context.idToDelete };
+    var citationMarkup = new bibleCitationMarkup;
+    citationMarkup.values = { id: context.idToDelete };
 
-    tasks.push(getQuery(citationVerse.getSelectString()));
+    tasks.push(deleteCitationMarkup(citationMarkup.getDeleteString()));
     Promise.all(tasks)
         .then(data => {
             var context = data[0].context;
-            var citationVerseValues = data[1].length == 1 ? data[1][0] : null;
+            var deleteResults = data[1];
 
-            if (!citationVerseValues) {
-                res.status(400).send(new errorMessage(
-                    400,
-                    "Not Found",
-                    req.path,
-                    `CitationVerse: ${context.idToDelete} was not found.`,
-                    "No action was taken"
-                ));
+            res.send({ deleted: deleteResults });
+        })
+}
 
-                return;
-            }
 
-            context.citationVerseValues = citationVerseValues;
+exports.deleteByVerseId = (req, res) => {
+    var verseId = Number(req.params.verseId);
+    if (verseId === NaN) {
+        res.status(400).send(errorMessage(
+            400,
+            "Invalid Parameter",
+            req.path,
+            "Delete argument must be the numeric verseId of the verse containing the markups",
+            "Usage (e.g. /verse/2000) deletes the markups whose parent verse id equates to 2000 from its citation."
+        ));
 
-            tasks = []
+        return;
+    }
 
-            tasks.push(addContext(context));
+    addContext = (context) => {
+        return new Promise(resolve => {
+            resolve({ context: context });
+        });
+    }
 
-            var citationVerse = new bibleCitationVerse;
-            citationVerse.values = { id: context.idToDelete };
+    getQuery = (selectString) => {
+        return new Promise((resolve, reject) => {
+            dbAccess.query(selectString, (err, results) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(results);
+                }
+            });
+        });
+    }
 
-            tasks.push(deleteCitationVerse(citationVerse.getDeleteString()));
+    deleteCitationMarkup = (deleteString) => {
+        return new Promise((resolve, reject) => {
+            dbAccess.delete(deleteString, (err, result) => {
+                if (err) {
+                    reject(err);
+                }
+                else {
+                    resolve(result);
+                }
+            });
+        });
+    }
+
+    var context = { idOfParentVerse: verseId };
+    tasks = [];
+
+    tasks.push(addContext(context));
+
+    var citationMarkup = new bibleCitationMarkup;
+    citationMarkup.values = { citationVerseId: context.idOfParentVerse };
+    const queryString = citationMarkup.getSelectString();
+    tasks.push(getQuery(queryString));
+    Promise.all(tasks)
+        .then(data => {
+            var context = data[0].context;
+            var markups = data[1];
+            var citationMarkup = new bibleCitationMarkup;
+
+            tasks = [];
+            markups.forEach(markup => {
+                citationMarkup.values = { id: markup.id };
+                const deleteString = citationMarkup.getDeleteString();
+                tasks.push(deleteCitationMarkup(deleteString));
+            });
 
             Promise.all(tasks)
                 .then(data => {
-                    var context = data[0].context;
-                    var deleteResults = data[1];
-
-                    res.send({ deleted: context.citationVerseValues });
-                })
+                    res.send({ deleted: data.length });
+                });
         });
+
 }
+

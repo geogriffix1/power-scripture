@@ -11,7 +11,7 @@ export interface CitationVerseModel {
 export interface CitationVerseExtendedModel extends CitationVerseModel {
     scripture: ScriptureModel,
     markups: CitationVerseMarkup[];
-    hide?: boolean,
+    hide?: string,
     isOpen?: boolean;
     verseCitationLabel?: string;
     text?: string;

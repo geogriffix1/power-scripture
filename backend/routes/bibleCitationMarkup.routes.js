@@ -5,8 +5,9 @@ module.exports = app => {
     router.get("/:id", bibleCitationMarkup.listOne);
     router.get("/", bibleCitationMarkup.listAll);
     router.post("/", bibleCitationMarkup.create);
-    router.put("/", bibleCitationMarkup.edit);
+    //router.put("/", bibleCitationMarkup.edit);
     router.delete("/:id", bibleCitationMarkup.delete);
+    router.delete("/verse/:verseId", bibleCitationMarkup.deleteByVerseId);
 
     app.use("/markups", router);
 };

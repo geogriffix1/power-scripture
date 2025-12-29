@@ -10,6 +10,7 @@ module.exports = app => {
     router.post("/", bibleCitationVerse.create);
     router.post("/citation/:id/scriptures", bibleCitationVerse.addToCitation);
     router.put("/", bibleCitationVerse.edit);
+    router.put("/:id/hide/:value", bibleCitationVerse.setHideProperty);
     router.delete("/:id", bibleCitationVerse.delete);
 
     app.use("/verses", router);

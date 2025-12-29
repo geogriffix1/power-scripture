@@ -490,7 +490,58 @@ exports.addToCitation = (req, res) => {
         .then(results => {
             res.send(results[0]);
         });
-} 
+}
+
+exports.setHideProperty = (req, res) => {
+    const id = Number(req.params.id);
+    const value = req.params.value;
+    var message = "";
+
+    if (value != "Y" && value != "N") {
+        'Error setting "hide" property for citation verse. Value must be "Y" or "N".'
+    }
+
+    if (!message && (id === NaN || id < 1)) {
+        'Error: Illegal value for citation verse id';
+    }
+
+    if (message) {
+        res.status(500).send(errorMessage(
+            500,
+            "Server Error",
+            req.path,
+            message,
+            ""
+        ));
+
+        return;
+    }
+
+    updateCitationVerse = (updateString) => {
+        return new Promise((resolve, reject) => {
+            var error;
+            dbAccess.update(updateString, (err, result) => {
+                if (err) {
+                    error = err;
+                    console.log("Error updating");
+                    reject(error);
+                }
+                else {
+                    resolve(result);
+                }
+            });
+        });
+    }
+
+    citationVerse = new bibleCitationVerse;
+    citationVerse.values = { id: id, hide: value };
+    const updateString = citationVerse.getUpdateString();
+
+    updateCitationVerse(updateString)
+        .then(result => {
+            res.send(result);
+        });
+}
 
 exports.edit = (req, res) => {
     var obj = null;

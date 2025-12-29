@@ -8,7 +8,7 @@ export enum CitationVerseMarkupKind {
 export interface CitationVerseMarkup {
   id: number;
   citationId: number;
-  verseId: number;
+  citationVerseId: number;
   startIndex: number;
   endIndex: number;
   kind: CitationVerseMarkupKind;

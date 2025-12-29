@@ -40,6 +40,7 @@ export class CitationVerseMarkupToolboxComponent {
     const verseId = this.activeVerse().id;
     if (!this.replacementDraft?.length) return;
     this.markupService.applyMarkupReplaceToActiveVerse(verseId, this.replacementDraft);
+    this.replacementDraft = "";
     this.markupService.clearPristineSelection();
   }
 

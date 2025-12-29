@@ -93,14 +93,6 @@ export class EditCitationComponent {
       verses: citation.verses
     };
 
-    // EditCitationComponent.previousCitation = {
-    //   id: citation.id,
-    //   description: citation.description,
-    //   citationLabel: citation.citationLabel,
-    //   bibleOrder: citation.bibleOrder,
-    //   verses: citation.verses
-    // };
-
     this.editedCitation =  {
       id: citation.id,
       description: citation.description,
@@ -235,14 +227,16 @@ export class EditCitationComponent {
   EditScriptureRange(index: number) {
     console.log(`Edit scripture range, index: ${index}`);
     console.log(this.scriptureRanges()[index]);
-    this.activeScriptureRange.set(this.scriptureRanges()[index]);
-    const scriptureIds = this.activeScriptureRange().scriptures.map(scripture => scripture.id);
-    console.log("scriptureIds:");
-    console.log(scriptureIds);
     (async () => {
       $("div.await").show(100);
+      const activeRange = this.scriptureRanges()[index];
+      const scriptureIds = activeRange.scriptures.map(scripture => scripture.id);
+      console.log("scriptureIds:");
+      console.log(scriptureIds);
+
       console.log(`calling getVersesByCitationAndScriptures active citation id: ${this.activeCitation.id}`);
       this.activeVerses.set(await this.service.getVersesByCitationAndScriptures(this.activeCitation.id, scriptureIds));
+      this.activeScriptureRange.set(activeRange);
       console.log(this.activeVerses());
       $("div.await").hide(100);
     })();
@@ -262,9 +256,43 @@ export class EditCitationComponent {
     this.activeVerse.set(verse);
   }
 
-  OnSaveMarkups() {}
+  OnSaveMarkups() {
+    // Markups that have been saved have positive id values. Markups that have not been saved
+    // have negative id values. The editor does not edit existing markups, but it will delete all
+    // existing markups for a given verse if it is directed to do so.
+    const original = this.markupService.getOriginalMarkupsForVerse(this.activeVerse().id);
+    const verse = this.activeVerse();
+    if (original.length > 0 && !verse.markups.some(markup => markup.id > 0)) {
+      console.log("delete all old markups");
+      this.service.deleteCitationVerseMarkups(this.activeVerse().id);
+    }
+
+    const markupsToSave  = this.activeVerse().markups.filter(markup => markup.id < 0);
+    console.log(`saving markups count: ${markupsToSave.length}`);
+    markupsToSave.forEach(markup => {
+      console.log(markup);
+      this.service.createCitationVerseMarkup(markup);
+    });
+
+    // TODO: update the scripture range
+
+    this.activeVerse.set(new NullCitationVerse);
+  }
 
   OnCancelMarkups() {
+    const original = this.markupService.getOriginalMarkupsForVerse(this.activeVerse().id);
+    const verse = this.activeVerse();
+    verse.markups = original.map(markup => ({...markup}));
+    const index = this.activeVerses().findIndex(v => v.id == verse.id );
+    this.activeVerses()[index] = {
+      id: verse.id,
+      citationId: verse.citationId,
+      scriptureId: verse.scripture.id,
+      scripture: verse.scripture,
+      hide: verse.hide,
+      markups: verse.markups
+    };
+
     this.activeVerse.set(new NullCitationVerse);
   }
 
@@ -326,6 +354,14 @@ export class EditCitationComponent {
     console.log(this.activeScriptureRange());
     console.log("activeVerse");
     console.log(this.activeVerse());
+  }
+
+  onHideVerseChanged($event:any) {
+    console.log("onHideVerseChanged $event:");
+    console.log($event);
+    const hide = $event.hidden ? "Y" : "N"
+    this.service.editCitationVerseHide($event.id, hide);
+    this.activeVerses().filter(verse => verse.id == $event.id)[0].hide = hide;
   }
 
   ngOnInit() {

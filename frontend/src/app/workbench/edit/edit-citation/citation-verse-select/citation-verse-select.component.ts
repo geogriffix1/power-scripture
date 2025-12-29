@@ -21,7 +21,7 @@ export class CitationVerseSelectComponent {
 
   onHideChanged(v: CitationVerseExtendedModel, checked: boolean) {
     console.log(`onHideChanged - emitting checked=${checked}`);
-    v.hide = checked;
+    v.hide = checked ? "Y" : "N";
     this.hideChanged.emit({ id: v.id, hidden: checked });
   }
 
@@ -37,7 +37,8 @@ export class CitationVerseSelectComponent {
   }
 
   ngOnInit() {
-    console.log("ngOnInit for citation-verse-select-component");
+    console.log("ngOnInit for citation-verse-select-component -- verses:");
+    console.log(this.verses());
     this.markupService.beginSessionSnapshot(this.verses());
   }
 }

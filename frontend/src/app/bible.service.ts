@@ -2,6 +2,7 @@ import { Injectable } from '@angular/core';
 import { ThemeExtendedModel } from './model/theme.model';
 import { CitationModel, CitationExtendedModel } from './model/citation.model';
 import { CitationVerseExtendedModel } from './model/citationVerse.model';
+import { CitationVerseMarkup, CitationVerseMarkupKind } from './model/citationVerseMarkup.model';
 import { ThemeChainModel } from './model/themeChain.model';
 import { ScriptureModel } from './model/scripture.model';
 import { JstreeModel, JstreeState } from './model/jstree.model';
@@ -12,7 +13,7 @@ import { ThemeToCitationModel, ThemeToCitationLinkModel } from './model/themeToC
 })
 export class BibleService {
   ROOT_URL = "http://localhost:8080/";
-  //ROOT_URL = "http://localhost:1749/";
+  //ROOT_URL = "http://localhost:1402/";
   constructor() { }
 
   async getAllThemes(): Promise<any> {
@@ -45,8 +46,6 @@ export class BibleService {
       let children = <JstreeModel[]>[];
 
       for (let i=0; i<rootThemes.themes.length; i++) {
-        // console.log("root theme raw:");
-        // console.log(rootThemes.themes[i]);
         let theme = new JstreeModel(
           `theme${rootThemes.themes[i].id}`,
           rootThemes.themes[i].name,
@@ -60,8 +59,6 @@ export class BibleService {
         theme.children = rootThemes.themes[i].childCount > 0;
         children.push(theme);
       }
-
-      //console.log("returning");
 
       return children;
     }
@@ -99,7 +96,6 @@ export class BibleService {
 
       for (let i=0; i < parentTheme.theme.themeToCitationLinks.length; i++) {
         let citation = new JstreeModel(
-          //`citation${parentTheme.theme.themeToCitationLinks[i].themeToCitation.citationId}`,
           `citation${parentTheme.theme.themeToCitationLinks[i].themeToCitation.id}`,
           parentTheme.theme.themeToCitationLinks[i].themeToCitation.citation.citationLabel,
           parentTheme.theme.themeToCitationLinks[i].themeToCitation.citation.description ?? "",
@@ -258,6 +254,21 @@ export class BibleService {
       "Content-Type": "application/json"
     },
     body: JSON.stringify(citation)
+  });
+
+  let result = await data.json();
+  return result;
+ }
+
+ async editCitationVerse(citationVerse:CitationVerseExtendedModel): Promise<any> {
+  var url = `${this.ROOT_URL}citations`;
+  const data = await fetch(url, {
+    method: "PUT",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(citationVerse)
   });
 
   let result = await data.json();
@@ -544,5 +555,56 @@ async normalizeThemeSequence(parentId:number, callback:any) {
     const data = await fetch (url);
     const result = await data.json();
     return <CitationVerseExtendedModel[]> result;
+  }
+  
+  async deleteCitationVerseMarkups(verseId: number) : Promise<any> {
+    var url = `${this.ROOT_URL}markups/verse/${verseId}`;
+    const data = await fetch (url, {
+      method: "DELETE",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json"
+      }
+    });
+
+    const result = await data.json();
+    return result;
+  }
+
+ 
+  async createCitationVerseMarkup(markup: CitationVerseMarkup): Promise<CitationVerseMarkup> {
+    var url = `${this.ROOT_URL}markups`;
+    const data = await fetch (url, {
+      method: "POST",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(markup)
+    });
+
+    const creationResults = (await data.json() ?? null);
+
+    if (creationResults)
+      console.log(JSON.stringify(creationResults));
+
+    return <CitationVerseMarkup>creationResults;
+  }
+
+  async editCitationVerseHide(verseId: number, hide:string): Promise<CitationVerseExtendedModel> {
+    var url = `${this.ROOT_URL}verses/${verseId}/hide/${hide}`;
+    console.log(`editCitationVerseHide(${verseId}, ${hide})`);
+    console.log(url);
+    const data = await fetch (url, {
+      method: "PUT",
+      cache: "no-cache",
+      headers: {
+        "content-type": "application/json"
+      }
+    });
+
+    const results = (await data.json() ?? null);
+    console.log(results);
+    return results;
   }
 }
