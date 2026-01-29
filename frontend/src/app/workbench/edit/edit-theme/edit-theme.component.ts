@@ -4,7 +4,7 @@ import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-t
 import { JstreeModel } from '../../../model/jstree.model';
 import { CdkDrag, CdkDropList, CdkDropListGroup, CdkDragSortEvent, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
 import { BibleService } from '../../../bible.service';
-import { ThemeModel, ThemeExtendedModel, ThemeModelReference } from '../../../model/theme.model';
+import { ThemeExtendedModel, ThemeModelReference } from '../../../model/theme.model';
 import { ThemeToCitationLinkModel } from '../../../model/themeToCitation.model';
 
 @Component({
@@ -49,8 +49,6 @@ export class EditThemeComponent {
 
   constructor(private service: BibleService) {
       effect(()=>{
-      console.log("edit-theme: in effect");
-      console.log()
       
       if (this.activeThemeNode()) {
         let id = <number><unknown>this.activeThemeNode().id.replace("theme", "");

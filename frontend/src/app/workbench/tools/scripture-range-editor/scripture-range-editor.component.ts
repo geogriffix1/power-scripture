@@ -1,18 +1,14 @@
-import { Component, Directive, Input, Output, EventEmitter, HostListener, OnInit, OnDestroy, inject, AfterViewInit, ViewChild, ElementRef } from '@angular/core';
-import { Subscription, Subject, fromEvent, map, filter } from 'rxjs';
+import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
+import { Subscription, fromEvent } from 'rxjs';
 import { NgStyle } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BibleService } from '../../../bible.service';
-import { ScriptureModel } from '../../../model/scripture.model';
 import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel';
-import { CiteContextMenuComponent } from '../../../context-menu/cite-context-menu.component';
-import { CiteScriptureReportComponent } from '../../../reports/cite-scripture-report/cite-scripture-report.component';
 import { CitationExtendedModel } from '../../../model/citation.model';
 import { AppComponent } from '../../../app.component';
 import { WorkbenchComponent } from '../../workbench.component';
 import * as BibleBookList from '../../../../assets/BibleBookList.json';
 import $ from 'jquery';
-//import { EditScriptureRangeContextMenuComponent } from '../../../context-menu/edit-scripture-range-context-menu/edit-scripture-range-context-menu.component';
 
 @Component({
     selector: 'app-scripture-range-editor',
@@ -31,15 +27,12 @@ export class ScriptureRangeEditorComponent {
   @Input()
   set citation(value: CitationExtendedModel | undefined) {
     this._citation = value;
-    console.log("CITATION SET IN SCRIPTURE-RANGE-EDITOR");
-    console.log(this._citation);
   }
   get citation(): CitationExtendedModel | undefined {
     console.log("returning this._citation from scripture-range-editor");
     return this._citation;
   }
 
-  //@Output() edited = new EventEmitter<number>();
   @Output() rangeAdded = new EventEmitter<CiteScriptureRangeModel|undefined>();
 
   unicodeSuperscriptNumbers = [
@@ -137,16 +130,12 @@ export class ScriptureRangeEditorComponent {
     let ariaChecked = row.attr('aria-checked') ?? "false";
     let ariaCheckedBool = ariaChecked === "false";
     row.attr('aria-checked', ariaCheckedBool.toString());
-    console.log(row);
   }
 
   runShow() {
-    console.log("runShow()");
     if ($("#endVerse.legal").length > 0) {
       $("div.command-message").text('').hide(100);
       (async () => {
-        console.log(`book: (innerText=${this.bookField.nativeElement.value})`);
-        console.log(this.bookField.nativeElement);
         let range = `${this.bookField.nativeElement.value} ` + 
           `${this.chapterField.nativeElement.value}:` +
           `${this.verseField.nativeElement.value}`;
@@ -190,13 +179,10 @@ export class ScriptureRangeEditorComponent {
     }
     else {
       $("div.command-message").text("Please complete the verse range.").show(100);
-      console.log("not legal");
     }
   }
 
   addRange() {
-    console.log("addRange");
-    console.log(this.activeScriptureRange);
    if (this.activeScriptureRange) {
       $("app-scripture-range-editor .command-message").text("").hide(500);
       this.rangeAdded.emit(this.activeScriptureRange);
@@ -209,21 +195,6 @@ export class ScriptureRangeEditorComponent {
   }
 
 
-        //WorkbenchComponent.setScriptureRanges
-
-      //  this.scriptureRanges.push(scriptureRange);
-  //      $(".command input[type=text]").val('').removeClass('legal');
-  //      this.isChapterDisabled = true;
-  //      this.isVerseDisabled = true;
-  //      this.isEndVerseDisabled = true;
-  //     })(this);
-  //   }
-  //   else {
-  //     $("div.command-message").text("Please complete the verse range.").show(100);
-  //     console.log("not legal");
-  //   }
-  // }
-
   superscript(n:number): string {
     let s = n.toString();
     let ss = "";
@@ -234,14 +205,6 @@ export class ScriptureRangeEditorComponent {
 
     return ss;
   }
-
-  // public showModalContextMenu(event:MouseEvent) {
-  //   console.log("showModalContextMenu");
-  //   event.preventDefault();
-  //   CiteContextMenuComponent.showContextMenu(this.scriptureRanges, this.context, this.router);
-  //   let context = $("app-cite-context-menu");
-  //   context.removeClass("hidden");
-  // }
 
   onFocusBook() {
     if (!$("#book").val()) {
@@ -265,7 +228,6 @@ export class ScriptureRangeEditorComponent {
       });
 
       this.bookList = tempList;
-      console.log("show booklist");
       $("#chapterlist,#verselist,#endverselist").hide(100);
       $("#booklist").show(100);
    }
@@ -350,13 +312,11 @@ export class ScriptureRangeEditorComponent {
 
   onClickChapter(chapter:number) {
     $("div.command-message").text('').hide(100);
-    console.log(`onClickChapter chapter: ${chapter}`);
     this.activeChapter = chapter;
     $("#chapter").val(chapter);
     (async () => {
       let provider = new BibleService;
       let max = await provider.getScripturesChapterMaxVerse(this.activeBook.book, chapter);
-      console.log(`max: ${max}`);
 
       let tempList:number[] = [];
       this.verseMasterList = [];
@@ -391,7 +351,6 @@ export class ScriptureRangeEditorComponent {
   onClickVerse(verse:number) {
     $("div.command-message").text('').hide(100);
     console.log(`onClickVerse verse: ${verse}`);
-    $("#verse").val(verse);
     let tempList:number[] = [];
     for (let i = verse; i <= this.verseList.length; i++) {
       tempList.push(i);
@@ -495,6 +454,7 @@ export class ScriptureRangeEditorComponent {
     this.verseList = newVerseList;
     return {isLegal: isLegal, isMatch: isMatch, matchverse: matchverse};
   }
+
   onChangeEndVerse(endVerse:string) {
     let newEndVerseList:any[] = [];
     let isLegal = false;
@@ -529,18 +489,14 @@ export class ScriptureRangeEditorComponent {
 
   ngOnInit() {
     ScriptureRangeEditorComponent.isActive = true;
-    console.log("ScriptureRangeEditorComponent onInit");
     this.scriptureRanges = <CiteScriptureRangeModel[]>[];
-    console.log("CiteScriptureComponent - end onInit");
     let rect = WorkbenchComponent.getWorkbenchSize();
     this.workbenchDomRect(rect);
     if (!ScriptureRangeEditorComponent.isSubscribed) {
       ScriptureRangeEditorComponent.inputElement = $("#book")[0];
       AppComponent.mouseupBroadcaster.subscribe(event => {
         if (ScriptureRangeEditorComponent.isActive) {
-          console.log("mouse event:");
           let targetId:string = event.target?.id ?? ""
-          console.log(`target id: "${targetId}"`);
           if (
             targetId != "book" &&
             targetId != "chapter" &&
@@ -565,7 +521,6 @@ export class ScriptureRangeEditorComponent {
         .subscribe((rect:DOMRectReadOnly) => {
           if (ScriptureRangeEditorComponent.isActive) {
             this.workbenchDomRect(rect);
-            //let commandWidth = 80//rect.width - 20;
             $(".command-label.book,.command.book").css('width', `${this.widthBook}`);
             $("#booklist").css('width', this.widthBook);
             $("#chapterlist,#verselist,#endverselist").css('width', this.widthChapter);
@@ -617,14 +572,12 @@ export class ScriptureRangeEditorComponent {
             setTimeout(() => {
               this.chapterField.nativeElement.focus();
             }, 0);
-            //$("#chapter").trigger('focus');
           }
           else if (changeTextResult.isMatch) {
             this.isChapterDisabled = false;
             setTimeout(() => {
               this.chapterField.nativeElement.focus();
             },0);
-            //$("#chapter").trigger('focus');
           }
         }
       });
@@ -632,20 +585,16 @@ export class ScriptureRangeEditorComponent {
     this.chapterFieldKeyupSubscription = fromEvent(this.chapterField.nativeElement, 'keyup')
       .subscribe(ev => {
         $("div.command-message").text('').hide(100);
-        console.log("chapter keyup event");
         let event = <KeyboardEvent>ev;
         let element = $("#chapter");
         let elementList = this.chapterList;
 
         let text = <string>element.val();
-        //console.log(`chapter text: ${text}`);
         let changeTextResult = this.onChangeChapter(text);
         if (this.workingText !== text) {
-          //console.log('calling onChangeText');
           this.isVerseDisabled = true;
           this.isEndVerseDisabled = true;
           $("#verse,#endVerse").val('');
-          //console.log(changeTextResult);
           if (changeTextResult.isMatch) {
             this.activeChapter = changeTextResult.matchchapter;
             (async () => {
@@ -686,7 +635,6 @@ export class ScriptureRangeEditorComponent {
             (async () => {
               let provider = new BibleService;
               let max = await provider.getScripturesChapterMaxVerse(this.activeBook.book, this.activeChapter);
-              console.log(`max: ${max}`);
         
               let tempList:number[] = [];
               for (let i = 1; i <= max; i++) {
@@ -700,7 +648,6 @@ export class ScriptureRangeEditorComponent {
               setTimeout(() => {
                 this.verseField.nativeElement.focus();
               },0);
-              //$("#verse").trigger('focus');
             })();
           }
         }
@@ -709,19 +656,15 @@ export class ScriptureRangeEditorComponent {
     this.verseFieldKeyupSubscription = fromEvent(this.verseField.nativeElement, 'keyup')
       .subscribe(ev => {
         $("div.command-message").text('').hide(100);
-        console.log("verse keyup event");
         let event = <KeyboardEvent>ev;
         let element = $("#verse");
         let elementList = this.verseList;
 
         let text = <string>element.val();
-        //console.log(`chapter text: ${text}`);
         let changeTextResult = this.onChangeVerse(text);
         if (this.workingText !== text) {
-          //console.log('calling onChangeText');
           this.isEndVerseDisabled = true;
           $("#endVerse").val('');
-          //console.log(changeTextResult);
           if (changeTextResult.isMatch) {
             this.activeVerse = changeTextResult.matchverse;
             let tempList:number[] = [];
@@ -746,14 +689,11 @@ export class ScriptureRangeEditorComponent {
           }
         }
         else if (event.key === "Enter") {
-          console.log("enter!")
           if (elementList.length === 1 || changeTextResult.isMatch) {
             if (elementList.length === 1) {
-              console.log("only element in list")
               this.activeVerse = elementList[0];
             }
             else {
-              console.log("matching element in list");
               this.activeVerse = changeTextResult.matchverse;
             }
 
@@ -770,7 +710,6 @@ export class ScriptureRangeEditorComponent {
               this.endVerseField.nativeElement.focus();
               this.endVerseField.nativeElement.select();
             }, 0);
-            //$("#endVerse").trigger('focus');
           }
         }
       });
@@ -778,7 +717,6 @@ export class ScriptureRangeEditorComponent {
     this.endVerseFieldKeyupSubscription = fromEvent(this.endVerseField.nativeElement, 'keyup')
       .subscribe(ev => {
         $("div.command-message").text('').hide(100);
-        console.log("end-verse field keyup entry");
         let event = <KeyboardEvent>ev;
         let element = $("#endVerse");
         let elementList = this.endVerseList;
@@ -818,7 +756,6 @@ export class ScriptureRangeEditorComponent {
   }
   
   ngOnDestroy() {
-    console.log("unsubscribing")
     ScriptureRangeEditorComponent.isActive = false;
     if (this.bookFieldKeyupSubscription) {
       this.bookFieldKeyupSubscription.unsubscribe();

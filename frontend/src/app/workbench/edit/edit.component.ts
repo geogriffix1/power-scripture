@@ -26,7 +26,6 @@ export class EditComponent {
    ) {
     BibleThemeTreeComponent.ActiveCitationSelector.subscribe((node: JstreeModel) => {
       runInInjectionContext(this.injector, () => {
-        console.log('Parent setting activeCitationNode', node);
         this.activeCitationNode.set(node);
       });
     });
@@ -59,7 +58,6 @@ export class EditComponent {
   }
   
   onClickSettings() {
-    console.log("onClickSettings");
     if (this.settingsActive) {
       $("div.settings").hide(500).removeClass("settings-active");
     }
@@ -70,10 +68,7 @@ export class EditComponent {
     this.settingsActive = !this.settingsActive;
   }
   onRadioClickSettings(index:number) {
-    console.log("onRadioClickSettings");
-
     if (this.activeType != index) {
-      console.log(`navigating to ${this.paths[index]}`);
       this.router.navigate([this.paths[index]]);
     }
 
@@ -81,14 +76,10 @@ export class EditComponent {
     this.settingsActive = false;
 
     this.activeType = index;
-    console.log(`onRadioClickSettings this.activeType = ${index}`);
   }
 
   ngOnInit() {
     EditComponent.isActive = true;
-    console.log("EditComponent ngOnInit");
-    console.log("route:");
-    console.log(this.actRoute);
 
     this.activeType = this.paths.indexOf(this.actRoute.snapshot.routeConfig?.path ?? "edit");
     this.editType = this.editTypes[this.activeType];
@@ -98,8 +89,6 @@ export class EditComponent {
       this.onClickSettings();
     }
 
-    console.log(`activeType: ${this.activeType}`);
-
     let rect = WorkbenchComponent.getWorkbenchSize();
     this.workbenchDomRect(rect);
     this.sectionWidth = rect.width;
@@ -108,7 +97,6 @@ export class EditComponent {
   }
 
   ngAfterViewInit() {
-    console.log("ngAfterViewInit");
     if (!EditComponent.isSubscribed) {
       WorkbenchComponent.WorkbenchResizeBroadcaster
         .subscribe((rect:DOMRectReadOnly) => {
@@ -121,26 +109,14 @@ export class EditComponent {
         });
 
       BibleThemeTreeComponent.ActiveThemeSelector.subscribe((themeNode:JstreeModel) => {
-        console.log("edit component ActiveThemeSelector");
-        console.log(themeNode);
         this.activeThemeNode.set(themeNode);
-        console.log("ActiveThemeSelector is done.")
       });
-
-      //BibleThemeTreeComponent.ActiveCitationSelector.subscribe((citationNode:JstreeModel) => {
-      //  console.log("ActiveCitationSelector event -> citationNode:", citationNode);
-      //   console.log("Parent signal identity:", this.activeCitationNode);
-      //   console.log("Parent signal current value:", this.activeCitationNode());
-      //   this.activeCitationNode.set(citationNode);
-      //   this.cdr.detectChanges();
-      // });
 
       EditComponent.isSubscribed = true;
     }
   }
 
   ngOnDestroy() {
-    console.log("ngOnDestroy - edit component");
     EditComponent.isActive = false;
   }
 }

@@ -45,8 +45,6 @@ export class CitationVerseMarkupWorkareaComponent {
 
   beginSession() {
     this.markup.beginSessionSnapshot(this.activeVerses());
-    console.log("beginSession - citationVerseMarkupWorkarea");
-    console.log(this.activeVerse());
 
     // 🔑 Seed an initial pristine selection for the active verse
     const v = this.activeVerse();

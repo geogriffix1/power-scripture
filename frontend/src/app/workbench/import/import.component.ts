@@ -42,48 +42,4 @@ export class ImportComponent {
     this.importType = this.importTypes[this.activeType];
     this.settingsActive = false;
   }
-
-  // workbenchDomRect(rect:DOMRectReadOnly) {
-  //   this.sectionWidth = rect.width;
-  //   this.sectionHeight = rect.height;
-  // }
-
-  // ngOnInit() {
-  //   ImportComponent.isActive = true;
-  //   console.log("ImportComponent ngOnInit");
-
-  //   let rect = WorkbenchComponent.getWorkbenchSize();
-  //   this.workbenchDomRect(rect);
-  //   this.sectionWidth = rect.width;
-  //   $("app-import").width(rect.width);
-  //   //$("#description").width(rect.width - 60);
-  // }
-
-//   ngAfterViewInit() {
-//     console.log("ngAfterViewInit");
-//     const activeTheme = WorkbenchComponent.activeTheme;
-//     if (activeTheme) {
-//       this.activeThemeId = Number(activeTheme.id.substring(5));
-//     }
-
-//     console.log(`activeTheme: ${this.activeThemeId}`);
-
-//     if (!ImportComponent.isSubscribed) {
-//       WorkbenchComponent.WorkbenchResizeBroadcaster
-//         .subscribe((rect:DOMRectReadOnly) => {
-//           if (ImportComponent.isActive) {
-//             this.workbenchDomRect(rect);       
-//             this.sectionWidth = rect.width - 4;
-//             $("app-import").width(rect.width);
-//           }      
-//         });
-
-//       ImportComponent.isSubscribed = true;
-//     }
-//   }
-
-//   ngOnDestroy() {
-//     console.log("ngOnDestroy - import component");
-//     ImportComponent.isActive = false;
-//   }
 }

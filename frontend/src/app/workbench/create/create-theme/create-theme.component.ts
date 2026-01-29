@@ -17,8 +17,6 @@ export class CreateThemeComponent {
 
   CreateTheme() {
     $("div.command-message").text("");
-    console.log("CreateTheme function");
-    console.log(WorkbenchComponent.activeTheme);
     if (WorkbenchComponent.activeTheme == null) {
       $("div.command-message").text("Theme not created: Parent Theme was not selected.").show(100);
       return;
@@ -36,9 +34,6 @@ export class CreateThemeComponent {
     if (this.descriptionField.nativeElement.value.length > 100) {
       this.descriptionField.nativeElement.value = this.descriptionField.nativeElement.value.substring(0, 100);
     }
-
-    console.log("activeTheme:");
-    console.log(JSON.stringify(WorkbenchComponent.activeTheme));
 
     (async (obj) => {
       let service = new BibleService;
@@ -64,6 +59,5 @@ export class CreateThemeComponent {
         $(".workbench-parent-theme div.selected-theme").addClass("missing");
       }
     })(this);
-    console.log("Create Theme clicked.")
   }
 }

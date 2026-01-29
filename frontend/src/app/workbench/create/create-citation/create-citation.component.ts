@@ -1,8 +1,6 @@
-import { Component, Input, ViewChild, OnInit, OnDestroy } from '@angular/core';
+import { Component } from '@angular/core';
 import { WorkbenchComponent } from '../../workbench.component';
 import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel';
-import { CreateComponent } from '../create.component';
-//import { CreateCitationContextMenuComponent } from '../../../context-menu/create-citation-context-menu.component';
 
 @Component({
     selector: 'app-create-citation',
@@ -22,10 +20,7 @@ export class CreateCitationComponent {
 
   ngOnInit() {
     CreateCitationComponent.isActive = true;
-    let rect = WorkbenchComponent.getWorkbenchSize();
   
-    console.log("create-citation ngOnInit rect:");
-    console.log(rect);
     this.scriptureRanges = WorkbenchComponent.scriptureRanges ?? [];
     let label = "";
     let comma = "";
@@ -38,7 +33,6 @@ export class CreateCitationComponent {
   }
 
   ngAfterViewInit() {
-    let rect = WorkbenchComponent.getWorkbenchSize();
     let viewTop = <number>$("as-split-area.workbench").offset()!.top;
     let viewHeight = <number>$("as-split-area.workbench").innerHeight();
     let resultsTop = $("section.scrollable-content").offset()!.top;

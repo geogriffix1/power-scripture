@@ -300,8 +300,6 @@ export class CitationMarkupService {
     this.workingMarkupsByVerse.set(verseId, arr);
     verse.markups = this.getMarkupsForVerse(verseId);
 
-    console.log("pushing new markup:");
-    console.log(newMarkup);
     this.pushUndoSnapshot(verseId);
 
     this.bump();

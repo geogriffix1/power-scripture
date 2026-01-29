@@ -44,12 +44,9 @@ export class AppComponent implements OnInit {
       $(this).removeClass("psmenu-icon-hover");
     });
     $('a.menu').on('mousedown', function(e) {
-      console.log(e.currentTarget);
-      //console.log(JSON.stringify(this));
       $(this).addClass("psmenu-down");
     }).on('mouseup', function(e) {
       if ($(this).hasClass("psmenu-down")) {
-        // completes the click operation
         $(this).removeClass("psmenu-down");
         $('a.menu').removeClass("psmenu-click");
         $(this).addClass("psmenu-click");

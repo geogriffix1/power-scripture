@@ -20,14 +20,11 @@ export class CitationVerseSelectComponent {
   markupClicked = output<CitationVerseExtendedModel>();
 
   onHideChanged(v: CitationVerseExtendedModel, checked: boolean) {
-    console.log(`onHideChanged - emitting checked=${checked}`);
     v.hide = checked ? "Y" : "N";
     this.hideChanged.emit({ id: v.id, hidden: checked });
   }
 
   onMarkupClicked(v: CitationVerseExtendedModel) {
-    console.log("onMarkupClicked in CitationVerseSelectComponent");
-    console.log(v);
     this.markupClicked.emit(v);
   }
 
@@ -37,8 +34,6 @@ export class CitationVerseSelectComponent {
   }
 
   ngOnInit() {
-    console.log("ngOnInit for citation-verse-select-component -- verses:");
-    console.log(this.verses());
     this.markupService.beginSessionSnapshot(this.verses());
   }
 }

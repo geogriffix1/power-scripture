@@ -58,10 +58,6 @@ export class WorkbenchComponent {
     }
 
     WorkbenchComponent.scriptureRanges = [];
-    console.log("WorkbenchComponent.citation");
-    console.log(citation);
-    console.log("WorkbenchComponent.citation.verses:");
-    console.log(citation.verses);
     const forCitations = <CitationVerseExtendedModel[]>citation?.verses ?? [];
     forCitations.sort((a,b) => a.scripture.bibleOrder - b.scripture.bibleOrder);
 
@@ -159,7 +155,6 @@ export class WorkbenchComponent {
   }
 
   onDeleteClick() {
-    console.log("onDeleteClick");
     AppComponent.editObject = undefined;
     this.router.navigate(['delete']);
   }
@@ -176,8 +171,6 @@ export class WorkbenchComponent {
 
     BibleThemeTreeComponent.ActiveCitationSelector.subscribe((citation:JstreeModel) => {
       WorkbenchComponent.activeCitation = citation;
-      console.log("In WorkbenchComponent, activeCitation:");
-      console.log(WorkbenchComponent.activeCitation);
     });
 
     BibleThemeTreeComponent.ActiveThemeSelector.subscribe((theme:JstreeModel) => {

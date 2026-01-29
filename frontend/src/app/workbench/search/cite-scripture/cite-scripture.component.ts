@@ -1,5 +1,5 @@
-import { Component, inject, Input, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
-import { Subscription, Observable, fromEvent, merge } from 'rxjs';
+import { Component, ViewChild, ElementRef } from '@angular/core';
+import { Subscription, fromEvent } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel';
 import { AppComponent } from '../../../app.component';
@@ -86,8 +86,6 @@ export class CiteScriptureComponent {
 
   CreateCitation() {
     $("div.command-message").text("").hide(100);    
-    console.log("Create Citation Clicked");
-    console.log(this.scriptureRanges);
     if (!this.scriptureRanges || this.scriptureRanges.length == 0) {
       $("div.command-message").text("Citation not created - No scriptures have been selected").show(100);
       return;
@@ -99,25 +97,18 @@ export class CiteScriptureComponent {
     }
 
     let description = <string>$("#description").val();
-    console.log(description);
-    console.log(`activeThemeId: ${WorkbenchComponent.activeTheme.id}`);
     let parentThemeId = <number><unknown>WorkbenchComponent.activeTheme.id.replace(/theme(\d+)/, "$1");
-    console.log(`parentThemeId: ${parentThemeId}`)
     let service = new BibleService;
     let scriptures:number[] = [];
     for (let i = 0; i < this.scriptureRanges.length; i++) {
       for (let j = 0; j < this.scriptureRanges[i].scriptures.length; j++) {
         let scripture = this.scriptureRanges[i].scriptures[j];
-        console.log(`${scripture.id} - ${scripture.book} ${scripture.chapter}:${scripture.verse}`)
         scriptures.push(scripture.id);
       }
     }
 
     service.createCitation(description, parentThemeId, scriptures);
     $('#theme-tree-full').jstree('refresh');
-
-    console.log("activeTheme:");
-    console.log(WorkbenchComponent.activeTheme);
   }
 
   callbacks = {
@@ -151,13 +142,9 @@ export class CiteScriptureComponent {
       }
 
       citations = [];
-      console.log("save citation");
-      console.log(`is router null? ${!router}`);
-      router.navigate(['/create/citation']);
     },
     canExportSelected(citations:any) { return true; },
     exportSelected(citations:any, context:any) {
-      console.log("export selected");
       let selected = $("tbody > tr[aria-checked=true]");
       if (selected.length == 0) {
         console.log(`all ${citations.length} citations selected`);
@@ -165,10 +152,8 @@ export class CiteScriptureComponent {
       }
       else {
         context.citations = [];
-        console.log()
         for (let i=0; i < selected.length; i++) {
           let key = +selected[i].id.replace("range_", "");
-          console.log(`selecting citations[${key}]`);
           context.citations.push(citations[key]);
         }
       }
@@ -206,16 +191,12 @@ export class CiteScriptureComponent {
     let ariaChecked = row.attr('aria-checked') ?? "false";
     let ariaCheckedBool = ariaChecked === "false";
     row.attr('aria-checked', ariaCheckedBool.toString());
-    console.log(row);
   }
 
   runAdd() {
-    console.log("runAdd()");
     if ($("#endVerse.legal").length > 0) {
       $("div.command-message").text('').hide(100);
       (async () => {
-        console.log(`book: (innerText=${this.bookField.nativeElement.value})`);
-        console.log(this.bookField.nativeElement);
         let cite = `${this.bookField.nativeElement.value} ` + 
           `${this.chapterField.nativeElement.value}:` +
           `${this.verseField.nativeElement.value}`;
@@ -224,11 +205,8 @@ export class CiteScriptureComponent {
           cite = `${cite}-${this.endVerseField.nativeElement.value}`;
         }
 
-        console.log(`cite:  ${cite}`);
         let bibleService = new BibleService;
         let scriptures = await bibleService.citeScriptures(cite);
-        console.log("SCRIPTURES:");
-        console.log(scriptures);
         let pattern = /Obadiah|Philemon|2 John|3 John|Jude/
         let isSingleChapterBook = scriptures[0].book.match(pattern);
         let citation = `${scriptures[0].book} ${scriptures[0].chapter}:${scriptures[0].verse}`;
@@ -262,7 +240,6 @@ export class CiteScriptureComponent {
     }
     else {
       $("div.command-message").text("Please complete the verse range.").show(100);
-      console.log("not legal");
     }
   }
 
@@ -307,7 +284,6 @@ export class CiteScriptureComponent {
       });
 
       this.bookList = tempList;
-      console.log("show booklist");
       $("#chapterlist,#verselist,#endverselist").hide(100);
       $("#booklist").show(100);
    }
@@ -392,13 +368,11 @@ export class CiteScriptureComponent {
 
   onClickChapter(chapter:number) {
     $("div.command-message").text('').hide(100);
-    console.log(`onClickChapter chapter: ${chapter}`);
     this.activeChapter = chapter;
     $("#chapter").val(chapter);
     (async () => {
       let provider = new BibleService;
       let max = await provider.getScripturesChapterMaxVerse(this.activeBook.book, chapter);
-      console.log(`max: ${max}`);
 
       let tempList:number[] = [];
       this.verseMasterList = [];
@@ -432,7 +406,6 @@ export class CiteScriptureComponent {
 
   onClickVerse(verse:number) {
     $("div.command-message").text('').hide(100);
-    console.log(`onClickVerse verse: ${verse}`);
     $("#verse").val(verse);
     let tempList:number[] = [];
     for (let i = verse; i <= this.verseList.length; i++) {
@@ -442,14 +415,12 @@ export class CiteScriptureComponent {
     this.endVerseList = tempList;
     this.isEndVerseDisabled = false;
 
-    console.log("show endverselist");
     $("#booklist,#chapterlist,#verselist").hide(100);
     $("#endverselist").show(100);
     setTimeout(() => {
       this.endVerseField.nativeElement.focus();      
       this.endVerseField.nativeElement.select();
     }, 0);
-    //$("#endVerse").trigger('focus');
 }
 
   onFocusEndVerse() {
@@ -571,9 +542,7 @@ export class CiteScriptureComponent {
 
   ngOnInit() {
     CiteScriptureComponent.isActive = true;
-    console.log("CiteScriptureComponent onInit");
     this.scriptureRanges = <CiteScriptureRangeModel[]>[];
-    console.log("CiteScriptureComponent - end onInit");
     let rect = WorkbenchComponent.getWorkbenchSize();
     this.workbenchDomRect(rect);
 
@@ -601,8 +570,6 @@ export class CiteScriptureComponent {
     }
 
     this.scriptureRanges = WorkbenchComponent.scriptureRanges ?? [];
-    console.log("routes:");
-    console.log(this.router);
   }
 
   ngAfterViewInit() {
@@ -611,7 +578,6 @@ export class CiteScriptureComponent {
         .subscribe((rect:DOMRectReadOnly) => {
           if (CiteScriptureComponent.isActive) {
             this.workbenchDomRect(rect);
-            //let commandWidth = 80//rect.width - 20;
             $(".command-label.book,.command.book").css('width', `${this.widthBook}`);
             $("#booklist").css('width', this.widthBook);
             $("#chapterlist,#verselist,#endverselist").css('width', this.widthChapter);
@@ -668,14 +634,12 @@ export class CiteScriptureComponent {
             setTimeout(() => {
               this.chapterField.nativeElement.focus();
             }, 0);
-            //$("#chapter").trigger('focus');
           }
           else if (changeTextResult.isMatch) {
             this.isChapterDisabled = false;
             setTimeout(() => {
               this.chapterField.nativeElement.focus();
             },0);
-            //$("#chapter").trigger('focus');
           }
         }
       });
@@ -683,26 +647,21 @@ export class CiteScriptureComponent {
     this.chapterFieldKeyupSubscription = fromEvent(this.chapterField.nativeElement, 'keyup')
       .subscribe(ev => {
         $("div.command-message").text('').hide(100);
-        console.log("chapter keyup event");
         let event = <KeyboardEvent>ev;
         let element = $("#chapter");
         let elementList = this.chapterList;
 
         let text = <string>element.val();
-        //console.log(`chapter text: ${text}`);
         let changeTextResult = this.onChangeChapter(text);
         if (this.workingText !== text) {
-          //console.log('calling onChangeText');
           this.isVerseDisabled = true;
           this.isEndVerseDisabled = true;
           $("#verse,#endVerse").val('');
-          //console.log(changeTextResult);
           if (changeTextResult.isMatch) {
             this.activeChapter = changeTextResult.matchchapter;
             (async () => {
               let provider = new BibleService;
               let max = await provider.getScripturesChapterMaxVerse(this.activeBook.book, this.activeChapter);
-              console.log(`max: ${max}`);
         
               let tempList:number[] = [];
               for (let i = 1; i <= max; i++) {
@@ -737,7 +696,6 @@ export class CiteScriptureComponent {
             (async () => {
               let provider = new BibleService;
               let max = await provider.getScripturesChapterMaxVerse(this.activeBook.book, this.activeChapter);
-              console.log(`max: ${max}`);
         
               let tempList:number[] = [];
               for (let i = 1; i <= max; i++) {
@@ -751,7 +709,6 @@ export class CiteScriptureComponent {
               setTimeout(() => {
                 this.verseField.nativeElement.focus();
               },0);
-              //$("#verse").trigger('focus');
             })();
           }
         }
@@ -766,13 +723,10 @@ export class CiteScriptureComponent {
         let elementList = this.verseList;
 
         let text = <string>element.val();
-        //console.log(`chapter text: ${text}`);
         let changeTextResult = this.onChangeVerse(text);
         if (this.workingText !== text) {
-          //console.log('calling onChangeText');
           this.isEndVerseDisabled = true;
           $("#endVerse").val('');
-          //console.log(changeTextResult);
           if (changeTextResult.isMatch) {
             this.activeVerse = changeTextResult.matchverse;
             let tempList:number[] = [];
@@ -797,14 +751,11 @@ export class CiteScriptureComponent {
           }
         }
         else if (event.key === "Enter") {
-          console.log("enter!")
           if (elementList.length === 1 || changeTextResult.isMatch) {
             if (elementList.length === 1) {
-              console.log("only element in list")
               this.activeVerse = elementList[0];
             }
             else {
-              console.log("matching element in list");
               this.activeVerse = changeTextResult.matchverse;
             }
 
@@ -817,11 +768,9 @@ export class CiteScriptureComponent {
             this.endVerseList = tempList;
             this.isEndVerseDisabled = false;
             setTimeout(() => {
-              console.log("triggering focus and select")
               this.endVerseField.nativeElement.focus();
               this.endVerseField.nativeElement.select();
             }, 0);
-            //$("#endVerse").trigger('focus');
           }
         }
       });
@@ -829,7 +778,6 @@ export class CiteScriptureComponent {
     this.endVerseFieldKeyupSubscription = fromEvent(this.endVerseField.nativeElement, 'keyup')
       .subscribe(ev => {
         $("div.command-message").text('').hide(100);
-        console.log("end-verse field keyup entry");
         let event = <KeyboardEvent>ev;
         let element = $("#endVerse");
         let elementList = this.endVerseList;
@@ -869,7 +817,6 @@ export class CiteScriptureComponent {
   }
   
   ngOnDestroy() {
-    console.log("unsubscribing")
     CiteScriptureComponent.isActive = false;
     if (this.bookFieldKeyupSubscription) {
       this.bookFieldKeyupSubscription.unsubscribe();

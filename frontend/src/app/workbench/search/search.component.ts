@@ -1,6 +1,5 @@
 import { Component } from '@angular/core';
-import { CommonModule, NgFor, NgIf } from '@angular/common';
-import { NavbarComponent } from '../../navbar/navbar.component';
+import { CommonModule } from '@angular/common';
 import { SearchScriptureComponent } from './search-scripture/search-scripture.component';
 import { CiteScriptureComponent } from './cite-scripture/cite-scripture.component';
 import $ from 'jquery';
@@ -47,9 +46,5 @@ export class SearchComponent {
     this.searchType = this.searchTypes[index];
     $("div.settings.settings-active").hide(500).removeClass("settings-active");
     this.settingsActive = false;
-  }
-
-  constructor() {
-    console.log("SearchComponent constructor");
   }
 }

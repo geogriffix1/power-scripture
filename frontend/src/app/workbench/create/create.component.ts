@@ -1,12 +1,12 @@
 import { Router, ActivatedRoute } from '@angular/router';
 import { Component } from '@angular/core';
-import { CommonModule, NgFor, NgIf } from '@angular/common';
+import { CommonModule, NgFor } from '@angular/common';
 import { WorkbenchComponent } from '../workbench.component';
 import { BibleThemeTreeComponent } from '../../bible-theme-tree/bible-theme-tree.component';
 import { CiteScriptureComponent } from '../search/cite-scripture/cite-scripture.component';
 import { CreateThemeComponent } from './create-theme/create-theme.component';
 import { JstreeModel } from '../../model/jstree.model';
-import { ThemeModel, ThemeExtendedModel } from '../../model/theme.model';
+import { ThemeModel } from '../../model/theme.model';
 import { BibleService } from '../../bible.service';
 import $ from 'jquery';
 
@@ -53,7 +53,6 @@ export class CreateComponent {
   }
 
   onClickSettings() {
-    console.log("onClickSettings");
     if (this.settingsActive) {
       $("div.settings").hide(500).removeClass("settings-active");
     }
@@ -66,7 +65,6 @@ export class CreateComponent {
 
   onRadioClickSettings(index:number) {
     if (this.activeType != index) {
-      console.log(`navigating to ${this.paths[index]}`);
       this.router.navigate([this.paths[index]]);
     }
     $("div.settings.settings-active").hide(500).removeClass("settings-active");
@@ -75,13 +73,6 @@ export class CreateComponent {
 
   ngOnInit() {
     CreateComponent.isActive = true;
-    console.log("CreateComponent ngOnInit");
-    //this.activeTheme:ThemeExtendedModel!;
-    console.log("activeTheme:")
-    console.log(this.activeTheme);
-
-    console.log("route:");
-    console.log(this.actRoute);
 
     this.activeType = this.paths.indexOf(this.actRoute.snapshot.routeConfig?.path ?? "create");
     this.createType = this.createTypes[this.activeType];
@@ -90,9 +81,6 @@ export class CreateComponent {
       this.settingsActive = false;
       this.onClickSettings();
     }
-
-    console.log(`activeType: ${this.activeType}`);
-    //console.log(this.route.url.value)
 
     let rect = WorkbenchComponent.getWorkbenchSize();
     this.workbenchDomRect(rect);
@@ -112,10 +100,7 @@ export class CreateComponent {
 
       if (!CreateComponent.isSubscribed) {
         BibleThemeTreeComponent.ActiveThemeSelector.subscribe((theme: JstreeModel) => {
-          console.log("in ActiveThemeSelector subscription - activeTheme:");
-          console.log(theme);
           let id = +theme.id.replace("theme", "");
-          console.log(`invoking getTheme(${id})`);
           obj.activeTheme = <ThemeModel>{
             id: +theme.id.replace("theme", ""),
             name: theme.text,
@@ -127,7 +112,6 @@ export class CreateComponent {
           };
 
           $("div.theme.selected-theme").text(obj.activeTheme.path);
-          console.log(`Active Theme set to: ${obj.activeTheme.path}`);
           $(".workbench-parent-theme div.selected-theme").removeClass("missing");
         });
       }
@@ -135,7 +119,6 @@ export class CreateComponent {
   }
 
   ngAfterViewInit() {
-    console.log("ngAfterViewInit");
     if (!CreateComponent.isSubscribed) {
       WorkbenchComponent.WorkbenchResizeBroadcaster
         .subscribe((rect:DOMRectReadOnly) => {
@@ -153,7 +136,6 @@ export class CreateComponent {
   }
 
   ngDestroy() {
-    console.log("ngOnDestroy - create components");
     CreateComponent.isActive = false;
   }
 }

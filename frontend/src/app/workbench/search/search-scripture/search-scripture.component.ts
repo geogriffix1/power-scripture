@@ -1,4 +1,4 @@
-import { Component, Directive, Input, HostListener, OnInit, OnDestroy, inject, AfterViewInit } from '@angular/core';
+import { Component, Directive, Input, OnInit, inject } from '@angular/core';
 import { BibleService } from '../../../bible.service';
 import { Router } from '@angular/router';
 import { ScriptureModel, ScriptureSearchResultModel } from '../../../model/scripture.model';
@@ -158,9 +158,6 @@ export class SearchScriptureComponent implements OnInit{
         }
       }
 
-      console.log("Scripture Ranges:")
-      console.log(WorkbenchComponent.scriptureRanges);
-
       if (forCitations.length > 0) {
         let isSingleChapterBook = book.match(/Obadiah|Philemon|2 John|3 John|Jude/);
         let firstVerse = `${book} ${chapter}:${startVerse}`;
@@ -183,7 +180,6 @@ export class SearchScriptureComponent implements OnInit{
       }
 
       context.searchResults = WorkbenchComponent.scriptureRanges;
-      console.log("Navigating to /create/citation");
       context.router.navigate(['/create/citation']);     
     },
     canExportSelected():boolean { return true; },
@@ -227,9 +223,7 @@ export class SearchScriptureComponent implements OnInit{
           let viewTop = $("as-split-area.workbench").offset()!.top;
           let viewHeight = <number>$("as-split-area.workbench").innerHeight();
           let resultsTop = $("section.scrollable-content").offset()!.top;
-          console.log(`results top: ${resultsTop}`);
           this.searchResultsHeight = viewHeight - resultsTop + viewTop;
-          //this.searchResultsHeight = viewHeight + viewTop;
           $("div.search-results").css("height", this.searchResultsHeight + "px");
         }
       });
@@ -250,7 +244,6 @@ export class SearchScriptureComponent implements OnInit{
     }
     else {
       $("div.command-message").text("").hide(100);
-      console.log(`newValue: ${newValue}`);
       const pattern = /.*?([a-z0-9]+)$/i;
       let change = newValue.replace(pattern, "$1");
       this.suggestions = wordList.wordList.filter(word => word.startsWith(change.toLowerCase()));
@@ -322,7 +315,6 @@ export class SearchScriptureComponent implements OnInit{
   // }
 
   public showModalContextMenu(event:MouseEvent) {
-    //console.log("showModalContextMenu");
     event.preventDefault();
     SearchContextMenuComponent.showContextMenu(this.searchResults, this.context);
     let contextMenu = $("app-search-context-menu");
@@ -350,7 +342,6 @@ export class SearchScriptureComponent implements OnInit{
   }
 
   public runSearch(event:any) {
-    console.log("runSearch");
     this.searchCommand = (<string>$("input[type=text].command-line").val()).trim();
     if (!this.searchCommand) {
       $("div.command-message").text("Please enter a search command").show(100);
@@ -404,7 +395,6 @@ export class SearchScriptureComponent implements OnInit{
         }
       
         if (pattern) {
-          console.log(`pattern=${pattern}`);
           this.service.processSearchLike(this.searchCommand, (data:ScriptureSearchResultModel[]) => {
             this.searchResults = data;
             this.processScriptureSearchResults(<RegExp>pattern);
@@ -420,10 +410,7 @@ export class SearchScriptureComponent implements OnInit{
 
   processScriptureSearchResults(pattern:RegExp) {
     for (let i=0; i<Math.min(this.searchResults.length, 400); i++) {
-      console.log(`pattern: ${pattern}`);
-      console.log(`searchResults text: ${this.searchResults[i].text}`);
       let prevMatch = <RegExpExecArray>pattern.exec(this.searchResults[i].text);
-      // console.log(prevMatch);
       let substrings = <any[]>[];
 
       if (prevMatch.index > 0) {
@@ -462,8 +449,6 @@ export class SearchScriptureComponent implements OnInit{
           break;
         }
       }
-
-      console.log(substrings);
     }
 
     $("div.await").hide();
@@ -492,7 +477,6 @@ export class SearchScriptureComponent implements OnInit{
   wordList:string[] = <string[]>[];
 
   ngOnInit():void {
-    //this.onResize(null);
     SearchScriptureComponent.isActive = true;
     if (!SearchScriptureComponent.isSubscribed) {
       AppComponent.mouseupBroadcaster.subscribe(event => {
@@ -513,26 +497,18 @@ export class SearchScriptureComponent implements OnInit{
 @Directive()
 export class ServiceDirective {
   constructor (provider:BibleService) {
-    console.log("serviceDirective initializer");
     this.provider = provider;
   }
 
   provider:BibleService;
 
   public async processSearchContains(search:string, callback:any) {
-    console.log("processing search contains");    
-    console.log(`service directive search=${search}`);
-
     let searchResult = await this.provider.searchScripturesContains(search);
-    console.log(searchResult);
     callback(searchResult);
   }
 
   public async processSearchLike(search:string, callback:any) {
-    console.log("processing search like");
-    console.log(`service directive search= ${search}`);
     let searchResult = await this.provider.searchScripturesLike(search);
-    console.log(searchResult);
     callback(searchResult);
   }
 }
