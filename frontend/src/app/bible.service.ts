@@ -142,6 +142,13 @@ export class BibleService {
     return <ThemeToCitationLinkModel>themeToCitation;
   }
 
+  async getScripturesByCitationString(cite:string) : Promise<ScriptureModel[]> {
+    var url = `${this.ROOT_URL}scriptures/${encodeURIComponent(cite)}`;
+    const data = await fetch(url);
+    const scriptures = (await data.json() ?? []);
+    return <ScriptureModel[]>scriptures;
+  }
+
   async getThemeTreeCitation(id:number): Promise<ThemeToCitationModel> {
     var url = `${this.ROOT_URL}themeToCitations/${id}/full`;
     const data = await fetch(url);

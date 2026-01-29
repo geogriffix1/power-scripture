@@ -1,3 +1,39 @@
-as-split-area.workbench { overflow: unset; }
-app-create { display: block; }
+:host {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+}
+
+header.bible-workbench,
+nav.bible-workbench {
+    flex: 0 0 auto;
+}
+
+nav.bible-workbench {
+    height: auto;
+    min-height: 0;
+}
+
+nav.bible-workbench > div.bible-workbench {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: nowrap;
+}
+
+section.bible-workbench {   /* use your actual wrapper class if you have one */
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+/* app-create { display: block; }
 app-edit { display: block; }
+app-import {display: block; } */

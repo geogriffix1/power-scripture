@@ -7,7 +7,7 @@ import { WorkbenchComponent } from '../../workbench.component';
 import { BibleService } from '../../../bible.service';
 import { CiteContextMenuComponent } from '../../../context-menu/cite-context-menu.component';
 import { CiteScriptureReportComponent } from '../../../reports/cite-scripture-report/cite-scripture-report.component';
-import * as BibleBookList from './BibleBookList.json';
+import * as BibleBookList from '../../../../assets/BibleBookList.json';
 import $ from 'jquery';
 
 @Component({

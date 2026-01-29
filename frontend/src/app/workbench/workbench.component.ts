@@ -148,6 +148,10 @@ export class WorkbenchComponent {
     this.router.navigate(['create']);
   }
 
+  onImportClick() {
+    this.router.navigate(['import']);
+  }
+
   onEditClick() {
     console.log("edit clicked!");
     AppComponent.editObject = undefined;

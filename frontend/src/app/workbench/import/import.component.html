@@ -1,0 +1,39 @@
+<!-- <div class="import-page"> -->
+    <header></header>
+    <nav class="workbench-import">
+        <div class="workbench-settings">
+            <a class="settings" title="Settings" (click)=onClickSettings()>
+                <i class="settings active"></i>
+            </a>
+        </div>
+        <div class="workbench-title">
+            {{importType}}
+            @if(settingsActive) {
+            <div class="settings settings-active">
+                <h3>Import Type:</h3>
+                <div class="settings-selector">
+                    @for(item of importTypes; track $index;) {
+                        @if ($index > 0) {
+                    <a class="menu-radio-{{$index === activeType ? 'checked' : 'unchecked'}}" (click)=onRadioClickSettings($index)>
+                        <i class="radio-icon"></i>
+                        <span>{{importTypes[$index]}}</span>
+                    </a><br/>
+                        }
+                    }
+                </div>
+            </div>
+            }
+        </div>
+    </nav>
+    <section class="scrollable">
+        @if(activeType == 0) {
+        <div></div>
+        }
+        @else if(activeType == 1) {
+        <app-import-console></app-import-console>
+        }
+        @else if(activeType == 2) {
+        <app-import-file></app-import-file>
+        }
+    </section>
+<!-- </div> -->

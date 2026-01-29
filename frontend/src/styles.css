@@ -1,3 +1,12 @@
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden; /* prevent browser from scrolling page */
+}
 /* W3.CSS 4.15 December 2020 by Jan Egil and Borge Refsnes */
 html{box-sizing:border-box}*,*:before,*:after{box-sizing:inherit}
 /* Extract from normalize.css by Nicolas Gallagher and Jonathan Neal git.io/normalize */
@@ -24,7 +33,7 @@ legend{color:inherit;display:table;max-width:100%;padding:0;white-space:normal}t
 [type=search]::-webkit-search-decoration{-webkit-appearance:none}
 ::-webkit-file-upload-button{-webkit-appearance:button;font:inherit}
 /* End extract */
-html,body{font-family:Verdana,sans-serif;font-size:15px;line-height:1.5}html{overflow-x:hidden}
+html,body{font-family:Verdana,sans-serif;font-size:12pt;line-height:1.5}html{overflow-x:hidden}
 .w3-serif{font-family:serif}.w3-sans-serif{font-family:sans-serif}.w3-cursive{font-family:cursive}.w3-monospace{font-family:monospace}
 /*h1,h2,h3,h4,h5,h6{font-family:"Segoe UI",Arial,sans-serif;font-weight:400;margin:10px 0}.w3-wide{letter-spacing:4px}*/
 hr{border:0;border-top:1px solid #eee;margin:20px 0}
@@ -270,7 +279,7 @@ nav.workbench-search { border: 1px; border-style: solid; border-color: white; pa
 nav.workbench-create { border: 1px; border-style: solid; border-color: white; padding: 4px; background-color: black;}
 nav.workbench-edit { border: 1px; border-style: solid; border-color: white; padding: 4px; background-color: black;}
 div.workbench-settings {height:32px; width: 32px; float: left; margin-right: 10px;}
-div.workbench-title {line-height:32px; color: white; font-weight: bold;}
+div.workbench-title {line-height:32px; color: white; font-weight: bold; background-color: black;}
 a.workbench-nav {display: inline-block; margin-right: 10px;}
 .workbench-nav span { display: table-cell; height: 34px; vertical-align: middle;}
 a.menu-radio-checked i.radio-icon{background: url("assets/images/Circle checked.png") center center no-repeat;}
@@ -279,6 +288,8 @@ a.menu-radio-checked, a.menu-radio-unchecked { display:inline-block; cursor: poi
 a.menu-radio-checked span, a.menu-radio-unchecked span { position: relative; bottom: 5px;}
 i.radio-icon{ width: 32px; height: 32px; display: inline-block;}
 div.settings.settings-active{ display:block; background:rgb(1, 1, 110); border-top: 1px solid white;}
+div.settings.settings-active a { text-decoration: none; }
+div.settings.settings-active h3 { font-weight: bold; font-size: 14pt; }
 div.settings { display: none; }
 div.settings-selector{ padding-left: 20px; }
 nav.command-line {background-color: black; padding: 4px;}
@@ -299,4 +310,13 @@ div.command-message {background-color: darkslategray; color: red; font-weight: b
 div.await {display:none; position:fixed; background:url("assets/images/throbber.gif") center center no-repeat;z-index: 1; width: 19px; height: 19px;}
 .modal-context div.context-menu {
     position: absolute;
+}
+
+html, body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  overflow: hidden; /* prevent browser from scrolling page */
 }

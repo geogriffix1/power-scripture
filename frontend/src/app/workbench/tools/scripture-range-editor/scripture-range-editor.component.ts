@@ -10,7 +10,7 @@ import { CiteScriptureReportComponent } from '../../../reports/cite-scripture-re
 import { CitationExtendedModel } from '../../../model/citation.model';
 import { AppComponent } from '../../../app.component';
 import { WorkbenchComponent } from '../../workbench.component';
-import * as BibleBookList from './BibleBookList.json';
+import * as BibleBookList from '../../../../assets/BibleBookList.json';
 import $ from 'jquery';
 //import { EditScriptureRangeContextMenuComponent } from '../../../context-menu/edit-scripture-range-context-menu/edit-scripture-range-context-menu.component';
 

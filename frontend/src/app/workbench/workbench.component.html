@@ -1,20 +1,20 @@
 <header class="bible-workbench">
     <h2 class="bible-workbench">Work Bench</h2>
-  </header>
-  <nav class="bible-workbench">
-    <div class="bible-workbench">
-      <a class="menu menu-icon-search" (click)="onSearchClick()"><i class="psmenu-icon"  title="Search scriptures or themes"></i></a>
-      <a class="menu menu-icon-create" (click)=onCreateClick()><i class="psmenu-icon" title="Create theme or citation"></i></a>
-      <a class="menu menu-icon-edit" (click)=onEditClick()><i class="psmenu-icon" title="Edit theme or citation"></i></a>
-      <a class="menu menu-icon-delete" (click)=onDeleteClick()><i class="psmenu-icon" title="Delete theme  or citation "></i></a>
-      <a class="menu menu-icon-copy" href="#"><i class="psmenu-icon" title="Copy theme, citation, or search results to clipboard"></i></a>
-      <a class="menu menu-icon-paste" href="#"><i class="psmenu-icon" title="Paste from clipboard"></i></a>
-      <a class="menu menu-icon-save" href="#"><i class="psmenu-icon" title="Save to database"></i></a>
-      <a class="menu menu-icon-import" href="#"><i class="psmenu-icon" title="Import from file"></i></a>
-      <a class="menu menu-icon-publish" href="#"><i class="psmenu-icon" title="Publish scriptures from theme or citation"></i></a>
-      <a class="menu menu-icon-help" href="#"><i class="psmenu-icon" title="Help"></i></a>
-    </div>      
-  </nav>
-  <section class="bible-workbench">
-    <router-outlet></router-outlet>
-  </section>
+</header>
+<nav class="bible-workbench">
+  <div class="bible-workbench">
+    <a class="menu menu-icon-search" (click)="onSearchClick()"><i class="psmenu-icon"  title="Search scriptures or themes"></i></a>
+    <a class="menu menu-icon-create" (click)=onCreateClick()><i class="psmenu-icon" title="Create theme or citation"></i></a>
+    <a class="menu menu-icon-edit" (click)=onEditClick()><i class="psmenu-icon" title="Edit theme or citation"></i></a>
+    <a class="menu menu-icon-delete" (click)=onDeleteClick()><i class="psmenu-icon" title="Delete theme  or citation "></i></a>
+    <!-- <a class="menu menu-icon-copy" href="#"><i class="psmenu-icon" title="Copy theme, citation, or search results to clipboard"></i></a>
+    <a class="menu menu-icon-paste" href="#"><i class="psmenu-icon" title="Paste from clipboard"></i></a>
+    <a class="menu menu-icon-save" href="#"><i class="psmenu-icon" title="Save to database"></i></a> -->
+    <a class="menu menu-icon-import" (click)=onImportClick()><i class="psmenu-icon" title="Import from file or console"></i></a>
+    <a class="menu menu-icon-publish" href="#"><i class="psmenu-icon" title="Publish scriptures from theme or citation"></i></a>
+    <a class="menu menu-icon-help" href="#"><i class="psmenu-icon" title="Help"></i></a>
+  </div>      
+</nav>
+<section class="bible-workbench">
+  <router-outlet></router-outlet>
+</section>

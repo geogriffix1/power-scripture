@@ -1,0 +1,42 @@
+:host {
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+
+    display: flex;
+    flex-direction: column;
+}
+
+header, nav {
+    flex: 0 0 auto;
+}
+
+section.scrollable {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+section.scrollable > app-import-console,
+section.scrollable > app-import-file,
+section.scrollable > * {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+}
+
+workbench-import {
+background-color: black;
+  color:white;
+}
+
+
+.workbench-import .header {
+    margin-left: 36px;
+    font-weight: bold;
+}
+
+
+nav.workbench-import i.settings {
+   margin-left: 4px;
+}

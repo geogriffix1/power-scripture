@@ -3,6 +3,7 @@ import { SearchComponent } from './workbench/search/search.component';
 import { CreateComponent } from './workbench/create/create.component';
 import { EditComponent } from './workbench/edit/edit.component';
 import { DeleteComponent } from './workbench/delete/delete.component';
+import { ImportComponent } from './workbench/import/import.component';
 
 export const routes: Routes = [
     { path: 'search', component: SearchComponent },
@@ -18,5 +19,6 @@ export const routes: Routes = [
     { path: 'delete', component: DeleteComponent },
     { path: 'delete/citation', component: DeleteComponent },
     { path: 'delete/theme', component: DeleteComponent },
+    { path: 'import', component: ImportComponent },
     { path: '**', redirectTo: '/search' }
 ];
