@@ -20,6 +20,7 @@ export class WorkbenchComponent {
 
   static activeCitation:JstreeModel;
   static activeTheme:JstreeModel;
+  static clipboardNode:JstreeModel;
   static scriptureRanges: CiteScriptureRangeModel[];
   static activeScriptureRange: string;
   static activeCitationVerse: CitationVerseExtendedModel;
@@ -176,11 +177,18 @@ export class WorkbenchComponent {
     BibleThemeTreeComponent.ActiveThemeSelector.subscribe((theme:JstreeModel) => {
       WorkbenchComponent.activeTheme = theme;
     });
+
+    BibleThemeTreeComponent.ClipboardSelector.subscribe((node:JstreeModel) => {
+      WorkbenchComponent.clipboardNode = node;
+      console.log("workbench clipboard change:");
+      console.log(node);
+    })
   }
 
   ngOnDestroy() {
     BibleThemeTreeComponent.ActiveCitationSelector.unsubscribe();
     BibleThemeTreeComponent.ActiveThemeSelector.unsubscribe();
+    BibleThemeTreeComponent.ClipboardSelector.unsubscribe();
   }
 
   constructor(private router:Router) {}

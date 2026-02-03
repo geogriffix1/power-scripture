@@ -21,6 +21,7 @@ export class BibleThemeTreeComponent implements OnInit {
   activeCitation!:JstreeModel;
   static ActiveThemeSelector: Subject<JstreeModel>;
   static ActiveCitationSelector: Subject<JstreeModel>;
+  static ClipboardSelector: Subject<JstreeModel>;
   static ngZone: NgZone;
   static LoadNodeCallback: any;
   constructor(ngzone: NgZone) {
@@ -28,6 +29,7 @@ export class BibleThemeTreeComponent implements OnInit {
     BibleThemeTreeComponent.service = new ServiceDirective(bibleService);
     BibleThemeTreeComponent.ActiveThemeSelector = new Subject<JstreeModel>();
     BibleThemeTreeComponent.ActiveCitationSelector = new Subject<JstreeModel>();
+    BibleThemeTreeComponent.ClipboardSelector = new Subject<JstreeModel>();
     BibleThemeTreeComponent.ngZone = ngzone;
   }
 
@@ -118,7 +120,11 @@ export class BibleThemeTreeComponent implements OnInit {
         },
         copyThemeItem: {
           label: "Copy",
-          action: () =>  { }
+          action: () =>  {
+            console.log("copying theme item");
+            BibleThemeTreeComponent.ClipboardSelector.next(node);;
+            console.log("done copying theme item");
+           }
         },
         pasteItem: {
           label: "Paste",
@@ -164,7 +170,11 @@ export class BibleThemeTreeComponent implements OnInit {
       },
         copyCitationItem: {
           label: "Copy",
-          action: () =>  { }
+          action: () =>  {
+            console.log("copying citation item");
+            BibleThemeTreeComponent.ClipboardSelector.next(node);;
+            console.log("done copying citation item");
+          }
         },
         deleteCitationItem: {
           label: "Delete",
@@ -354,7 +364,7 @@ export class ServiceDirective {
   public async getThemeChain(id: number, callback:any) {
     console.log(`getThemeChain for ${id}`);
     await this.provider.getThemeChain(id, (chain:ThemeChainModel) => {
-      callback(chain);
+      callback(chain.chain.map(t => t.name).join("/"));
     });
   }
 

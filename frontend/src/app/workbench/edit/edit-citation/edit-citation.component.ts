@@ -147,7 +147,6 @@ export class EditCitationComponent {
   }
 
   onRangeAdded(scriptureRange?: CiteScriptureRangeModel) {
-    console.log("onRangeAdded");
     (async () => {
       if (scriptureRange) {
         this.newScriptureRange = scriptureRange;

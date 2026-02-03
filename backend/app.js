@@ -6,6 +6,9 @@ const refreshThemePaths = require("./appHelpers/refreshThemePaths");
 
 global.verseValidation = require("./models/validation");
 
+console.log("execArgv:", process.execArgv);
+console.log("isDebug:", process.execArgv.some(arg => arg.includes('--inspect')));
+
 var app = express();
 
 var corsOptions = {
@@ -32,7 +35,12 @@ require("./routes/publisher.routes")(app);
 
 refreshThemePaths();
 
-const PORT = process.env.PORT || 8080;
-app.listen(PORT, () => {
-    console.log(`Server is running on port ${PORT}.`);
+const isDebug = process.execArgv.some(arg => arg.includes('--inspect'));
+
+const port = isDebug ? 9229 : 3000;
+//   ? Math.floor(Math.random() * (65535 - 1025) + 1025)  // random port for debugging
+//   : (process.env.PORT || 3000);                        // stable port for normal runs
+
+app.listen(port, () => {
+  console.log(`Server running on port ${port} (${isDebug ? 'debug' : 'normal'} mode)`);
 });

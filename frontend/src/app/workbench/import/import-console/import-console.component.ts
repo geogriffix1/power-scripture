@@ -1,4 +1,5 @@
 import {
+  OnInit,
   AfterViewInit,
   Component,
   ElementRef,
@@ -6,6 +7,12 @@ import {
   ViewChild,
   signal
 } from "@angular/core";
+import { Subject } from "rxjs";
+import { WorkbenchComponent } from "../../workbench.component";
+import { ThemeChainModel } from "../../../model/themeChain.model";
+import { JstreeModel } from "../../../model/jstree.model";
+import { BibleService } from "../../../bible.service";
+import { BibleThemeTreeComponent } from "../../../bible-theme-tree/bible-theme-tree.component";
 
 type LineLevel = "info" | "error";
 
@@ -38,6 +45,52 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
   private roHost?: ResizeObserver;
   private roSection?: ResizeObserver;
 
+  static isActive = false;
+  static isSubscribed = false;
+
+  private clipboard: JstreeModel|null = null;
+
+  private basePath = "";
+  private baseThemeId = -1;
+  private activeTheme: JstreeModel|null = null;
+
+  ngOnInit() {
+    ImportConsoleComponent.isActive = true;
+    if (WorkbenchComponent.clipboardNode) {
+      this.clipboard = WorkbenchComponent.clipboardNode;
+    }
+
+    if (!ImportConsoleComponent.isSubscribed) {
+      BibleThemeTreeComponent.ClipboardSelector.subscribe((node: JstreeModel | null) => {
+        if (node)  {
+          this.clipboard = node;
+          let service = new BibleService();
+
+          let theme = -1;
+          if (node.id.startsWith("citation")) {
+            theme = node.parent ? +node.parent.replace("theme", "") : -1;
+          }
+          else {
+            theme = +node.id.replace("theme", "");
+          }
+
+          (async () => {
+            console.log("getting theme chain...");
+            await service.getThemeChain(theme, (chain: ThemeChainModel) => {
+              console.log("theme chain:");
+              console.log(chain);
+              let path = "/" + chain.chain.map(theme => theme.name).join("/");
+
+              this.copyTextToClipboard(path);
+            });
+          })();
+        }
+      });
+
+      ImportConsoleComponent.isSubscribed = true;
+    } 
+  }
+
   ngAfterViewInit(): void {
     const root = this.consoleRoot?.nativeElement;
 
@@ -55,6 +108,9 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
     this.roRoot?.disconnect();
     this.roHost?.disconnect();
     this.roSection?.disconnect();
+    BibleThemeTreeComponent.ClipboardSelector.unsubscribe();
+    ImportConsoleComponent.isSubscribed = false;
+    ImportConsoleComponent.isActive = false;
   }
 
   private observeHeight(label: string, el: Element | null | undefined): ResizeObserver | undefined {
@@ -106,6 +162,18 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
       return;
     }
 
+    if (/^base/i.test(raw)) {
+      let predicate = /^base\s+(.+)$/i.exec(raw)?.at(1)?.trim();
+      if (predicate) {
+        (async () => {
+          let service = new BibleService();
+          let baseTheme = await service.getThemeByPath(predicate);
+          console.log("base theme:");
+          console.log(baseTheme);
+        })();
+      }
+    }
+
     this.inputText.set("");
 
     queueMicrotask(() => {
@@ -136,4 +204,31 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
       el.focus();
     }
   }
+
+  private async copyTextToClipboard(text: string): Promise<boolean> {
+    try {
+      if (typeof navigator !== 'undefined' && 'clipboard' in navigator && typeof navigator.clipboard.writeText === 'function') {
+        await navigator.clipboard.writeText(text);
+        return true;
+      }
+
+      // Fallback for older browsers: use a temporary textarea and execCommand
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      // Prevent scrolling to bottom
+      ta.style.position = 'fixed';
+      ta.style.left = '-9999px';
+      document.body.appendChild(ta);
+      ta.focus();
+      ta.select();
+
+      const successful = document.execCommand('copy');
+      document.body.removeChild(ta);
+      return successful;
+    }
+    catch (e) {
+      console.error('copyTextToClipboard failed', e);
+      return false;
+    }
+  } 
 }

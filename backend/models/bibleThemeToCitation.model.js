@@ -1,4 +1,3 @@
-/// <reference path="bibleCitationVerse.model.js" />
 class BibleThemeToCitationModel {
     constructor() {
         const attr = require("./dbAttributes");

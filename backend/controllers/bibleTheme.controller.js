@@ -6,38 +6,59 @@ const tools = new responseTools;
 
 exports.listOne = (req, res) => {
     var originalPath = req.path;
-    var path = originalPath.toLowerCase();
-    var query = eval(req.params.id);
+    var query;
     var byId = false;
-    if (typeof query == "number") {
-        originalPath = query;
+    if (req.params.id) {
+        query = Number(req.params.id);
         byId = true;
     }
-    else if (path.startsWith("/path=")) {
-        path = path.substr(6);
-        if (!path.startsWith("/")) {
-            path = "/" + path;
-        }
-        if (path.endsWith("/")) {
-            path = path.substr(0, path.length - 1);
+    else if (req.path && req.path.startsWith("/path=")) {
+        var path = originalPath.toLowerCase().substring(6).trim();
+
+        if (path.startsWith("/")) {
+            path = path.substr(1).trimStart();
         }
 
+        if (path.endsWith("/")) {
+            path = path.substr(0, path.length - 1).trimEnd();
+        }
+
+        // split input string into individual themes
+        themeList = path.split("/").map(theme => theme.trim().toLowerCase());
+        themePath = "/" + themeList.join("/");
+
+        query = -1;
+
         for (var index in global.themePaths) {
-            themePath = global.themePaths[index].path;
-            if (themePath.toLowerCase() == path) {
-                query = eval(index);
+            let thisPath = global.themePaths[index].path;
+            if (thisPath.toLowerCase() == themePath) {
+                query = index;
+                break;
             }
+        }
+
+        if (query == -1) {
+            res.status(400).send(errorMessage(
+                400,
+                "Invalid Parameter",
+                `/themes${originalPath}`,
+                `Theme path "${themePath}" not found`,
+                "Usage (e.g. /themes/2000) returns the value of the theme whose id equates to 2000. \n" +
+                "Or (e.g. /themes/path=/persons/Jesus) returns theme Jesus (path names are not case sensitve)."
+            ));
+            return;
         }
     }
     else {
         res.status(400).send(errorMessage(
             400,
             "Invalid Parameter",
-            `/theme/${originalPath}`,
+            `/themes${originalPath}`,
             "Query argument must be the numeric theme id or path=... followed by the theme path",
-            "Usage (e.g. /theme/2000) returns the value of the theme whose id equates to 2000.",
-            "Or (e.g. /theme/path=/persons/Jesus) path names are not case sensitive."
+            "Usage (e.g. /themes/2000) returns the value of the theme whose id equates to 2000.\n" +
+            "Or (e.g. /themes/path=/persons/Jesus) path names are not case sensitive."
         ));
+        return;
     }
 
     const theme = new bibleTheme;
@@ -49,7 +70,7 @@ exports.listOne = (req, res) => {
             res.status(500).send(errorMessage(
                 500,
                 "Server Error",
-                "/theme/" + originalPath,
+                "/themes" + originalPath,
                 err.message,
                 ""
             ));
@@ -103,7 +124,6 @@ exports.listOne = (req, res) => {
             theme.themeToCitationLinks.sort((a, b) => a.themeToCitation.sequence - b.themeToCitation.sequence);
             res.send({ theme: theme });
         }
-
     });
 };
 
@@ -172,7 +192,6 @@ exports.listAll = (req, res) => {
 
         allNodes.sort((a, b) => { a.sequence - b.sequence });
     }
-
 
     res.send({ themes: allNodes });
 };

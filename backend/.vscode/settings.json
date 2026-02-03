@@ -1,0 +1,5 @@
+{
+  "debug.javascript.usePreview": false,
+  "debug.console.consoleKind": "integratedTerminal",
+  "workbench.colorTheme": "Default Light Modern"
+}

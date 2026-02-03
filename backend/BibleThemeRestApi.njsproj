@@ -32,6 +32,9 @@
     <DebugSymbols>true</DebugSymbols>
   </PropertyGroup>
   <ItemGroup>
+    <Content Include=".jshintrc">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="app.js" />
     <Content Include="appHelpers\refreshThemePaths.js" />
     <Content Include="appHelpers\refreshThemePathsAsync.js">
@@ -57,6 +60,9 @@
     <Content Include="controllers\helpers\responseTools.js" />
     <Content Include="controllers\publisher.controller.js" />
     <Content Include="db\db.access.js" />
+    <Content Include="jsconfig.json">
+      <SubType>Code</SubType>
+    </Content>
     <Content Include="models\bibleBook.model.js">
       <SubType>Code</SubType>
     </Content>

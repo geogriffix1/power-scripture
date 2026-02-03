@@ -2,10 +2,10 @@ module.exports = app => {
     const bibleTheme = require("../controllers/bibleTheme.controller");
     var router = require("express").Router();
 
-    router.get("/:id", bibleTheme.listOne);
-    router.get(/path=(?:\/?[^\/]*?)+\/?/, bibleTheme.listOne);
+    router.get("/:id(\\d+)", bibleTheme.listOne);
+    router.get(/path=.+/, bibleTheme.listOne);
     router.get("/", bibleTheme.listAll);
-    router.get("/chain/:id", bibleTheme.chain);
+    router.get("/chain/:id(\\d+)", bibleTheme.chain);
     router.post("/", bibleTheme.create);
     router.put("/", bibleTheme.edit);
     router.put("/:id/sequence/:sequence", bibleTheme.setSequence);

@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34330.188
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9092AA53-FB77-4645-B42D-1CCCA6BD08BD}") = "BibleThemeRestApi", "BibleThemeRestApi.njsproj", "{CA83A49D-74F2-42B3-9C92-0BB5969962F4}"
+Project("{54A90642-561A-4BB1-A94E-469ADEE60C69}") = "BibleThemeRestApi", "BibleThemeRestApi.esproj", "{50E16339-F0DD-9FB0-5C95-C07B47607977}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,10 +11,12 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{CA83A49D-74F2-42B3-9C92-0BB5969962F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{CA83A49D-74F2-42B3-9C92-0BB5969962F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{CA83A49D-74F2-42B3-9C92-0BB5969962F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{CA83A49D-74F2-42B3-9C92-0BB5969962F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50E16339-F0DD-9FB0-5C95-C07B47607977}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{50E16339-F0DD-9FB0-5C95-C07B47607977}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{50E16339-F0DD-9FB0-5C95-C07B47607977}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
+		{50E16339-F0DD-9FB0-5C95-C07B47607977}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{50E16339-F0DD-9FB0-5C95-C07B47607977}.Release|Any CPU.Build.0 = Release|Any CPU
+		{50E16339-F0DD-9FB0-5C95-C07B47607977}.Release|Any CPU.Deploy.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

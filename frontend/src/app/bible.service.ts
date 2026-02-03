@@ -12,8 +12,8 @@ import { ThemeToCitationModel, ThemeToCitationLinkModel } from './model/themeToC
   providedIn: 'root'
 })
 export class BibleService {
-  ROOT_URL = "http://localhost:8080/";
-  //ROOT_URL = "http://localhost:1402/";
+  ROOT_URL = "http://localhost:3000/";
+  //ROOT_URL = "http://localhost:9229/";
   constructor() { }
 
   async getAllThemes(): Promise<any> {
@@ -141,6 +141,14 @@ export class BibleService {
     const themeToCitation = (await data.json() ?? null);
     return <ThemeToCitationLinkModel>themeToCitation;
   }
+
+  async getThemeByPath(path:string) : Promise<ThemeExtendedModel> {
+    var url = `${this.ROOT_URL}themes/path=${path}`;
+    const data = await fetch(url);
+    const theme = (await data.json() ?? null);
+    return <ThemeExtendedModel>theme;
+  }
+
 
   async getScripturesByCitationString(cite:string) : Promise<ScriptureModel[]> {
     var url = `${this.ROOT_URL}scriptures/${encodeURIComponent(cite)}`;
