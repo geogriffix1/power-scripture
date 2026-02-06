@@ -146,7 +146,35 @@ export class BibleService {
     var url = `${this.ROOT_URL}themes/path=${path}`;
     const data = await fetch(url);
     const theme = (await data.json() ?? null);
-    return <ThemeExtendedModel>theme;
+
+    if (theme.status && theme.status == 400) {
+      return <ThemeExtendedModel> {
+        id: -1,
+        name: "",
+        description: `Error: ${theme.message}`,
+        parent: -1,
+        sequence: -1,
+        childCount: 0,
+        node: undefined,
+        path: "",
+        expanded: false,
+        themes: [],
+        themeToCitationLinks: [],
+      }
+    }
+
+    if (!theme.theme.description) {
+      theme.theme.description = "";
+    }
+
+    theme.theme.themes.forEach((theme:any) => {
+      if (!theme.theme.description) {
+        theme.theme.description = "";
+      }
+    });
+
+
+    return <ThemeExtendedModel>theme.theme;
   }
 
 

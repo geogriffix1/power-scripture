@@ -82,7 +82,9 @@ exports.listOne = (req, res) => {
                 var result = results[i];
                 if (theme === null) {
                     theme = tools.getObjectFromResult(result, 1);
+                    theme.description = theme.description ? theme.description : "";
                     theme.path = global.themePaths[theme.id].path;
+                    theme.extended = true;
                     theme.themes = [];
                     theme.themeToCitationLinks = [];
                 }
@@ -98,6 +100,7 @@ exports.listOne = (req, res) => {
 
                     if (!activeChildTheme && newChildTheme.id) {
                         activeChildTheme = newChildTheme;
+                        activeChildTheme.description = activeChildTheme.description ? activeChildTheme.description : "";
                         activeChildTheme.path = global.themePaths[activeChildTheme.id].path;
                         theme.themes.push({ theme: activeChildTheme });
                     }
@@ -115,6 +118,7 @@ exports.listOne = (req, res) => {
                     if (!activeThemeToCitation && newThemeToCitation.id) {
                         activeThemeToCitation = newThemeToCitation;
                         activeThemeToCitation.citation = tools.getObjectFromResult(result, 4);
+                        activeThemeToCitation.citation.description = activeThemeToCitation.citation.description ? activeThemeToCitation.citation.description : "";
                         theme.themeToCitationLinks.push({ themeToCitation: activeThemeToCitation });
                     }
                 }

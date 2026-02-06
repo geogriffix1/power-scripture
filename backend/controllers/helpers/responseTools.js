@@ -77,6 +77,7 @@ class responseTools {
                     if (!activeThemeToCitation && newThemeToCitation.id) {
                         activeThemeToCitation = newThemeToCitation;
                         activeThemeToCitation.citation = this.getObjectFromResult(result, 4);
+                        activeThemeToCitation.citation.description = activeThemeToCitation.citation.description ? activeThemeToCitation.citation.description : "";
                         theme.themeToCitationLinks.push({ themeToCitation: activeThemeToCitation });
                     }
                 }

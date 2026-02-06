@@ -9,6 +9,7 @@ import {
 } from "@angular/core";
 import { Subject } from "rxjs";
 import { WorkbenchComponent } from "../../workbench.component";
+import { ThemeExtendedModel } from "../../../model/theme.model";
 import { ThemeChainModel } from "../../../model/themeChain.model";
 import { JstreeModel } from "../../../model/jstree.model";
 import { BibleService } from "../../../bible.service";
@@ -50,9 +51,12 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
 
   private clipboard: JstreeModel|null = null;
 
-  private basePath = "";
+  private baseTheme: ThemeExtendedModel|null = null;
+  private openTheme: ThemeExtendedModel|null = null;
   private baseThemeId = -1;
   private activeTheme: JstreeModel|null = null;
+  private openStack: ThemeExtendedModel[] = [];
+  private service = new BibleService();
 
   ngOnInit() {
     ImportConsoleComponent.isActive = true;
@@ -168,12 +172,163 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
         (async () => {
           let service = new BibleService();
           let baseTheme = await service.getThemeByPath(predicate);
-          console.log("base theme:");
-          console.log(baseTheme);
+
+          if (baseTheme.id > 0) {
+            this.baseTheme = baseTheme;
+            this.openTheme = structuredClone(baseTheme);
+            this.openStack = [this.openTheme];
+            this.writeLine(`${this.openTheme.path}`, "info");
+          }
+          else {
+            this.writeLine(`Error: Theme not found for path '${predicate}'`, "error");
+          }
         })();
       }
     }
+    
+    else if (/^show/i.test(raw)) {
+      if (this.openTheme) {
+        this.writeLine(`${this.openTheme.path} "${this.openTheme.description}"`, "info");
+        let predicate = /^show\s+(.+)$/i.exec(raw)?.at(1)?.trim();
+        let showThemes = false;
+        let showCitations = false;
+        if (predicate) {
+          console.log(`predicate: "${predicate}"`);
+          let themeOrCitation = /^(themes?$|them?$|th?$|citations?$|citatio?$|citat?$|cit?$|c$)/i.exec(predicate)?.at(1);
+          console.log(`type: ${themeOrCitation}`);
+          showThemes = <boolean>(themeOrCitation && themeOrCitation.toLowerCase().startsWith("t"));
+          showCitations = <boolean>(themeOrCitation && themeOrCitation.toLowerCase().startsWith("c"));
+        }
+        else {
+          console.log("no predicate");
+          showThemes = true;
+          showCitations = true;
+        }
 
+        if (showThemes) {
+          if (!this.openTheme?.themes?.length) {
+            this.writeLine(`[Themes]`, "info");
+          }
+          else {
+            this.writeLine("[Themes]", "info");
+            this.openTheme.themes.forEach(theme=> {
+              this.writeLine(`${theme.theme.name} "${theme.theme.description}"`, "info");
+            })
+          }
+        }
+
+        if (showCitations) {
+          if (!this.openTheme?.themeToCitationLinks?.length) {
+            this.writeLine("[Citations]", "info");
+          }
+          else {
+            this.writeLine("[Citations]", "info");
+            this.openTheme.themeToCitationLinks.forEach(link=> {
+              this.writeLine(`${link.themeToCitation.citation.citationLabel} "${link.themeToCitation.citation.description}"`, "info");
+            });
+          }
+        }
+      }
+      else {
+        this.writeLine(`Error: No open theme. Use 'base <theme path>' to set a base theme.`, "error");
+      }
+    }
+
+    else if (/^open/i.test(raw)) {
+      if (!this.openTheme) {
+        this.writeLine(`Error: No open theme. Use 'base <theme path>' to set a base theme.`, "error");
+        this.readyForInput();
+        return;
+      }
+
+      let predicate = /^open\s+(.+)$/i.exec(raw)?.at(1)?.trim();
+      if (predicate) {
+        (async () => {
+          let themes = predicate.split("/").map(s => s.trim());
+          let failed = false;
+          let thisTheme = structuredClone(this.openTheme);
+          let themeTry = "";
+
+          for (let theme of themes) {
+            themeTry = theme;
+            console.log(`trying to open "${theme}"`);
+            if (thisTheme?.themes && thisTheme.themes.length > 0) {
+              let nextTheme = thisTheme?.themes.find(t =>
+                t.theme.name.toLowerCase() === theme.toLowerCase());
+              if (nextTheme) {
+                console.log("matched");
+                let checkTheme = nextTheme.theme as any;
+                console.log("checkTheme:");
+                console.log(checkTheme);
+                if (!checkTheme.extended) {
+                  console.log("fetching theme details...");
+                  let extendedTheme = await this.service.getTheme(checkTheme.id);
+                  nextTheme.theme = extendedTheme;
+                  console.log("nextTheme extended");
+                  console.log(nextTheme.theme);
+                }
+
+                thisTheme = nextTheme.theme as ThemeExtendedModel;
+                console.log("assigning thisTheme");
+                console.log(thisTheme);
+              }
+              else {
+                failed = true;
+                break;
+              }
+            }
+            else {
+              failed = true;
+              break;
+            }
+          }
+
+          if (failed) {
+            this.writeLine(`Error: theme "${themeTry}" not found`, "error");
+          }
+          else {
+            this.openTheme = thisTheme;
+            this.openStack.push(<ThemeExtendedModel>this.openTheme);
+            this.writeLine(`theme opened: ${this.openTheme?.name} "${this.openTheme?.description ?? ''}"`, "info");
+          }
+        })();
+      }
+      else {
+        this.writeLine(`Error: no theme specified. Usage: open <subtheme path>`, "error");
+      }
+    }
+
+    else if (/^close/i.test(raw)) {
+      if (!this.openTheme) {
+        this.writeLine(`Error: No open theme. Use 'base <theme path>' to set a base theme.`, "error");
+        this.readyForInput();
+        return;
+      }
+
+      if (this.openTheme.id === this.baseTheme?.id) {
+        this.writeLine(`Error: cannot close base theme.  Use 'base <theme path>' to set new base theme.`, "error");
+        this.readyForInput();
+        return;
+      }
+
+      this.openStack.pop();
+      this.openTheme = <ThemeExtendedModel>this.openStack.at(-1);
+      this.writeLine(`open theme: ${this.openTheme?.name} "${this.openTheme?.description ?? ''}"`, "info");
+    }
+
+    this.readyForInput();
+
+    // this.inputText.set("");
+
+    // queueMicrotask(() => {
+    //   requestAnimationFrame(() => {
+    //     this.scrollToBottom();
+    //     this.focusInputNoScroll();
+    //   });
+    // });
+  }
+
+  private readyForInput() {
     this.inputText.set("");
 
     queueMicrotask(() => {
@@ -182,6 +337,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
         this.focusInputNoScroll();
       });
     });
+
   }
 
   private writeLine(text: string, level: LineLevel): void {
