@@ -17,7 +17,7 @@ export interface ThemeModelReference {
 }
 
 export interface ThemeExtendedModel extends ThemeModel {
-    expanded: boolean;
+    extended: boolean;
     themes: ThemeModelReference[];
     themeToCitationLinks: ThemeToCitationLinkModel[];
 }

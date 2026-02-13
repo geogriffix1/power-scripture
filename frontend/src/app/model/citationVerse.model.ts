@@ -8,6 +8,16 @@ export interface CitationVerseModel {
     scriptureId: number
 }
 
+export interface CitationVerseRange {
+    citationId: number,
+    book: string,
+    chapter: number,
+    startVerse: number,
+    endVerse: number,
+    label: string
+}
+
+
 export interface CitationVerseExtendedModel extends CitationVerseModel {
     scripture: ScriptureModel,
     markups: CitationVerseMarkup[];

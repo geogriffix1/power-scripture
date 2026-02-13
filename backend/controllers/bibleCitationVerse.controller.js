@@ -130,7 +130,7 @@ exports.listAll = (req, res) => {
 
 exports.citationId = (req, res) => {
     var citationId = Number(req.params.id);
-    if (!typeof id == NaN) {
+    if (!citationId) {
         res.status(400).send(errorMessage(
             400,
             "Invalid Parameter",
@@ -163,7 +163,7 @@ exports.citationId = (req, res) => {
                 var result = results[i];
                 if (citationVerse === null || citationVerse.id != tools.getObjectFromResult(result, 1).id) {
                     if (citationVerse !== null) {
-                        citationVerse.verseCitationLabel = getCitationLabel(citationVerse.book, citationVerse.chapter, citationVerse.verse);
+                        citationVerse.verseCitationLabel = getCitationLabel(citationVerse.scripture.book, citationVerse.scripture.chapter, citationVerse.scripture.verse);
                         verses.push(citationVerse);
                     }
 
@@ -187,6 +187,7 @@ exports.citationId = (req, res) => {
                 verses.push(citationVerse);
             }
 
+            verses.sort((a, b) => a.scripture.bibleOrder - b.scripture.bibleOrder);
             res.send(verses);
         }
     });

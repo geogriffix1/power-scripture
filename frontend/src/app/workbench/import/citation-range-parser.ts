@@ -1,15 +1,16 @@
 // citation-range-parser.ts
 import { BibleBooksService, BookInfo } from "../../bible-books.service";
+import { CitationVerseRange } from "../../model/citationVerse.model";
 
 /**
  * A fully explicit range understood by the backend.
  */
-export interface RangeSpec {
-  book: string;      // canonical book name, e.g. "John", "1 John", "Jude"
-  chapter: number;   // always explicit internally
-  start: number;     // >= 1
-  end: number;       // >= start
-}
+// export interface RangeSpec {
+//   book: string;      // canonical book name, e.g. "John", "1 John", "Jude"
+//   chapter: number;   // always explicit internally
+//   start: number;     // >= 1
+//   end: number;       // >= start
+// }
 
 /* ============================================================
    Helpers
@@ -61,7 +62,7 @@ function matchLeadingBook(
     }
   }
 
-  if (!best) return null;
+  if (!best) {return null;}
   return { book: best, rest: token.slice(bestLen).trim() };
 }
 
@@ -93,7 +94,7 @@ function assertChapterValid(book: BookInfo, chapter: number) {
 export async function parseCitationToRanges(
   input: string,
   booksService: BibleBooksService
-): Promise<RangeSpec[]> {
+): Promise<CitationVerseRange[]> {
   await booksService.ensureLoaded();
   const books = booksService.getAllBooks();
 
@@ -106,13 +107,19 @@ export async function parseCitationToRanges(
     throw new Error("Citation is empty.");
   }
 
-  const ranges: RangeSpec[] = [];
+  const ranges: CitationVerseRange[] = [];
   let currentBook: BookInfo | undefined;
   let currentChapter: number | undefined;
 
+  let initial = true;
   for (const token of tokens) {
     // Try "<Book> <Chapter>:<verses>" OR "<Book> <verses>" (one-chapter)
     const bookMatch = matchLeadingBook(token, books);
+    if (initial && !bookMatch) {
+      throw new Error("Book not matched, (? for help)");
+    }
+
+    initial = false;
 
     if (bookMatch) {
       currentBook = bookMatch.book;
@@ -126,11 +133,18 @@ export async function parseCitationToRanges(
         currentChapter = chapter;
 
         const se = parseStartEnd(chv[2]);
+        let label = bookMatch.book.chapterCount == 1 ? `${currentBook.book} ${se.start}` : `${currentBook.book} ${chapter}:${se.start}`;
+        if (se.end > se.start) {
+          label += `-${se.end}`;
+        }
+
         ranges.push({
+          citationId: -1,
           book: currentBook.book,
           chapter,
-          start: se.start,
-          end: se.end
+          startVerse: se.start,
+          endVerse: se.end,
+          label: label
         });
         continue;
       }
@@ -144,13 +158,22 @@ export async function parseCitationToRanges(
 
       currentChapter = 1;
       const se = parseStartEnd(rest);
+      let label = `${currentBook.book} ${se.start}`;
+      if (se.end > se.start) {
+        label += `-${se.end}`;
+      }
+
       ranges.push({
+        citationId: -1,
         book: currentBook.book,
         chapter: 1,
-        start: se.start,
-        end: se.end
+        startVerse: se.start,
+        endVerse: se.end,
+        label: label
       });
       continue;
+    }
+    else {
     }
 
     // "<Chapter>:<verses>" (reuse book)
@@ -165,11 +188,18 @@ export async function parseCitationToRanges(
       currentChapter = chapter;
 
       const se = parseStartEnd(chv[2]);
+      let label = currentBook.chapterCount == 1 ? `${currentBook.book} ${se.start}` : `${currentBook.book} ${chapter}:${se.start}`;
+      if (se.end > se.start) {
+        label += `-${se.end}`;
+      }
+
       ranges.push({
+        citationId: -1,
         book: currentBook.book,
         chapter,
-        start: se.start,
-        end: se.end
+        startVerse: se.start,
+        endVerse: se.end,
+        label: label
       });
       continue;
     }
@@ -190,11 +220,18 @@ export async function parseCitationToRanges(
     }
 
     const se = parseStartEnd(token);
+    let label = currentBook.chapterCount == 1 ? `${currentBook.book} ${se.start}` : `${currentBook.book} ${currentChapter}:${se.start}`;
+    if (se.end > se.start) {
+      label += `-${se.end}`;
+    }
+
     ranges.push({
+      citationId: -1,
       book: currentBook.book,
       chapter: currentChapter,
-      start: se.start,
-      end: se.end
+      startVerse: se.start,
+      endVerse: se.end,
+      label: label
     });
   }
 
@@ -211,7 +248,7 @@ export async function parseCitationToRanges(
  *   2 John 6         -> 2john6
  */
 export function rangesToResolverQuery(
-  ranges: RangeSpec[],
+  ranges: CitationVerseRange[],
   booksService: BibleBooksService
 ): string {
   const bookMap = new Map(
@@ -221,7 +258,7 @@ export function rangesToResolverQuery(
   return ranges
     .map(r => {
       const slug = slugBook(r.book);
-      const versePart = r.start === r.end ? `${r.start}` : `${r.start}-${r.end}`;
+      const versePart = r.startVerse === r.endVerse ? `${r.startVerse}` : `${r.startVerse}-${r.endVerse}`;
       const chapterCount = bookMap.get(r.book) ?? 0;
 
       // One-chapter books: jude5-7

@@ -157,7 +157,7 @@ export class BibleService {
         childCount: 0,
         node: undefined,
         path: "",
-        expanded: false,
+        extended: false,
         themes: [],
         themeToCitationLinks: [],
       }
@@ -262,7 +262,7 @@ export class BibleService {
         sequence: -1,
         childCount: -1,
         path:"",
-        expanded: false,
+        extended: false,
         themes: [],
         themeToCitationLinks: [],
         node: undefined
@@ -588,6 +588,13 @@ async normalizeThemeSequence(parentId:number, callback:any) {
     const result = (await data.json() ?? null);
     console.log(result.citationLabel);
     return <string>result.citationLabel;
+  }
+
+  async getVersesByCitation(citationId: number): Promise<CitationVerseExtendedModel[]> {
+    var url = `${this.ROOT_URL}verses/citation/${citationId}`;
+    const data = await fetch (url);
+    const result = await data.json();
+    return <CitationVerseExtendedModel[]> result;
   }
 
   async getVersesByCitationAndScriptures(citationId: number, scriptureIds: number[]): Promise<CitationVerseExtendedModel[]> {

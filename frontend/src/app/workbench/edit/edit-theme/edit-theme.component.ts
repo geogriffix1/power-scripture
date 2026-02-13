@@ -78,7 +78,7 @@ export class EditThemeComponent {
               parent: this.activeTheme.parent,
               sequence: this.activeTheme.sequence,
               path: this.activeTheme.path,
-              expanded: this.activeTheme.expanded,
+              extended: this.activeTheme.extended,
               themes: themes,
               themeToCitationLinks: themeToCitationLinks
             };
@@ -187,7 +187,7 @@ export class EditThemeComponent {
               parent: obj.editedTheme.parent,
               sequence: obj.editedTheme.sequence,
               path: obj.editedTheme.path,
-              expanded: obj.editedTheme.expanded,
+              extended: obj.editedTheme.extended,
               themes: obj.editedTheme.themes,
               themeToCitationLinks: obj.editedTheme.themeToCitationLinks
             };
