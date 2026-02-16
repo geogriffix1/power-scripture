@@ -270,6 +270,7 @@ export class BibleService {
       
       return error;
     }
+    
     return <ThemeExtendedModel>theme;
  }
 

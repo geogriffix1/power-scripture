@@ -2,7 +2,7 @@
   <div #scrollArea class="ps-console-output">
     @for (line of outputLines(); track line.id) {
       <div class="ps-line" [class.ps-err]="line.level === 'error'">
-        <div class="ps-line-text">{{ line.text }}</div>
+        <div class="ps-line-text">{{ line.text }}<span class="ps-memo">{{line.memo}}</span></div>
       </div>
     }
   </div>

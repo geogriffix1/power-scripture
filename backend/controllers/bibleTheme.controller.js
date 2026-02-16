@@ -322,6 +322,7 @@ exports.create = (req, res) => {
                             theme.values = { id: data[0].context.insertId };
                             getQuery(theme.getSelectString())
                                 .then(results => {
+                                    results[0].description = results[0].description ?? "";
                                     results[0].path = global.themePaths[results[0].id].path;
                                     res.send(results[0]);
                                 });
