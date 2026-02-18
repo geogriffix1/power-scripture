@@ -1,5 +1,6 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
 import { BibleService } from '../../../bible.service';
+import { BibleBooksService } from '../../../bible-books.service';
 import { WorkbenchComponent } from '../../workbench.component';
 import { ThemeModel } from '../../../model/theme.model';
 import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-tree.component';

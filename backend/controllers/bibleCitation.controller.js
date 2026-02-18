@@ -209,6 +209,7 @@ exports.create = (req, res) => {
     var scriptureIds = [];
     var scriptures = [];
     var foundVerse = null;
+    console.log("== Create Citation ==")
     if (req.body) {
         try {
             obj = req.body;
@@ -225,7 +226,7 @@ exports.create = (req, res) => {
                     methodType = "scripture ids";
                     obj.scriptureIds.forEach(scriptureId => {
                         id = Number(scriptureId);
-                        if (id === NaN) {
+                        if (!id) {
                             message = `Error: scriptureIds is an array of numeric values: ${id} is not a number.`
                             return;
                         }
@@ -238,24 +239,28 @@ exports.create = (req, res) => {
                         var id;
                         if (scripture.id) {
                             id = Number(scripture.id);
-                            if (id !== NaN && id > 0) {
+                            if (id && id > 0) {
                                 scriptureIds.push(id);
                                 methodType = "scripture ids"
                             }
                         }
                         else {
                             methodType = null;
-                            return;
+                            //return;
                         }
                     });
 
                     if (!methodType) {
                         methodType = "scriptures";
-                        for (var scripture in obj.scriptures) {
+                        console.log(`methodType: "scriptures"`);
+                        for (var scripture of obj.scriptures) {
                             console.log("scripture:");
                             console.log(scripture);
                             foundVerse = null;
                             for (var idx in global.verseValidation) {
+                                console.log(`idx: ${idx}`);
+                                console.log("global.verseValidation[idx]:");
+                                console.log(global.verseValidation[idx]);
                                 var validBook = global.verseValidation[idx];
                                 if (validBook.book.toLowerCase() == scripture.book.toLowerCase()) {
                                     console.log(`book found: ${scripture.book}`);
@@ -313,6 +318,8 @@ exports.create = (req, res) => {
             message,
             ""
         ));
+
+        return;
     }
 
     var citation = new bibleCitation;
@@ -427,16 +434,19 @@ exports.create = (req, res) => {
 
     context = {};
     context.themeId = themeId;
+    context.citation = citation;
+    context.methodType = methodType;
+    context.scriptures = scriptures;
+    context.scriptureIds = scriptureIds;
 
     var tasks = [];
 
     tasks.push(addContext(context));
-
     tasks.push(getQuery(`SELECT get_next_citation_sequence_from_parent_theme(${themeId}) AS nextSequence`));
 
     if (methodType == "scriptures") {
         for (var index in scriptures) {
-            scr = new bibleScripture;
+            var scr = new bibleScripture;
             scr.values = scriptures[index];
             var selectString = scr.getSelectString();
             console.log(selectString);
@@ -444,27 +454,40 @@ exports.create = (req, res) => {
             tasks.push(getQuery(selectString));
         }
     }
+    else {
+        for (var index in scriptureIds) {
+            scr = new bibleScripture;
+            scr.values = { id: scriptureIds[index] };
+            var selectString = scr.getSelectString();
+            console.log(selectSTring);
+
+            tasks.push(getQuery(selectString));
+        }
+    }
 
     Promise.all(tasks)
         .then(data => {
-            console.log("scriptures selection completed.");
-
+            console.log("data:");
+            console.log(data);
             var context = data[0].context;
-
-            var nextSequence = data[1][0].nextSequence;
-            for (var index in data) {
-                if (index > 1) {
-                    var result = data[index];
-                    scriptureIds.push(result.id);
-                }
+            var scriptureIds = context.scriptureIds;
+            var scriptures = [];
+            for (var i = 2; i < data.length; i++) {
+                scriptures.push(data[i][0]);
             }
 
             tasks = [];
-            context.scriptureIds = scriptureIds;
+            context.scriptures = scriptures;
+            context.nextSequence = data[1][0].nextSequence;
+            console.log(`nextSequence: ${context.nextSequence}`);
 
             tasks.push(addContext(context));
-
-            tasks.push(createCitation(citation));
+            tasks.push(createCitation(context.citation));
+            
+            console.log("context:");
+            console.log(context);
+            console.log("after reading scriptures");
+            console.log(data);
 
             Promise.all(tasks)
                 .then(data => {
@@ -472,22 +495,29 @@ exports.create = (req, res) => {
                     var citation = data[1].citation;
 
                     context.citation = citation;
+                    scriptures = context.scriptures;
 
                     var tasks = [];
                     tasks.push(addContext(context));
 
                     console.log(`Citation ${citation.id} created. Attaching scriptures`);
                     var themeToCitation = new bibleThemeToCitation;
-                    themeToCitation.themeId.value = context.themeId;
-                    themeToCitation.citationId.value = context.citation.id;
-                    themeToCitation.sequence.value = nextSequence;
+                    themeToCitation.values = {
+                        themeId: context.themeId,
+                        citationId: context.citation.id,
+                        sequence: context.nextSequence
+                    };
 
                     tasks.push(createThemeToCitation(themeToCitation));
 
-                    var citationVerse = new bibleCitationVerse;
-                    for (var i = 0; i < scriptureIds.length; i++) {
-                        citationVerse.citationId.value = citation.id;
-                        citationVerse.scriptureId.value = scriptureIds[i];
+                    for (var i = 0; i < scriptures.length; i++) {
+                        var citationVerse = new bibleCitationVerse;
+                        citationVerse.values = {
+                            citationId: citation.id,
+                            scriptures: scriptures[i],
+                            scriptureId: scriptures[i].id,
+                            hide: "N"
+                        };
 
                         tasks.push(createCitationVerse(citationVerse));
                     }
@@ -499,8 +529,10 @@ exports.create = (req, res) => {
                     console.log("waiting for themeToCitation and multiple verse completions");
                     Promise.all(tasks)
                         .then(data => {
+                            console.log("Data:");
+                            console.log(data);
                             var context = data[0].context;
-                            var themeToCitation = data[1].themeToCitation;
+                            var themeToCitation = data[1];
                             var scriptures = [];
                             var citationVerses = [];
                             var markups = [];
@@ -517,7 +549,7 @@ exports.create = (req, res) => {
                             }
 
                             for (var i = 0; i < citationVerses.length; i++) {
-                                citationVerses[i].scripture = scriptures.find(s => s.id == citationVerses[i].scriptureId);
+                                citationVerses[i].scripture = context.scriptures.find(s => s.id == citationVerses[i].scriptureId);
                             }
 
                             context.themeToCitation = themeToCitation;
@@ -535,12 +567,12 @@ exports.create = (req, res) => {
                             Promise.all(tasks)
                                 .then(data => {
                                     var context = data[0].context;
-                                    var citation = data[1][0];
+                                    var citation = data[1];
 
                                     citation.themeToCitation = context.themeToCitation;
                                     citation.verses = context.citationVerses;
 
-                                    res.send({ created: citation });
+                                    res.send(citation);
                                 });
                         });
                 });

@@ -70,7 +70,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
   private baseThemeId = -1;
   private activeTheme: JstreeModel|null = null;
   private openStack: ThemeExtendedModel[] = [];
-  private service = new BibleService();
   private operationPromise: Promise<CitationExtendedModel[]>[] = [];
 
   readonly noOpenThemeError = `Error: No open theme. Use 'base <theme-path>' to set an open base theme.`;
@@ -78,6 +77,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
 
   constructor(
     private books: BibleBooksService,
+    private service: BibleService,
     private scriptService: ScriptExecutionService
   ) {}
 
@@ -91,7 +91,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
       BibleThemeTreeComponent.ClipboardSelector.subscribe((node: JstreeModel | null) => {
         if (node)  {
           this.clipboard = node;
-          let service = new BibleService();
 
           let theme = -1;
           if (node.id.startsWith("citation")) {
@@ -103,7 +102,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
 
           (async () => {
             console.log("getting theme chain...");
-            await service.getThemeChain(theme, (chain: ThemeChainModel) => {
+            await this.service.getThemeChain(theme, (chain: ThemeChainModel) => {
               console.log("theme chain:");
               console.log(chain);
               let path = "/" + chain.chain.map(theme => theme.name).join("/");
@@ -203,8 +202,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
       let predicate = /^base\s+(.+)$/i.exec(raw)?.at(1)?.trim();
       if (predicate) {
         (async () => {
-          let service = new BibleService();
-          let baseTheme = await service.getThemeByPath(predicate);
+          let baseTheme = await this.service.getThemeByPath(predicate);
 
           if (baseTheme.id > 0) {
             this.baseTheme = baseTheme;
@@ -470,6 +468,8 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
           } as CitationExtendedModel);
 
           this.childCitations.set(this.openTheme!.id, citations);
+          console.log("adding prospective childCitation:");
+          console.log(citations);
           this.writeLine(`Citation entered ("save" to complete)`, "info");
           this.pendingSave = true;
         }
@@ -581,10 +581,9 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
 
           // Physically save a layer of unsaved themes which have saved parents
           const saved = await this.createThemeLayer(unsaved)!;
-          console.log("recently saved themes");
-          console.log(saved);
 
-          // Saved themes are unsaved themes with real id
+          // Saved themes are the same as unsaved themes except they have
+          // an id that was assigned by the database.
           for (let i = 0; i < saved.length; i++) {
             // get all siblings of the parent theme, because this temp sibling is now permanent
             let siblingThemes = this.childThemes.get(unsaved[i].parent)!;
@@ -593,6 +592,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
             // set thisTheme to the saved version of the theme
             let thisTheme = saved[i];
             let thisThemeChildren = this.childThemes.get(unsaved[i].id) ?? [];
+            let thisThemeCitations = this.childCitations.get(unsaved[i].id) ?? [];
 
             // if there are child themes, they are still temporary. Add them to the saved theme.
             if (thisThemeChildren.length) {
@@ -629,15 +629,15 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
             console.log(`setting ${thisTheme.parent} to siblingThemes`);
             this.childThemes.set(thisTheme.parent, siblingThemes);
 
-            // console.log(`setting ${saved[i].id} to:`);
-            // console.log(this.childCitations.get(unsaved[i].id!));
-            this.childCitations.set(saved[i].id, this.childCitations.get(unsaved[i].id) ?? []);
-
-            // console.log(`deleting `)
-            this.childCitations.delete(unsaved[i].id);
-
             console.log("Saving childCitations MAP:");
             console.log(this.childCitations);
+            console.log(`unsaved[${i}].id: ${unsaved[i].id}`);
+            console.log(`saved[${i}].id: ${saved[i].id}`);
+          
+            if (thisThemeCitations.length) {
+              this.childCitations.set(saved[i].id, [...this.childCitations.get(unsaved[i].id)!]);
+              this.childCitations.delete(unsaved[i].id);
+            }
           }
           
           unsaved = [];
@@ -651,6 +651,37 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
                 .filter(theme => theme.id < 0) ?? []];
           });
         }
+
+        let themeIds = [...this.childCitations.keys()];
+        console.log(themeIds);
+        const unsavedCitations: {
+          themeId: number;
+          citations: CitationExtendedModel[];
+        }[] = [];
+
+        themeIds.forEach(themeId => {
+          let unsaved = (this.childCitations.get(themeId) ?? [])
+            .filter(cite => cite.id < 0);
+          if (unsaved && unsaved.length) {
+            unsavedCitations.push({ themeId:<number> themeId, citations:<CitationExtendedModel[]>[...unsaved]});
+          }
+        });
+
+        console.log("unsaved citations:");
+        console.log(unsavedCitations);
+
+        let tasks = <any>[];
+        unsavedCitations.forEach(cite => {
+          for (var citation of <CitationExtendedModel[]>cite.citations) {
+            tasks.push(this.service.createCitationFromScriptureLabel(citation.description, cite.themeId, citation.citationLabel ?? ""));
+          }
+        });
+
+        Promise.all(tasks)
+          .then(data => {
+            console.log("CITATIONS CREATED");
+            console.log(data)
+          });
       })();
 
       this.pendingSave = false;

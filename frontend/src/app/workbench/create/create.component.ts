@@ -89,7 +89,7 @@ export class CreateComponent {
     $("#description").width(rect.width - 60);
   
     (async (obj:CreateComponent) => {
-      let service = new BibleService;
+      let service = new BibleService();
       if (WorkbenchComponent.activeTheme) {
         let id = <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", "");
         obj.activeTheme = await service.getTheme(id);

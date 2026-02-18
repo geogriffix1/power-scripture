@@ -1,8 +1,11 @@
 import { Injectable } from '@angular/core';
 import { ThemeExtendedModel } from './model/theme.model';
+import { parseCitationToRanges } from './workbench/import/citation-range-parser';
+import { BibleBooksService } from './bible-books.service';
 import { CitationModel, CitationExtendedModel } from './model/citation.model';
 import { CitationVerseExtendedModel } from './model/citationVerse.model';
 import { CitationVerseMarkup, CitationVerseMarkupKind } from './model/citationVerseMarkup.model';
+import { CitationVerseRange } from './model/citationVerse.model';
 import { ThemeChainModel } from './model/themeChain.model';
 import { ScriptureModel } from './model/scripture.model';
 import { JstreeModel, JstreeState } from './model/jstree.model';
@@ -14,7 +17,6 @@ import { ThemeToCitationModel, ThemeToCitationLinkModel } from './model/themeToC
 export class BibleService {
   ROOT_URL = "http://localhost:3000/";
   //ROOT_URL = "http://localhost:9229/";
-  constructor() { }
 
   async getAllThemes(): Promise<any> {
     let url = `${this.ROOT_URL}themes`;
@@ -500,6 +502,53 @@ async normalizeThemeSequence(parentId:number, callback:any) {
       console.log(JSON.stringify(creationResults));
 
     return <ThemeToCitationLinkModel>creationResults;
+  }
+
+
+  async createCitationFromScriptureLabel(description:string, parentTheme:number, label:string): Promise<CitationModel | null> {
+    console.log("createCitation");
+    var url = `${this.ROOT_URL}citations`;
+
+    const scriptures = [];
+    var ranges: CitationVerseRange[];
+
+    try {
+      ranges = await parseCitationToRanges(label, new BibleBooksService);
+      for (var range of ranges) {
+        for (let i = range.startVerse; i <= range.endVerse; i++) {
+          scriptures.push({ book: range.book, chapter: range.chapter, verse: i });
+        }
+      }
+
+    }
+    catch(err) {
+      return null;
+    }
+
+    let payload = {
+      "themeId": parentTheme,
+      "description": description,
+      "scriptures": scriptures
+    };
+
+    console.log("payload sent to create a citation");
+    console.log(JSON.stringify(payload));
+
+    const data = await fetch (url, {
+      method: "POST",
+      cache: "no-cache",
+      headers: {
+        "Content-Type": "application/json" 
+      },
+      body: JSON.stringify(payload)
+    });
+
+    const creationResults = (await data.json() ?? []);
+
+    if (creationResults)
+      console.log(JSON.stringify(creationResults));
+
+    return <CitationModel>creationResults[0];
   }
 
   async createCitationVerse(citationId:number, scriptureId:number): Promise<CitationVerseExtendedModel> {
