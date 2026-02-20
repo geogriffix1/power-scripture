@@ -1,0 +1,32 @@
+Power Scripture Import Console Help
+
+Commands: 
+clear
+base <path name>
+show, show t[hemes], show c[itations]
+open <theme or subpath name>
+close
+create t[heme] <create theme parameters>, create c[itation] <create citation parameters>
+save
+reset
+help, help <command>, help <option>
+
+Options:
+books,
+book <book name>
+
+All commands are entered beginning on the first column. The help command can be invoked with a question mark (?).
+All commands are entered on a single line followed by pressing the enter key.
+
+Clear - clears all lines from the screen that have been entered before.
+Base - establishes a theme to serve as the primary reference for the session. It may be changed.
+Show - displays a list of themes and citations which are direct children of the open theme.
+Open - changes the open theme to a child theme or path to a descendant theme.
+Close - closes the open theme and opens its parent theme.
+Create Theme - creates a theme as an immediate child of the open theme.
+Create Citation - creates a citation as an immediat child of the open theme.
+Save - saves all themes and citations that have been created this session.
+Reset - clears out all created themes and citations that have not been saved.
+Help - can be invoked with ?. Help followed by a command elaborates on the command.
+Books - displays the properly-spelled names of each Bible book and three-character abbreviations accepted
+Book - displays the number of verses in each chapter of a particular book

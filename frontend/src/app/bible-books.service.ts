@@ -2,7 +2,7 @@
 import { Injectable } from "@angular/core";
 
 export interface BibleBookListJson {
-  books: Array<{ book: string; chapterCount: number }>;
+  books: Array<{ code: string, book: string, chapterCount: number }>;
 }
 
 export interface BookInfo {
@@ -11,6 +11,7 @@ export interface BookInfo {
   sortBase: string;      // "John" for "1 John"
   sortNum: 0 | 1 | 2 | 3;// 0 for no prefix, else 1/2/3
   oneChapter: boolean;   // chapterCount === 1
+  code: string;          // three-character book name abbreviation
 }
 
 function norm(s: string) {
@@ -43,6 +44,7 @@ export class BibleBooksService {
         sortBase,
         sortNum,
         oneChapter: b.chapterCount === 1,
+        code: b.code
       };
     });
 

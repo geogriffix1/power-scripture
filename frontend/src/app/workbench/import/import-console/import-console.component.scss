@@ -29,11 +29,14 @@
   min-height: 0;
   overflow-y: auto;
   overflow-x: hidden;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
 
   padding: 10px 12px;
   font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
-  font-size: 13px;
-  line-height: 1.35rem;
+  font-size: 0.9rem;
+  line-height: 1.4rem;
   color: rgba(255, 255, 255, 0.90);
 }
 

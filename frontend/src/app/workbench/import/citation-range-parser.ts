@@ -53,7 +53,7 @@ function matchLeadingBook(
 
     if (token.substring(0, name.length).toLowerCase() === name.toLowerCase()) {
       const boundary = token.substring(name.length, name.length + 1);
-      if (boundary === "" || /\s/.test(boundary)) {
+      if (boundary === "" || /\d|\s/.test(boundary)) {
         if (name.length > bestLen) {
           best = b;
           bestLen = name.length;

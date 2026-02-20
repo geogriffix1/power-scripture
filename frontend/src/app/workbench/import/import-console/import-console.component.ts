@@ -7,21 +7,20 @@ import {
   ViewChild,
   signal
 } from "@angular/core";
-import { Subject } from "rxjs";
 import { WorkbenchComponent } from "../../workbench.component";
 import { ThemeExtendedModel } from "../../../model/theme.model";
 import { CitationExtendedModel } from "../../../model/citation.model";
 import { CitationVerseExtendedModel, CitationVerseRange } from "../../../model/citationVerse.model";
-import { ScriptureModel } from "../../../model/scripture.model";
 import { ThemeChainModel } from "../../../model/themeChain.model";
 import { JstreeModel } from "../../../model/jstree.model";
-import { parseCitationToRanges, rangesToResolverQuery } from "../citation-range-parser";
-import { ThemeToCitationModel, ThemeToCitationLinkModel } from "../../../model/themeToCitation.model";
-import { BibleBooksService } from "../../../bible-books.service";
+import { parseCitationToRanges } from "../citation-range-parser";
+import { BibleBooksService, BookInfo } from "../../../bible-books.service";
 import { BibleService } from "../../../bible.service";
 import { BibleThemeTreeComponent } from "../../../bible-theme-tree/bible-theme-tree.component";
 import { ScriptExecutionService } from "../../../script-execution.service";
-import { getLocaleNumberSymbol } from "@angular/common";
+import { HttpClient } from '@angular/common/http';
+import { firstValueFrom } from 'rxjs';
+//import { BookCodeToName } from "../bookCodeToName";
 
 type LineLevel = "info" | "error";
 
@@ -78,7 +77,8 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
   constructor(
     private books: BibleBooksService,
     private service: BibleService,
-    private scriptService: ScriptExecutionService
+    private http: HttpClient
+    //private scriptService: ScriptExecutionService
   ) {}
 
   ngOnInit() {
@@ -101,10 +101,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
           }
 
           (async () => {
-            console.log("getting theme chain...");
             await this.service.getThemeChain(theme, (chain: ThemeChainModel) => {
-              console.log("theme chain:");
-              console.log(chain);
               let path = "/" + chain.chain.map(theme => theme.name).join("/");
 
               this.copyTextToClipboard(path);
@@ -145,7 +142,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
     const ro = new ResizeObserver(entries => {
       const h = Math.round(entries[0].contentRect.height);
       if (h !== last) {
-        console.log(`[${label}] height=${h}px (changed from ${last}px)`);
+        //console.log(`[${label}] height=${h}px (changed from ${last}px)`);
         last = h;
       }
     });
@@ -171,37 +168,91 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
     this.focusInputNoScroll();
   }
 
+  async bookCodeLookup(input:string): Promise<string> {
+    let match = /^(create\s+(?:citation?|citati?|cita?|ci?))(\s*"([^"]+)(?:"|$))?(\s*(.+?)(?=\s*$))?/i.exec(input);
+    if (!match?.length) {
+      return Promise.resolve(input);
+    }
+
+    let createC = match.at(1);
+    let desc = match.at(3)?.trim() ?? "";
+    let cite = match.at(5)?.trim() ?? "";
+
+    if (!cite) {
+      return Promise.resolve(input);
+    }
+
+    await this.books.ensureLoaded();
+    let allBooks = this.books.getAllBooks()
+
+    let ranges = cite.split(",").map(range => range.trim());
+    let outRange = <string[]>[];
+    ranges.forEach(range => {
+      let match = /((?:[^\s]{3})[^\s\d]*)\s*(.*)/i.exec(range);
+
+      if (match && match.at(1) && match.at(1)!.length == 3) {
+        let bookInfo = allBooks.find(bookInfo => bookInfo.code == match.at(1)!.toLowerCase());
+        if (!bookInfo) {
+          outRange.push(range);
+        }
+        else {
+          let chapterVerse = (match.at(2) === undefined ? "" : match.at(2)!)
+          outRange.push(`${bookInfo!.book} ${chapterVerse}`);
+        }
+      }
+      else {
+        outRange.push(range);
+      }
+    });
+
+    if (desc) {
+      return `${createC} "${desc}" ${outRange.join(",")}`;
+    }
+  
+    return Promise.resolve(`${createC} ${outRange.join(",")}`);
+  }
+
+  async preparse(input:string): Promise<string> {
+    if (/^(create\s+?:citation?|citati?|cita?|ci?)(\s*"([^"]+)(?:"|$))?(\s*(.+?)(?=\s*$))?/.test(input)) {
+      input = await this.bookCodeLookup(input);
+    }
+
+    return Promise.resolve(input);
+  }
+
   submit(): void {
-    const raw = this.inputText().trim();
-    if (!raw) return;
+    (async () => {
+      let raw = this.inputText().trim();
+      if (!raw) return;
 
-    if (this.inputMemo() && /^save|reset/i.test(raw)) {
-      this.inputMemo.set("");
-    }
-    this.writeLine(`❯ ${raw}`, "info", this.inputMemo());
+      if (this.inputMemo() && /^save|reset/i.test(raw)) {
+        this.inputMemo.set("");
+      }
 
-    if (/^clear$/i.test(raw)) {
-      this.outputLines.set([]);
-      this.inputText.set("");
-      this.inputMemo.set("");
-      queueMicrotask(() => {
-        requestAnimationFrame(() => {
-          this.scrollToBottom();
-          this.focusInputNoScroll();
+      raw = await this.preparse(raw);
+      this.writeLine(`❯ ${raw}`, "info", this.inputMemo());
+
+      if (/^clear$/i.test(raw)) {
+        this.outputLines.set([]);
+        this.inputText.set("");
+        this.inputMemo.set("");
+        queueMicrotask(() => {
+          requestAnimationFrame(() => {
+            this.scrollToBottom();
+            this.focusInputNoScroll();
+          });
         });
-      });
-      return;
-    }
-
-    if (/^base/i.test(raw)) {
-      if (this.pendingSave) {
-        this.writeLine(`Changes are pending. Enter "save" or "reset" before continuing`, "error");
         return;
       }
 
-      let predicate = /^base\s+(.+)$/i.exec(raw)?.at(1)?.trim();
-      if (predicate) {
-        (async () => {
+      if (/^base/i.test(raw)) {
+        if (this.pendingSave) {
+          this.writeLine(`Changes are pending. Enter "save" or "reset" before continuing`, "error");
+          return;
+        }
+
+        let predicate = /^base\s+(.+)$/i.exec(raw)?.at(1)?.trim();
+        if (predicate) {
           let baseTheme = await this.service.getThemeByPath(predicate);
 
           if (baseTheme.id > 0) {
@@ -215,72 +266,66 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
           else {
             this.writeLine(`Error: Theme not found for path '${predicate}'`, "error");
           }
-        })();
+        }
       }
-    }
-    
-    else if (/^show/i.test(raw)) {
-      if (this.openTheme) {
-        this.writeLine(`${this.openTheme.path} "${this.openTheme.description}"`, "info");
-        let predicate = /^show\s+(.+)$/i.exec(raw)?.at(1)?.trim();
-        let showThemes = false;
-        let showCitations = false;
-        if (predicate) {
-          console.log(`predicate: "${predicate}"`);
-          let themeOrCitation = /^(themes?$|them?$|th?$|citations?$|citatio?$|citat?$|cit?$|c$)/i.exec(predicate)?.at(1);
-          console.log(`type: ${themeOrCitation}`);
-          showThemes = <boolean>(themeOrCitation && themeOrCitation.toLowerCase().startsWith("t"));
-          showCitations = <boolean>(themeOrCitation && themeOrCitation.toLowerCase().startsWith("c"));
+      
+      else if (/^show/i.test(raw)) {
+        if (this.openTheme) {
+          this.writeLine(`${this.openTheme.path} "${this.openTheme.description}"`, "info");
+          let predicate = /^show\s+(.+)$/i.exec(raw)?.at(1)?.trim();
+          let showThemes = false;
+          let showCitations = false;
+          if (predicate) {
+            let themeOrCitation = /^(themes?$|them?$|th?$|citations?$|citatio?$|citat?$|cit?$|c$)/i.exec(predicate)?.at(1);
+            showThemes = <boolean>(themeOrCitation && themeOrCitation.toLowerCase().startsWith("t"));
+            showCitations = <boolean>(themeOrCitation && themeOrCitation.toLowerCase().startsWith("c"));
+          }
+          else {
+            showThemes = true;
+            showCitations = true;
+          }
+
+          if (showThemes) {
+            if (!this.childThemes.get(this.openTheme.id)?.length) {
+              this.writeLine(`[Themes]`, "info");
+            }
+            else {
+              this.writeLine("[Themes]", "info");
+              this.childThemes.get(this.openTheme.id)?.forEach(theme=> {
+                this.writeLine(`${theme.name} "${theme.description}"`, "info");
+              })
+            }
+          }
+
+          if (showCitations) {
+            if (!this.childCitations.get(this.openTheme.id)?.length) {
+              this.writeLine("[Citations]", "info");
+            }
+            else {
+              this.writeLine("[Citations]", "info");
+              let citations = this.childCitations.get(this.openTheme.id);
+              citations?.forEach(citation => {
+                let description = `"${citation.description ?? ""}"`;
+                this.writeLine(description == `""` ? "(no description)" : description, "info");
+                this.writeLine(citation.citationLabel ?? "(no verses cited)", "info");
+              });
+            }
+          }
         }
         else {
-          console.log("no predicate");
-          showThemes = true;
-          showCitations = true;
-        }
-
-        if (showThemes) {
-          if (!this.childThemes.get(this.openTheme.id)?.length) {
-            this.writeLine(`[Themes]`, "info");
-          }
-          else {
-            this.writeLine("[Themes]", "info");
-            this.childThemes.get(this.openTheme.id)?.forEach(theme=> {
-              this.writeLine(`${theme.name} "${theme.description}"`, "info");
-            })
-          }
-        }
-
-        if (showCitations) {
-          console.log(`number of citations: ${this.childCitations.get(this.openTheme.id)?.length}`);
-          if (!this.childCitations.get(this.openTheme.id)?.length) {
-            this.writeLine("[Citations]", "info");
-          }
-          else {
-            this.writeLine("[Citations]", "info");
-            let citations = this.childCitations.get(this.openTheme.id);
-            citations?.forEach(citation => {
-              let description = `"${citation.description ?? ""}"`;
-              this.writeLine(description == `""` ? "(no description)" : description, "info");
-              this.writeLine(citation.citationLabel ?? "(no verses cited)", "info");
-            });
-          }
+          this.writeLine(this.noOpenThemeError, "error");
         }
       }
-      else {
-        this.writeLine(this.noOpenThemeError, "error");
-      }
-    }
 
-    else if (/^open/i.test(raw)) {
-      if (!this.openTheme) {
-        this.writeLine(this.noBaseThemeError, "error");
-        this.readyForInput();
-        return;
-      }
+      else if (/^open/i.test(raw)) {
+        if (!this.openTheme) {
+          this.writeLine(this.noBaseThemeError, "error");
+          this.readyForInput();
+          return;
+        }
 
-      let predicate = /^open\s+(.+)$/i.exec(raw)?.at(1)?.trim();
-      if (predicate) {
-        (async () => {
+        let predicate = /^open\s+(.+)$/i.exec(raw)?.at(1)?.trim();
+        if (predicate) {
           // remove leading and trailing slashes, then split on slash to get theme subpath segments
           if (predicate!.startsWith("/")) {
             predicate = predicate!.substring(1);
@@ -296,8 +341,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
           let themeTry = "";
 
           // user may have asked for a subpath such as a/b/c - themes = ["a", "b", "c"]
-          console.log(`open ${predicate}, subthemes:`);
-          console.log(themes);
           for (let theme of themes) {
             themeTry = theme;
             let childThemes = this.childThemes.get(thisTheme!.id);
@@ -308,7 +351,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
               // nextTheme should be a subtheme of thisTheme, check to see if it has already been extended with description and child theme/citation info.  If not, get it from the service.
               if (nextTheme) {
                 let checkTheme = nextTheme as any;
-                console.log(`theme found: ${nextTheme.name}, extended: ${checkTheme.extended}`);
                 if (!checkTheme.extended) {
                   let extendedTheme = await this.service.getTheme(checkTheme.id);
                   nextTheme = extendedTheme;
@@ -316,8 +358,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
                 }
 
                 thisTheme = nextTheme as ThemeExtendedModel;
-                console.log("thisTheme:");
-                console.log(thisTheme);
               }
               else {
                 failed = true;
@@ -335,125 +375,110 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
           }
           else {
             this.openTheme = structuredClone(thisTheme);
-            console.log("openTheme:");
-            console.log(this.openTheme);
             this.openStack.push(<ThemeExtendedModel>this.openTheme);
             this.setThemeChildren(this.openTheme as ThemeExtendedModel);
             this.writeLine(`theme opened: ${this.openTheme?.name} "${this.openTheme?.description ?? ''}"`, "info");
           }
-        })();
-      }
-      else {
-        this.writeLine(`Error: no theme specified. Usage: open <subtheme path>`, "error");
-      }
-    }
-
-    else if (/^close/i.test(raw)) {
-      if (!this.openTheme) {
-        this.writeLine(this.noOpenThemeError, "error");
-        this.readyForInput();
-        return;
+        }
+        else {
+          this.writeLine(`Error: no theme specified. Usage: open <subtheme path>`, "error");
+        }
       }
 
-      if (this.openTheme.id === this.baseTheme?.id) {
-        this.writeLine(`Error: cannot close base theme.  Use 'base <theme path>' to set new base theme.`, "error");
-        this.readyForInput();
-        return;
+      else if (/^close/i.test(raw)) {
+        if (!this.openTheme) {
+          this.writeLine(this.noOpenThemeError, "error");
+          this.readyForInput();
+          return;
+        }
+
+        if (this.openTheme.id === this.baseTheme?.id) {
+          this.writeLine(`Error: cannot close base theme.  Use 'base <theme path>' to set new base theme.`, "error");
+          this.readyForInput();
+          return;
+        }
+
+        this.openStack.pop();
+        this.openTheme = <ThemeExtendedModel>this.openStack.at(-1);
+        this.writeLine(`open theme: ${this.openTheme?.name} "${this.openTheme?.description ?? ''}"`, "info");
       }
 
-      this.openStack.pop();
-      this.openTheme = <ThemeExtendedModel>this.openStack.at(-1);
-      this.writeLine(`open theme: ${this.openTheme?.name} "${this.openTheme?.description ?? ''}"`, "info");
-    }
+      else if (/^create\s+(?:theme?|the?|t)/.test(raw)) {
+        if (!this.openTheme) {
+          this.writeLine(this.noOpenThemeError, "error");
+          this.readyForInput();     
+          return;
+        }
 
-    else if (/^create\s+(?:theme?|the?|t)/.test(raw)) {
-      console.log("create theme command detected");
-      if (!this.openTheme) {
-        this.writeLine(this.noOpenThemeError, "error");
-        this.readyForInput();     
-        return;
+        let predicate = /^create\s+(?:theme?|the?|t)(\s+([^"]+)(?:"|$)(.*))?/i.exec(raw);
+        if (!predicate?.length) {
+          this.writeLine(`Error: invalid syntax. Usage: create theme <name>[ "<description>]`, "error");
+          this.readyForInput();
+          return;
+        }
+
+        let themeName = predicate.at(2)?.trim();
+        let desc = predicate.at(3)?.trim();
+        if (desc && desc.length > 0 && desc.at(-1) == '"') {
+          desc = desc.substring(0, desc.length - 1).trim();
+        }
+
+        if (!themeName) {
+          this.writeLine(`Error: theme name is required. Usage: create theme <name>[ "<description>]`, "error");
+          this.readyForInput();
+          return;
+        }
+
+        if (this.openTheme.themes &&
+          this.openTheme.themes.some(theme => (theme.theme.name.toLowerCase() == themeName.toLowerCase()))) {
+          this.writeLine(`Error: duplicate theme name: ${themeName}`, "error");
+          this.readyForInput();
+          return;
+        }
+
+        let childThemes = this.childThemes.get(this.openTheme.id) ?? [];
+        let sequence = childThemes.length > 0 ? Math.max(...childThemes.map(t => t.sequence)) + 1 : 1;
+
+        let newTheme = {
+          id: this.nextThemeId--,
+          parent: this.openTheme.id,
+          name: themeName,
+          path: this.openTheme.path + "/" + themeName,
+          node: undefined,
+          description: desc ?? "",
+          sequence: sequence,
+          childCount: 0,
+          extended: true,
+          themes: [],
+          themeToCitationLinks: []
+        } as ThemeExtendedModel;
+
+        this.childThemes.set(this.openTheme.id, [...(this.childThemes.get(this.openTheme.id) ?? []), newTheme]);
+        this.pendingSave = true;
+        this.writeLine(`theme ${newTheme.name} entered ("save" to complete)`, "info");
       }
 
-      let predicate = /^create\s+(?:theme?|the?|t)(\s+([^"]+)(?:"|$)(.*))?/i.exec(raw);
-      if (!predicate?.length) {
-        this.writeLine(`Error: invalid syntax. Usage: create theme <name>[ "<description>]`, "error");
-        this.readyForInput();
-        return;
-      }
+      else if (/^create\s+(?:citation?|citati?|cita?|ci?)(\s*"([^"]+)(?:"|$))?(\s*(.+?)(?=\s*$))?/.test(raw)) {
 
-      let themeName = predicate.at(2)?.trim();
-      let desc = predicate.at(3)?.trim();
-      if (desc && desc.length > 0 && desc.at(-1) == '"') {
-        desc = desc.substring(0, desc.length - 1).trim();
-      }
+        if (!this.openTheme) {
+          this.writeLine(this.noOpenThemeError, "error");
+          this.readyForInput();     
+          return;
+        }
 
-      console.log(`theme: ${themeName}`);
-      console.log(`desc: ${desc}`);
+        let predicate = /^create\s+(?:citation?|citati?|cita?|ci?)(\s*"([^"]+)(?:"|$))?(\s*(.+?)(?=\s*$))?/i.exec(raw);
+        if (!predicate?.length) {
+          this.writeLine(`Error: invalid syntax. Usage: create citation ["<description>"] [scriptures]`, "error");
+          this.readyForInput();
+          return;
+        }
 
-      console.log("openTheme:");
-      console.log(this.openTheme);
+        let desc = predicate.at(2)?.trim() ?? "";
+        let cite = predicate.at(4)?.trim() ?? "";
+        if (desc && desc.length > 0 && desc.at(-1) == '"') {
+          desc = desc.substring(0, desc.length - 1).trim();
+        }
 
-      if (!themeName) {
-        this.writeLine(`Error: theme name is required. Usage: create theme <name>[ "<description>]`, "error");
-        this.readyForInput();
-        return;
-      }
-
-      if (this.openTheme.themes &&
-         this.openTheme.themes.some(theme => (theme.theme.name.toLowerCase() == themeName.toLowerCase()))) {
-        this.writeLine(`Error: duplicate theme name: ${themeName}`, "error");
-        this.readyForInput();
-        return;
-      }
-
-      let childThemes = this.childThemes.get(this.openTheme.id) ?? [];
-      let sequence = childThemes.length > 0 ? Math.max(...childThemes.map(t => t.sequence)) + 1 : 1;
-
-      let newTheme = {
-        id: this.nextThemeId--,
-        parent: this.openTheme.id,
-        name: themeName,
-        path: this.openTheme.path + "/" + themeName,
-        node: undefined,
-        description: desc ?? "",
-        sequence: sequence,
-        childCount: 0,
-        extended: true,
-        themes: [],
-        themeToCitationLinks: []
-      } as ThemeExtendedModel;
-
-      this.childThemes.set(this.openTheme.id, [...(this.childThemes.get(this.openTheme.id) ?? []), newTheme]);
-      this.pendingSave = true;
-      this.writeLine(`theme ${newTheme.name} entered ("save" to complete)`, "info");
-      console.log("child themes:");
-      console.log(this.childThemes);
-    }
-
-    else if (/^create\s+(?:citation?|citati?|cita?|ci?)(\s*"([^"]+)(?:"|$))?(\s*(.+?)(?=\s*$))?/.test(raw)) {
-      console.log("create citation command detected");
-
-      if (!this.openTheme) {
-        this.writeLine(this.noOpenThemeError, "error");
-        this.readyForInput();     
-        return;
-      }
-
-      let predicate = /^create\s+(?:citation?|citati?|cita?|ci?)(\s*"([^"]+)(?:"|$))?(\s*(.+?)(?=\s*$))?/i.exec(raw);
-      console.log(predicate);
-      if (!predicate?.length) {
-        this.writeLine(`Error: invalid syntax. Usage: create citation ["<description>"] [scriptures]`, "error");
-        this.readyForInput();
-        return;
-      }
-
-      let desc = predicate.at(2)?.trim() ?? "";
-      let cite = predicate.at(4)?.trim() ?? "";
-      if (desc && desc.length > 0 && desc.at(-1) == '"') {
-        desc = desc.substring(0, desc.length - 1).trim();
-      }
-
-      (async () => {
         try {
           const ranges = await parseCitationToRanges(cite, this.books);
           const label = ranges.map(range => range.label).join(",");
@@ -468,100 +493,96 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
           } as CitationExtendedModel);
 
           this.childCitations.set(this.openTheme!.id, citations);
-          console.log("adding prospective childCitation:");
-          console.log(citations);
           this.writeLine(`Citation entered ("save" to complete)`, "info");
           this.pendingSave = true;
         }
         catch (e) {
           this.writeLine((e as Error).message, "error");
         }
-      })();
-    }
+      }
 
-    else if (/^create/i.test(raw)) {
-      if (!this.openTheme) {
-        this.writeLine(this.noBaseThemeError, "error");
+      else if (/^create/i.test(raw)) {
+        if (!this.openTheme) {
+          this.writeLine(this.noBaseThemeError, "error");
+          this.readyForInput();
+          return;
+        }
+
+        this.writeLine("Error: invalid syntax. Usage: create [theme or citation] <parameters>", "error");
         this.readyForInput();
         return;
       }
 
-      this.writeLine("Error: invalid syntax. Usage: create [theme or citation] <parameters>", "error");
-      this.readyForInput();
-      return;
-    }
-
-    else if (/^reset/i.test(raw)) {
-      // This undoes all proposed changes to the database
-      if (!this.pendingSave) {
-        this.writeLine("No pending changes.", "info");
-        this.readyForInput();
-      }
-
-      // note: we can actually assume an open theme at this point
-      if (!this.openTheme) {
-        this.writeLine(this.noBaseThemeError, "error");
-        this.readyForInput();
-        return;
-      }
-
-      let isClosed = this.openTheme!.id < 0;
-
-      // Close all pending themes that are currently open
-      while (this.openTheme!.id < 0) {
-        this.openStack.pop();
-        this.openTheme = <ThemeExtendedModel>this.openStack.at(-1);
-      }
-
-      if (isClosed) {
-       this.writeLine(`open theme: ${this.openTheme?.name} "${this.openTheme?.description ?? ''}"`, "info");
-      }
-
-      // remove all child themes from the childthemes folder that have not been saved
-      for (const [parentId, childThemes] of this.childThemes) {
-        if (parentId < 0) {
-          this.childThemes.delete(parentId);
+      else if (/^reset/i.test(raw)) {
+        // This undoes all proposed changes to the database
+        if (!this.pendingSave) {
+          this.writeLine("No pending changes.", "info");
+          this.readyForInput();
         }
-        else {
-          const originalChildThemes = childThemes.filter(theme => theme.id > 0);
-          this.childThemes.set(parentId, originalChildThemes);
+
+        // note: we can actually assume an open theme at this point
+        if (!this.openTheme) {
+          this.writeLine(this.noBaseThemeError, "error");
+          this.readyForInput();
+          return;
         }
-      }
 
-      for (const [parentId, childCitations] of this.childCitations) {
-        if (parentId < 0) {
-          this.childCitations.delete(parentId);
+        let isClosed = this.openTheme!.id < 0;
+
+        // Close all pending themes that are currently open
+        while (this.openTheme!.id < 0) {
+          this.openStack.pop();
+          this.openTheme = <ThemeExtendedModel>this.openStack.at(-1);
         }
-        else {
-          const originalCitations = childCitations.filter(citation => citation.id > 0);
-          this.childCitations.set(parentId, originalCitations);
+
+        if (isClosed) {
+        this.writeLine(`open theme: ${this.openTheme?.name} "${this.openTheme?.description ?? ''}"`, "info");
         }
+
+        // remove all child themes from the childthemes folder that have not been saved
+        for (const [parentId, childThemes] of this.childThemes) {
+          if (parentId < 0) {
+            this.childThemes.delete(parentId);
+          }
+          else {
+            const originalChildThemes = childThemes.filter(theme => theme.id > 0);
+            this.childThemes.set(parentId, originalChildThemes);
+          }
+        }
+
+        for (const [parentId, childCitations] of this.childCitations) {
+          if (parentId < 0) {
+            this.childCitations.delete(parentId);
+          }
+          else {
+            const originalCitations = childCitations.filter(citation => citation.id > 0);
+            this.childCitations.set(parentId, originalCitations);
+          }
+        }
+
+        this.pendingSave = false;
+        this.writeLine("Updates have been reset to previous save point", "info");
       }
 
-      this.pendingSave = false;
-      this.writeLine("Updates have been reset to previous save point", "info");
-    }
 
+      else if (/^save/i.test(raw)) {
+        // This saves all proposed changes to the database
+        if (!this.pendingSave) {
+          this.writeLine("No pending changes.", "info");
+          this.readyForInput();
+        }
 
-    else if (/^save/i.test(raw)) {
-      // This saves all proposed changes to the database
-      if (!this.pendingSave) {
-        this.writeLine("No pending changes.", "info");
-        this.readyForInput();
-      }
+        // note: we can actually assume an open theme at this point
+        if (!this.openTheme) {
+          this.writeLine(this.noBaseThemeError, "error");
+          this.readyForInput();
+          return;
+        }
 
-      // note: we can actually assume an open theme at this point
-      if (!this.openTheme) {
-        this.writeLine(this.noBaseThemeError, "error");
-        this.readyForInput();
-        return;
-      }
-
-      // Creates a list of theme ids of themes we've opened this base session
-      let savedThemeIds = [...this.childThemes.keys()]
-        .filter(themeId => themeId > 0);
-      
-      (async () => {
+        // Creates a list of theme ids of themes we've opened this base session
+        let savedThemeIds = [...this.childThemes.keys()]
+          .filter(themeId => themeId > 0);
+        
         let unsaved: ThemeExtendedModel[] = [];
 
         // Creates a list of unsaved themes that have saved parent themes
@@ -572,13 +593,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
               .filter(theme => theme.id < 0) ?? []];
         });
 
-        console.log("unsaved themes:");
-        console.log(unsaved);
-
         while(unsaved.length) {
-          console.log("ids of unsaved themes with saved parent themes");
-          console.log(unsaved);
-
           // Physically save a layer of unsaved themes which have saved parents
           const saved = await this.createThemeLayer(unsaved)!;
 
@@ -602,37 +617,21 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
                 thisTheme.themes.push({ theme: child });
               });
 
-              console.log(`deleting ${unsaved[i].id}`);
-              console.log(`setting ${thisTheme.id}:`);
-              console.log(thisThemeChildren);
               this.childThemes.delete(unsaved[i].id);
               this.childThemes.set(thisTheme.id, thisThemeChildren);
             }
             else {
               this.childThemes.delete(unsaved[i].id);
               this.childThemes.set(saved[i].id, []);
-              console.log(`deleting ${unsaved[i].id}`);
-              console.log(`setting ${thisTheme.id}: []`);
             }
 
             if (this.openTheme?.id && this.openTheme.id == unsaved[i].id) {
               this.openTheme = thisTheme;
             }
 
-            console.log("siblingThemes before:");
-            console.log(siblingThemes);
-
             siblingThemes[thisIndex] = thisTheme;
 
-            console.log("siblingThemes after:")
-            console.log(siblingThemes);
-            console.log(`setting ${thisTheme.parent} to siblingThemes`);
             this.childThemes.set(thisTheme.parent, siblingThemes);
-
-            console.log("Saving childCitations MAP:");
-            console.log(this.childCitations);
-            console.log(`unsaved[${i}].id: ${unsaved[i].id}`);
-            console.log(`saved[${i}].id: ${saved[i].id}`);
           
             if (thisThemeCitations.length) {
               this.childCitations.set(saved[i].id, [...this.childCitations.get(unsaved[i].id)!]);
@@ -653,7 +652,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
         }
 
         let themeIds = [...this.childCitations.keys()];
-        console.log(themeIds);
         const unsavedCitations: {
           themeId: number;
           citations: CitationExtendedModel[];
@@ -667,9 +665,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
           }
         });
 
-        console.log("unsaved citations:");
-        console.log(unsavedCitations);
-
         let tasks = <any>[];
         unsavedCitations.forEach(cite => {
           for (var citation of <CitationExtendedModel[]>cite.citations) {
@@ -677,18 +672,76 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
           }
         });
 
-        Promise.all(tasks)
-          .then(data => {
-            console.log("CITATIONS CREATED");
-            console.log(data)
-          });
-      })();
+        Promise.all(tasks).then();
 
-      this.pendingSave = false;
-      this.writeLine("Updates have been saved", "info");
-    }
+        this.pendingSave = false;
+        this.writeLine("Updates have been saved", "info");
+      }
+      else if (/^(\?|help)/i.test(raw)) {
+        let match = /^(\?|help)\s+(.*)/i.exec(raw);
+        let page = match?.at(2) === undefined ? "" : match.at(2)?.trim();
+        if (!page || page == "help" || page == "?") {
+          this.loadHelpFile("general");
+        }
+        else if (page == "clear") {
+          this.loadHelpFile("clear");
+        }
+        else if (page == "base") {
+          console.log("base");
+        }
+        else if (page == "show") {
+          console.log("show");
+        }
+        else if (page == "open") {
+          console.log(open);
+        }
+        else if (page == "close") {
+          console.log("close");
+        }
+        else if (page == "create theme") {
+          console.log("create theme");
+        }
+        else if (page == "create citation") {
+          console.log("create citation");
+        }
+        else if (page == "save") {
+          console.log("save");
+        }
+        else if (page == "reset") {
+          console.log("reset");
+        }
+        else if (page == "books") {
+          await this.books.ensureLoaded();
+          this.writeLine(`${"CODE".padStart(6).padEnd(12)}${"BOOK".padEnd(14)}${"CHAPTER COUNT"}`, "info");
+          this.books.getAllBooks()
+            .forEach(book => {
+              this.writeLine(`${book.code.padStart(5).padEnd(10)}${book.book.padEnd(20)}${book.chapterCount.toString().padStart(3)}`, "info");
+            });
+        }
+        else if (page == "book") {
+          console.log("book");
+        }
+        else {
+          this.writeLine(`Help not found for ${page}`, "error");
+        }
+      }
+      else {
+        this.writeLine("Invalid command entered", "error");
+      }
 
-    this.readyForInput();
+      this.readyForInput();
+
+    })();
+  }
+
+  async loadHelpFile(name: string) {
+    const text = await firstValueFrom(
+      this.http.get(`/assets/help files/${name}.txt`, {
+        responseType: 'text'
+      })
+    );
+
+    this.writeLine(text, "info");
   }
 
   private readyForInput() {
@@ -762,19 +815,14 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
     });
 
     await Promise.all(tasks).then(data => {
-      console.log("in promise. data:");
-      console.log(data);
       let verseArray = data as CitationVerseExtendedModel[][];
 
       for (let i = 0; i < verseArray.length; i++) {
         let citation = citations[i];
 
         // each array of verses are the verses of a child citation
-        console.log("convert verses to ranges");
         var ranges = this.convertVersesToRanges(verseArray[i]);
         citation!.citationLabel = ranges.map(range => range.label).join(",") ?? "";
-        console.log("setting childCitations to");
-        console.log([...this.childCitations.get(parentTheme.id) ?? [], citation!]);
         this.childCitations.set(parentTheme.id, [...this.childCitations.get(parentTheme.id) ?? [], citation!]);
       };
     });
@@ -797,26 +845,20 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
   }
 
   private setThemeChildren(parentTheme: ThemeExtendedModel): void {
-    console.log(`setThemeChildren(${parentTheme.id})`);
     var childThemes = this.childThemes.get(parentTheme.id);
     var childCitations = this.childCitations.get(parentTheme.id);
 
     if (!childThemes) {
       childThemes = parentTheme.themes ? parentTheme.themes.map(t => t.theme) as ThemeExtendedModel[] : [];
       this.childThemes.set(parentTheme.id, childThemes);
-
-      console.log("in setThemeChildren");
-      console.log(this.childThemes.get(parentTheme.id));
     }
 
     if (!childCitations) {
-      console.log("setting child citations.");
       this.getThemeCitations(parentTheme);
     }
   }
 
   private convertVersesToRanges(verses: CitationVerseExtendedModel[]) : CitationVerseRange[] {
-    console.log("convertVersesToRanges");
     let citationId = 0;
     let book = "";
     let chapter = 0;
@@ -842,8 +884,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
           } as CitationVerseRange;
 
           range.label = this.getLabel(range);
-          console.log("range:");
-          console.log(range);
           ranges.push(range);
 
           startVerse = verses[i].scripture.verse;
@@ -864,10 +904,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
       label: ""
     } as CitationVerseRange;
 
-    console.log("range:");
-    console.log(range);
     range.label = this.getLabel(range);
-    ranges.push(range);
 
     return ranges;
   }
@@ -914,5 +951,26 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
       console.error('copyTextToClipboard failed', e);
       return false;
     }
-  } 
+  }
+
+  private wrapText(text: string): string[] {
+    const words = text.trim().split(/\s+/);
+    const lines: string[] = [];
+    let line = "";
+
+    for (const w of words) {
+      if (!line) {
+        line = w;
+        continue;
+      }
+      if ((line.length + 1 + w.length) <= 100) {
+        line += " " + w;
+      } else {
+        lines.push(line);
+        line = w;
+      }
+    }
+    if (line) lines.push(line);
+    return lines.length ? lines : [""];
+  }
 }
