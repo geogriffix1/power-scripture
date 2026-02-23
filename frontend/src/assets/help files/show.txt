@@ -1,0 +1,28 @@
+Import Console Show Command
+
+Syntax: show, show t[hemes], show c[itations]
+Examples: show, show t, show cit, show th, show themes
+
+Shows the contents of the open Theme. A base Theme must be set for the session.
+Once a base Theme is set it becomes the open Theme until a different theme is opened.
+
+The contents are shown in the form of a list. If the "themes" qualifier is added,
+only the child themes are displayed. If the "citations" qualifier is supplied, only the
+citations are displayed. If there is no qualifier then both are displayed. Themes are
+displayed first followed by Citations.
+
+Only the Name and the Description of each child theme are displayed. Contents of child
+themes are not displayed.
+
+The Description and Citation label of all Citations in the theme are displayed.
+Citations of child themes are not displayed.
+
+The Citation label is a list of all scriptures being cited in the citation in the form
+of scripture ranges separated by commas. Verse ranges are displayed in Bible order,
+which is the order in which books, chapters, and verses naturally appear in the Bible.
+One example of a scripture range would be John 3:16-19.
+
+A scripture range, on output, is confined to one chapter. One citation can contain any
+number of individual ranges. The show command will show all ranges in the citation,
+separated by commas.
+

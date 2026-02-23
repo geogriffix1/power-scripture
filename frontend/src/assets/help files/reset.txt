@@ -1,0 +1,9 @@
+Import Console Reset Command
+
+Syntax: reset
+
+The "Reset" command resets all created Themes and Citations which have not already been
+saved. New Themes and Citations which are not already saved are removed. They have
+effectively been deleted except that they were never saved in the first place.
+A new base register cannot be established until all created Themes and Citations
+are either saved or reset.

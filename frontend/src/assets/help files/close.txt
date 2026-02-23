@@ -1,0 +1,19 @@
+Import Console Close Command
+
+Syntax: close
+
+Closes the open Theme and opens the Theme previous to the open Theme. The Base Theme cannot
+be closed.
+
+Example: Assume the following path exists - /Persons/Genesis/Abraham/Isaac/Jacob
+
+We set the base theme as Persons/Genesis, then we open Abraham. Later we open the subpath
+"isaac/jacob". When we close Jacob, Abraham becomes the open Theme. This is because
+we earlier opened Jacob directly from Abraham without opening Isaac.
+
+Abraham is the open Theme. When we close Abraham, Genesis becomes open because Genesis
+was open when we opened Abraham. Any attempt to close Genesis will be unsuccessful
+because Genesis is the base Theme that we set. We can set a different base Theme using
+the "Base" command.
+
+Opening and closing Themes is how we traverse the Theme tree in the import console.

@@ -28,6 +28,7 @@ interface ConsoleLine {
   id: number;
   level: LineLevel;
   text: string;
+  anchor?: string;
   memo?: string;
 }
 
@@ -62,6 +63,8 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
   static isActive = false;
   static isSubscribed = false;
 
+  private autoScroll = true;
+  // private scrollMark = 0;
   private clipboard: JstreeModel|null = null;
 
   private baseTheme: ThemeExtendedModel|null = null;
@@ -164,8 +167,21 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
     }
   }
 
-  onConsoleClick(): void {
+  onConsoleMousedown(event:MouseEvent): void {
+    if (event.button !==0) {
+      return;
+    }
+
+    const sel = window.getSelection();
+    if (sel && sel.type === "Range") {
+      return;
+    }
+
     this.focusInputNoScroll();
+  }
+
+  onConsoleContextMenu(event:MouseEvent): void {
+    event.stopPropagation();
   }
 
   async bookCodeLookup(input:string): Promise<string> {
@@ -213,8 +229,12 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
   }
 
   async preparse(input:string): Promise<string> {
+    this.autoScroll = true;
     if (/^(create\s+?:citation?|citati?|cita?|ci?)(\s*"([^"]+)(?:"|$))?(\s*(.+?)(?=\s*$))?/.test(input)) {
       input = await this.bookCodeLookup(input);
+    }
+    else if(/^(\?|help)(\s|$)/i.test(input)) {
+      this.autoScroll = false;
     }
 
     return Promise.resolve(input);
@@ -681,45 +701,91 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
         let match = /^(\?|help)\s+(.*)/i.exec(raw);
         let page = match?.at(2) === undefined ? "" : match.at(2)?.trim();
         if (!page || page == "help" || page == "?") {
-          this.loadHelpFile("general");
+          this.showHelpAppended("general");
         }
         else if (page == "clear") {
-          this.loadHelpFile("clear");
+          this.showHelpAppended("clear");
         }
         else if (page == "base") {
-          console.log("base");
+          this.showHelpAppended("base");
         }
         else if (page == "show") {
-          console.log("show");
+          this.showHelpAppended("show");
         }
         else if (page == "open") {
-          console.log(open);
+          this.showHelpAppended("open");
         }
         else if (page == "close") {
-          console.log("close");
+          this.showHelpAppended("close");
         }
-        else if (page == "create theme") {
-          console.log("create theme");
+        else if (page == "create") {
+          this.showHelpAppended("create");
         }
-        else if (page == "create citation") {
-          console.log("create citation");
-        }
-        else if (page == "save") {
-          console.log("save");
+         else if (page == "save") {
+          this.showHelpAppended("save");
         }
         else if (page == "reset") {
-          console.log("reset");
+          this.showHelpAppended("reset");
         }
         else if (page == "books") {
           await this.books.ensureLoaded();
-          this.writeLine(`${"CODE".padStart(6).padEnd(12)}${"BOOK".padEnd(14)}${"CHAPTER COUNT"}`, "info");
-          this.books.getAllBooks()
-            .forEach(book => {
-              this.writeLine(`${book.code.padStart(5).padEnd(10)}${book.book.padEnd(20)}${book.chapterCount.toString().padStart(3)}`, "info");
-            });
+          this.showBookHelpAppended(() => {
+            this.writeLine(`${"CODE".padStart(6).padEnd(12)}${"BOOK".padEnd(14)}${"CHAPTER COUNT"}`, "info");
+            this.books.getAllBooks()
+              .forEach(book => {
+                this.writeLine(`${book.code.padStart(5).padEnd(10)}${book.book.padEnd(20)}${book.chapterCount.toString().padStart(3)}`, "info");
+              });
+          });
         }
-        else if (page == "book") {
-          console.log("book");
+        else if (/^book(\s*\S.*)|$/i.test(page)) {
+          const match = /^book\s+(.+)/i.exec(page);
+          const bookError = "Error: ? book or help book must be followed by the name or code of a book. (? books for the list of books and codes)";
+          if (match?.at(1)) {
+            let book = match!.at(1)?.trim();
+            var found = "";
+            var chapterCount = 0;
+
+            await this.books.ensureLoaded();
+
+            if (book!.length == 3) {
+              const bookInfo = this.books.getAllBooks().find(bk => bk.code == book!.toLowerCase());
+              if (!bookInfo) {
+                this.writeLine(`Error: book code "${book!}" was not found.`, "error");
+              }
+              else {
+                found = bookInfo.book;
+                chapterCount = bookInfo.chapterCount;
+              }
+            }
+            else {
+              const bookInfo = this.books.getAllBooks().find(bk => bk.book.toLowerCase() == book!.toLowerCase());
+              if (!bookInfo) {
+                this.writeLine(`Error: book code "${book!}" was not found.`, "error");
+              }
+              else {
+                found = bookInfo.book;
+                chapterCount = bookInfo.chapterCount;
+              }
+            }
+
+            if (found) {
+              this.showBookHelpAppended(() => {
+                this.writeLine(`${found}:`, "info");
+                this.writeLine(`${"CHAPTER".padStart(10).padEnd(6)}${"VERSE COUNT".padStart(15)}`, "info");
+
+                const bookInfo = this.books.getAllBooks().find(bk => bk.book.toLowerCase() == found.toLowerCase());
+                if (bookInfo) {
+                  for (let i=0; i < bookInfo.chapterCount; i++) {
+                    const count = this.books.getVerseCountByChapter(bookInfo.book, i + 1);
+                    this.writeLine(`${("" + (i + 1)).padStart(7)}${("" + count!).padStart(14)}`, "info");
+                  }
+                }
+              });
+            }
+          }
+          else {
+            this.writeLine(bookError, "error");
+          }
         }
         else {
           this.writeLine(`Help not found for ${page}`, "error");
@@ -734,16 +800,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
     })();
   }
 
-  async loadHelpFile(name: string) {
-    const text = await firstValueFrom(
-      this.http.get(`/assets/help files/${name}.txt`, {
-        responseType: 'text'
-      })
-    );
-
-    this.writeLine(text, "info");
-  }
-
   private readyForInput() {
     this.inputText.set("");
 
@@ -756,15 +812,64 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
 
   }
 
-  private writeLine(text: string, level: LineLevel, memo?: string): void {
-    this.outputLines.update(lines => [...lines, { id: this.nextId++, level, text, memo }]);
+  private writeLine(text: string, level: LineLevel, memo?: string, anchor?:string): void {
+    this.outputLines.update(lines => [...lines, { id: this.nextId++, level, text, memo, anchor }]);
     requestAnimationFrame(() => this.scrollToBottom());
+
+    if (this.autoScroll) {
+      requestAnimationFrame(() => this.scrollToBottom());
+    }
   }
 
   private scrollToBottom(): void {
     const el = this.scrollArea?.nativeElement;
     if (!el) return;
+
     el.scrollTop = el.scrollHeight;
+  }
+
+  private scrollToAnchor(anchor: string): void {
+    const root = this.consoleRoot?.nativeElement as HTMLElement | null;
+    const out = root?.querySelector('.ps-console-output') as HTMLElement | null;
+    if (!out) return;
+
+    const el = out.querySelector(`[data-anchor="${CSS.escape(anchor)}"]`) as HTMLElement | null;
+    if (!el) return;
+
+    el.scrollIntoView({ block: 'start' });
+  }
+
+  async showHelpAppended(page: string): Promise<void> {
+    this.autoScroll = false;
+
+    const anchor = `help-start-${Date.now()}`;
+    this.writeLine('', 'info', undefined, anchor);
+
+    const text = await firstValueFrom(
+      this.http.get(`/assets/help files/${page}.txt`, { responseType: 'text' })
+    );
+
+    for (const line of text.split(/\r?\n/)) {
+      this.writeLine(line, 'info');
+    }
+
+    // wait for DOM/layout, then anchor scroll
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => this.scrollToAnchor(anchor))
+    );
+  }
+
+  async showBookHelpAppended(callback:any) {
+    this.autoScroll = false;
+    const anchor = `help-start-${Date.now()}`;
+    this.writeLine('', 'info', undefined, anchor);
+    callback();
+
+    // wait for DOM/layout, then anchor scroll
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => this.scrollToAnchor(anchor))
+    );
+
   }
 
   private focusInputNoScroll(): void {
@@ -951,26 +1056,5 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
       console.error('copyTextToClipboard failed', e);
       return false;
     }
-  }
-
-  private wrapText(text: string): string[] {
-    const words = text.trim().split(/\s+/);
-    const lines: string[] = [];
-    let line = "";
-
-    for (const w of words) {
-      if (!line) {
-        line = w;
-        continue;
-      }
-      if ((line.length + 1 + w.length) <= 100) {
-        line += " " + w;
-      } else {
-        lines.push(line);
-        line = w;
-      }
-    }
-    if (line) lines.push(line);
-    return lines.length ? lines : [""];
   }
 }

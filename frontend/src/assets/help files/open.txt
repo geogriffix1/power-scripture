@@ -1,0 +1,16 @@
+Import Console Open Command
+
+Syntax open <theme>, open <subpath>
+Examples: open abraham, open abraham/isaac
+
+Sets a new open theme from the subthemes. The first example sets Abraham as the open theme.
+The second example sets Isaac as the open theme.
+
+Discussion: An open theme is a theme which has already been created. Only Themes which are
+descended from the currently open theme can be opened with the open command. Use the base
+command to set a new base theme, which would automatically open it. Only one theme can be
+open at a time.
+
+The user can show the Themes and Citations that are the immediate children of the Theme that
+is open. A user can create new themes and citations which become the children of the the
+open theme. Created Themes can be opened and even before they are saved.

@@ -1,0 +1,20 @@
+Import Console Base Command
+
+Syntax: base <full-path>
+Example: base /Persons/Genesis/Abraham
+
+The leading slash and capitalization are optional. The base theme in the example is Abraham.
+Abraham has a parent Theme, Genesis. Genesis is a child of the Persons theme.
+
+Discussion: The "base" command sets a specific Theme as the base Theme for the session.
+Users can create new Themes and new Citations attached to an open Theme. A
+user can open a subtheme, show its attached Themes and Citations, and create
+new themes and citations. A user cannot close the base theme, but they can set
+a new base theme.
+
+Narrative: The user can type the path of the Theme, but a shorthand way to obtain
+the path of the Theme is to navigate through the Theme Tree to the theme they would like
+to set as the base Theme. They can right-click the Theme folder and select "Copy" from
+the context menu. Then in the Import Console, right-click the command line and Paste the 
+theme. The path will appear in the command line. Base Themes cannot be closed, but a
+new base Theme can be set by the user. 

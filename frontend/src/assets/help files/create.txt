@@ -1,0 +1,40 @@
+Import Console Create Command
+
+Syntax:
+    create t[heme] <theme name>
+    create t[heme] <theme name> "<description>"
+    create c[itation] <range>,<range>,<range>...
+    create c[itation] "<description>" <range>,<ramge>,<range>...
+
+Examples:
+    create t My Theme
+    create th My Theme "My theme description"
+    create c genesis 1:1-10, exodus 1:1-10, leviticus 1:1-10
+    create cit "My Citation" mat 1:1-10, mrk 1:1-10, luk: 1:1-10
+
+Creates a new Theme or Citation as a child of the Open Theme. A Base Theme must be
+established or creation will fail. Enter the word "create" followed by the word "theme"
+or "citation", which can be shortened to one or more characters in length.
+
+A theme must have a name. A name can be up to 45 characters long, but should be
+considerably shorter than that. Capitalization matters in the theme name. Theme names cannot have
+slashes or quotation marks in them. Descriptions are optional. They begin with a quotation mark.
+Ending quotation marks are optional.
+
+A citation has a description, followed by a list of scripture ranges. The description is
+optional and it begins and ends with quotation marks. Citation ranges are designations
+of scripture using book, chapter, start verse, and end verse. Multiple ranges can be
+used separated by commas.
+
+Chapter names must be spelled correctly, or a three-character code unique to each book
+can be entered in place of the chapter name.
+
+For a complete list of book names and codes use "help books". Book names and codes can
+be copied and pasted.
+
+Once created, a theme can be opened like any other theme. Open Themes can serve as
+parent Themes to Themes and Citations. Created Themes and Citations are not permanent
+until they are saved. The "save" command saves all created Themes and Citations which
+have not already been saved.
+
+

@@ -30,3 +30,16 @@ Reset - clears out all created themes and citations that have not been saved.
 Help - can be invoked with ?. Help followed by a command elaborates on the command.
 Books - displays the properly-spelled names of each Bible book and three-character abbreviations accepted
 Book - displays the number of verses in each chapter of a particular book
+
+Discussion: The Import Console allows a user to quickly enter Themes and Citations through the keyboard
+as an alternative to the graphical interface. It is strictly for data entry and viewing. No edits or
+or deletes are supported through the import console. Themes are essentially a directory structure for
+cataloguing Citations. Themes have names and descriptions. Citations are a collection of scriptures
+from anywhere in the Bible. All scripture is preloaded in the database. Citations reference scriptures.
+
+Narrative: The user sets a Base Theme as a starting point. The user can navigate by opening and closing
+subthemes of an open theme. They can create citation attached to the open theme. Themes and Citations
+are saved to the database through the Save command. Resetting a session clears all unsaved Themes
+and Citations. Helps provide access to the names of Bible books. Three-character codes can be used as
+short-hand book names to make coding easier. Copying and pasting verses is a handy way to build
+the database quickly.

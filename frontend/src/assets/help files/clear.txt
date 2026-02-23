@@ -1,6 +1,9 @@
-Import Console Clear Commands
+Import Console Clear Command
 
-The clear command clears all output lines from the console.
-It does not affect any operations.
+Syntax: clear
 
-In a power scripture command file, clear has no affect.
+The clear command clears all output lines from the console. It removes
+the clutter of previous operations, but it does not affect any operations.
+Once cleared, the output is no longer available.
+
+In a power scripture import file, clear has no affect.

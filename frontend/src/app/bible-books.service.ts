@@ -1,5 +1,6 @@
 // bible-books.service.ts
 import { Injectable } from "@angular/core";
+import { Chapters } from "./model/chapter.model";
 
 export interface BibleBookListJson {
   books: Array<{ code: string, book: string, chapterCount: number }>;
@@ -28,6 +29,7 @@ function computeSort(book: string): { sortBase: string; sortNum: 0 | 1 | 2 | 3 }
 export class BibleBooksService {
   private loaded = false;
   private byNorm = new Map<string, BookInfo>();
+  private byCode = new Map<string, BookInfo>();
   private all: BookInfo[] = [];
 
   async ensureLoaded(): Promise<void> {
@@ -49,11 +51,26 @@ export class BibleBooksService {
     });
 
     this.byNorm = new Map(this.all.map(b => [norm(b.book), b]));
+    this.byCode = new Map(this.all.map(b => [b.code, b]));
     this.loaded = true;
   }
 
   getBookInfoExactSpellingCaseInsensitive(bookInput: string): BookInfo | undefined {
+    if (norm(bookInput).length == 3)
+    {
+      return this.byCode.get(norm(bookInput));
+    }
+
     return this.byNorm.get(norm(bookInput));
+  }
+
+  getVerseCountByChapter(book:string, chapter:number) : number | undefined {
+    const entry = Chapters.find(ch => ch.book == book && ch.chapter == chapter);
+    if (entry) {
+      return entry.verseCount;
+    }
+
+    return undefined;
   }
 
   getHelpListSorted(): string[] {
@@ -71,4 +88,5 @@ export class BibleBooksService {
   getAllBooks(): BookInfo[] {
     return [...this.all];
   }
+
 }

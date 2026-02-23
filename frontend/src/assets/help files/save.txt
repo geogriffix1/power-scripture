@@ -1,0 +1,7 @@
+Import Console Save Command
+
+Syntax: save
+
+The "Save" command saves all created themes and citations which have not already been
+saved. A new base register cannot be established until all created Themes and Citations
+are either saved or reset.
