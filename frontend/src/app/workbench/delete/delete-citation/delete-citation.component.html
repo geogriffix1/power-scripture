@@ -6,4 +6,19 @@
         Please select an active <b>Citation</b> from the <b>Bible Theme Tree</b>
     </div>
     }
+    <nav class="cite-scripture">
+        <div class="workbench-settings">
+            <button
+                type="button"
+                class="menu menu-icon-delete"
+                (click)="DeleteCitationLink()"
+                title="Click to Delete"
+            >
+                <i class="theme psmenu-icon"></i>
+            </button>
+        </div>
+        <input id="label" #label type="text" class="command-line" placeholder="Citation Link" title="The Citation Label" disabled>
+        <input id="description" #description type="text" class="command-line" placeholder="Citation Description" title="The description of the citation" disabled>
+        <div class="command-message"></div>
+    </nav>
 </div>

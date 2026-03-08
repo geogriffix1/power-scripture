@@ -80,7 +80,8 @@ export class EditCitationComponent {
       description: citation.description,
       citationLabel: citation.citationLabel,
       bibleOrder: citation.bibleOrder,
-      verses: citation.verses
+      verses: citation.verses,
+      extended: true
     };
 
     this.editedCitation =  {
@@ -88,7 +89,8 @@ export class EditCitationComponent {
       description: citation.description,
       citationLabel: citation.citationLabel,
       bibleOrder: citation.bibleOrder,
-      verses: citation.verses
+      verses: citation.verses,
+      extended: true
     };
 
     WorkbenchComponent.setScriptureRanges(citation);

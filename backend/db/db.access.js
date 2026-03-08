@@ -14,6 +14,19 @@ const pool = mysql.createPool({
     multipleStatements: true
 });
 
+pool.query("SELECT DATABASE() AS db, CURRENT_USER() AS user", (err, rows) => {
+  if (err) return console.error(err);
+  console.log("DB/user:", rows[0]);
+});
+
+pool.query(
+  "SHOW VARIABLES WHERE Variable_name IN ('hostname','port')",
+  (err, rows) => {
+    if (err) return console.error(err);
+    // rows will look like [{Variable_name:'hostname',Value:'...'}, {Variable_name:'port',Value:'3306'}]
+    console.log("Host/port vars:", rows);
+  }
+);
 //-------------------------
 // Core query executor
 //-------------------------
@@ -77,5 +90,14 @@ module.exports = {
         } catch (err) {
             output(err, null);
         }
+    },
+
+    executeWithConnection: async (handler) => {
+        pool.getConnection((err, conn) => {
+            if (err) return handler(err);
+
+            const done = () => conn.release();
+            handler(null, conn, done);
+        });
     }
-};
+}

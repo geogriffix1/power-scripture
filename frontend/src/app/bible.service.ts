@@ -7,6 +7,7 @@ import { CitationVerseExtendedModel } from './model/citationVerse.model';
 import { CitationVerseMarkup, CitationVerseMarkupKind } from './model/citationVerseMarkup.model';
 import { CitationVerseRange } from './model/citationVerse.model';
 import { ThemeChainModel } from './model/themeChain.model';
+import { ThemeCascadeModel, ThemeCascadeCitationModel } from './model/themeCascade.model';
 import { ScriptureModel } from './model/scripture.model';
 import { JstreeModel, JstreeState } from './model/jstree.model';
 import { ThemeToCitationModel, ThemeToCitationLinkModel } from './model/themeToCitation.model';
@@ -92,7 +93,7 @@ export class BibleService {
           new JstreeState(false, false, false)
         );
 
-        theme.children = parentTheme.theme.themes[i].theme.childCount > 0;
+        theme.children = parentTheme.theme.themes[i].theme.childCount > 0 
         children.push(theme);
       }
 
@@ -127,6 +128,7 @@ export class BibleService {
     var url = `${this.ROOT_URL}citations/${id}/full`;
     const data = await fetch(url);
     const citation = (await data.json() ?? null);
+    citation.extended = true;
     return <CitationExtendedModel>citation.citation;
   }
 
@@ -179,7 +181,6 @@ export class BibleService {
     return <ThemeExtendedModel>theme.theme;
   }
 
-
   async getScripturesByCitationString(cite:string) : Promise<ScriptureModel[]> {
     var url = `${this.ROOT_URL}scriptures/${encodeURIComponent(cite)}`;
     const data = await fetch(url);
@@ -202,6 +203,13 @@ export class BibleService {
     const themeToCitation = (await data.json() ?? null);
     return <ThemeToCitationModel>themeToCitation.themeToCitation;
   }
+
+  async getThemeToCitationsByCitation(citationId: number) {
+     var url = `${this.ROOT_URL}themeToCitations/citation/${citationId}`;
+    const data = await fetch(url);
+    const themeToCitations = (await data.json() ?? null);
+    return <ThemeToCitationModel[]>themeToCitations;
+ }
 
   async setThemeSequence(id:number, sequence:number): Promise<boolean> {
     var url = `${this.ROOT_URL}themes/${id}/sequence/${sequence}`;
@@ -233,10 +241,19 @@ export class BibleService {
 
   // The theme chain is a the theme heirarchy expressed as a directory structure
   async getThemeChain(id:number, callback:any) {
-    var url = `${this.ROOT_URL}themes/chain/${id}`;
-    const data = await fetch(url)
+    var url = `${this.ROOT_URL}themes/${id}/chain`;
+    const data = await fetch(url);
     const chain = (await data.json() ?? [])
     callback(chain);
+  }
+
+  async getThemeCascade(id: number) {
+    const url = `${this.ROOT_URL}themes/${id}/cascade`;
+
+    const resp = await fetch(url, { headers: { Accept: "application/json" } });
+    if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+
+    return await resp.json();
   }
 
   async createTheme(parentId:number, name:string, description:string) {
@@ -361,7 +378,7 @@ const data = await fetch(url, {
   }
  }
 
-async deleteTheme(themeId:number, callback:any) {
+async deleteTheme(themeId:number) {
   var url = `${this.ROOT_URL}themes/${themeId}`;
   var data:any;
   try {
@@ -377,17 +394,16 @@ async deleteTheme(themeId:number, callback:any) {
   catch (e) {
     console.log("delete theme failed");
     console.log(e);
-    callback(false, "Theme delete failed.");
+    return false;
   }
 
   const result:any = await data.json();
   if (result !== null && result.deleteted !== null) {
     console.log("calling back success");
-    callback(true, "Theme deleted successfully.");
+    return true;
   }
-  else {
-    callback(false, "Theme delete failed.");
-  }
+
+  return false;
  }
 
 async normalizeThemeSequence(parentId:number, callback:any) {

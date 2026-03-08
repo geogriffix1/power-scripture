@@ -389,7 +389,6 @@ exports.create = (req, res) => {
     }
 }
 
-
 exports.delete = (req, res) => {
     var linkId = eval(req.params.id);
     var themeToCitation = new bibleThemeToCitation;
@@ -406,9 +405,9 @@ exports.delete = (req, res) => {
         ));
     }
 
-    const queryObjects = (selectString, context) => {
+    const execute = (deleteString, context) => {
         return new Promise((resolve, reject) => {
-            dbAccess.query(selectString, (err, results) => {
+            dbAccess.execute(deleteString, (err, results) => {
                 if (err) {
                     reject(err);
                 }
@@ -419,119 +418,30 @@ exports.delete = (req, res) => {
         });
     }
 
-    const deleteLink = (deleteString, context) => {
-        return new Promise((resolve, reject) => {
-            dbAccess.delete(deleteString, (err, results) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve({ results: results, context: context });
-                }
-            });
-        });
-    }
-
-    const editSequence = (updateString) => {
-        return new Promise((resolve, reject) => {
-            dbAccess.update(updateString, (err, results) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve(results);
-                }
-            });
-        });
-    }
-
-    var selectString = themeToCitation.getSelectString();
+    var deleteString = `CALL delete_bible_theme_to_citation(${linkId})`;
     var context = { themeToCitationToDeleteId: linkId };
-    queryObjects(selectString, context)
+
+    // This deletes the theme_to_citation and also the citation itself if the citation has on other links to themes
+    execute(deleteString, context)
         .then(data => {
-            if (data.results.length == 0) {
-                res.status(500).send(errorMessage(
-                    500,
-                    "Server Error",
-                    req.path,
-                    `Theme to Citation id: ${data.context.themeToCitationToDeleteId} was not found.`,
-                    ""
-                ));
-
-                return;
-            }
-
-            context.themeToCitationValues = data.results[0];
-            context.citationId = context.themeToCitationValues.citationId;
-
-            var themeToCitation = new bibleThemeToCitation;
-            themeToCitation.values = { citationId: context.citationId };
-            var selectString = themeToCitation.getSelectString() + " ORDER BY bible_theme_sequence";
-
-            queryObjects(selectString, context)
-                .then(data => {
-                    if (data.results.length == 1) {
-                        var linkId = data.context.themeToCitationValues.id;
-                        var citationId = data.context.themeToCitationValues.citationId;
-
-                        res.status(500).send(errorMessage(
-                            500,
-                            "Server Error",
-                            req.path,
-                            `Unable to delete Theme to Citation id: ${linkId} - references to Citation id: ${citationId} lost. Citation must be deleted explicitly`,
-                            ""
-                        ));
-
-                        return;
-                    }
-
-                    var themeToCitation = new bibleThemeToCitation;
-                    themeToCitation.values = { id: data.context.themeToCitationValues.id };
-                    var deleteString = themeToCitation.getDeleteString();
-                    data.context.toResequence = data.results;
-
-                    deleteLink(deleteString, context)
-                        .then(data => {
-
-                            var resequence = [];
-                            index = 1;
-                            if (data.context.toResequence.length > 1) {
-                                for (var i = 0; i < data.context.toResequence.length; i++) {
-                                    if (data.context.toResequence[i].id != data.context.themeToCitationToDeleteId) {
-                                        if (data.context.toResequence[i].sequence != index) {
-                                            var themeToCitation = new bibleThemeToCitation;
-                                            themeToCitation.values = { id: data.context.toResequence[i].id, sequence: index };
-                                            var updateObject = themeToCitation.getUpdateObject();
-                                            resequence.push(editSequence(updateObject));
-                                        }
-
-                                        index++;
-                                    }
-                                }
-
-                                Promise.all(resequence);
-                            }
-
-                            res.send({ deleted: data.context.themeToCitationValues });
-                            return;
-                        });
-                });
+            res.send({ deletedThemeToCitationId: context.themeToCitationToDeleteId });
         })
-        .catch(err => {
-            var message = err;
-            if (err.message) {
-                message = err.message;
-            }
+    .catch(err => {
+        var message = err;
+        if (err.message) {
+            message = err.message;
+        }
 
-            res.status(500).send(errorMessage(
-                500,
-                "Server Error",
-                req.path,
-                message,
-                ""
-            ));
-        })
+        res.status(500).send(errorMessage(
+            500,
+            "Server Error",
+            req.path,
+            message,
+            ""
+        ));
+    });
 
+    return;
 }
 
 exports.update = (req, res) => {
@@ -761,7 +671,6 @@ exports.update = (req, res) => {
             ));
         });
 }
-
 
 exports.setSequence = (req, res) => {
     var message;

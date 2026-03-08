@@ -324,10 +324,11 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
             else {
               this.writeLine("[Citations]", "info");
               let citations = this.childCitations.get(this.openTheme.id);
+              console.log("in show citations, citations:");
+              console.log(citations);
               citations?.forEach(citation => {
                 let description = `"${citation.description ?? ""}"`;
-                this.writeLine(description == `""` ? "(no description)" : description, "info");
-                this.writeLine(citation.citationLabel ?? "(no verses cited)", "info");
+                this.writeLine(`${description ?? '""'} ${citation.citationLabel ?? ""}`, "info");
               });
             }
           }
@@ -613,9 +614,13 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
               .filter(theme => theme.id < 0) ?? []];
         });
 
+        // Keeps a unique list of themes that will need to be refreshed once their children are saved
+        const themesToRefresh = new Set<number>;
+
         while(unsaved.length) {
           // Physically save a layer of unsaved themes which have saved parents
           const saved = await this.createThemeLayer(unsaved)!;
+          saved.forEach(savedTheme => themesToRefresh.add(savedTheme.parent));
 
           // Saved themes are the same as unsaved themes except they have
           // an id that was assigned by the database.
@@ -629,7 +634,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
             let thisThemeChildren = this.childThemes.get(unsaved[i].id) ?? [];
             let thisThemeCitations = this.childCitations.get(unsaved[i].id) ?? [];
 
-            // if there are child themes, they are still temporary. Add them to the saved theme.
+            // if there are child themes of the newly-saved theme, they are still temporary. Add them to the saved theme.
             if (thisThemeChildren.length) {
               thisTheme.themes = [];
               thisThemeChildren.forEach(child => {
@@ -690,12 +695,22 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
           for (var citation of <CitationExtendedModel[]>cite.citations) {
             tasks.push(this.service.createCitationFromScriptureLabel(citation.description, cite.themeId, citation.citationLabel ?? ""));
           }
+
+          console.log(`parent theme of citation: ${cite.themeId}`);
+          themesToRefresh.add(cite.themeId);
         });
 
-        Promise.all(tasks).then();
+        Promise.all(tasks)
+          .then((citations) => {
+            console.log("after creation citations:");
+            console.log(citations);
+            themesToRefresh.forEach(themeId => BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${themeId}`));
+          })
+
 
         this.pendingSave = false;
         this.writeLine("Updates have been saved", "info");
+        this.readyForInput();
       }
       else if (/^(\?|help)/i.test(raw)) {
         let match = /^(\?|help)\s+(.*)/i.exec(raw);
@@ -902,34 +917,17 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
 
   private async lazyLoadCitationsByTheme(parentTheme: ThemeExtendedModel) : Promise<CitationExtendedModel[]> {
     let links = parentTheme.themeToCitationLinks;
-    let tasks = <any>[];
-    let citations = <CitationExtendedModel[]>[];
 
     links.forEach(link => {
       let citation = {
         id: link.themeToCitation?.citation.id,
         description: link.themeToCitation?.citation.description,
+        citationLabel: link.themeToCitation?.citation.citationLabel,
         extended: false,
         verses: []
       } as CitationExtendedModel;
 
-      citations.push(citation);
-
-      // Queue up a database query for the verses in this citation
-      tasks.push(this.service.getVersesByCitation(link.themeToCitation.citation.id));
-    });
-
-    await Promise.all(tasks).then(data => {
-      let verseArray = data as CitationVerseExtendedModel[][];
-
-      for (let i = 0; i < verseArray.length; i++) {
-        let citation = citations[i];
-
-        // each array of verses are the verses of a child citation
-        var ranges = this.convertVersesToRanges(verseArray[i]);
-        citation!.citationLabel = ranges.map(range => range.label).join(",") ?? "";
-        this.childCitations.set(parentTheme.id, [...this.childCitations.get(parentTheme.id) ?? [], citation!]);
-      };
+      this.childCitations.set(parentTheme.id, [...this.childCitations.get(parentTheme.id) ?? [], citation]);
     });
 
     return Promise.resolve(this.childCitations.get(parentTheme.id)!);

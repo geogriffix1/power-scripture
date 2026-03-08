@@ -459,7 +459,7 @@ exports.create = (req, res) => {
             scr = new bibleScripture;
             scr.values = { id: scriptureIds[index] };
             var selectString = scr.getSelectString();
-            console.log(selectSTring);
+            console.log(selectString);
 
             tasks.push(getQuery(selectString));
         }

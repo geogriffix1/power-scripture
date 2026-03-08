@@ -5,7 +5,8 @@ module.exports = app => {
     router.get("/:id(\\d+)", bibleTheme.listOne);
     router.get(/path=.+/, bibleTheme.listOne);
     router.get("/", bibleTheme.listAll);
-    router.get("/chain/:id(\\d+)", bibleTheme.chain);
+    router.get("/:id(\\d+)/chain/", bibleTheme.chain);
+    router.get("/:id(\\d+)/cascade", bibleTheme.cascade);
     router.post("/", bibleTheme.create);
     router.put("/", bibleTheme.edit);
     router.put("/:id/sequence/:sequence", bibleTheme.setSequence);

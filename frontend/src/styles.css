@@ -262,7 +262,7 @@ a.menu-icon-search i.psmenu-icon { background: url("assets/images/Search.png") c
 a.menu-icon-create i.psmenu-icon { background: url("assets/images/Create.png") center center no-repeat;}
 a.menu-icon-edit i.psmenu-icon {background: url("assets/images/Edit page.png") center center no-repeat;}
 a.menu-icon-cancel i.psmenu-icon { background: url("assets/images/Wrong.png") center center no-repeat;}
-a.menu-icon-delete i.psmenu-icon { background: url("assets/images/Delete.png") center center no-repeat;}
+.menu-icon-delete i.psmenu-icon { background: url("assets/images/Delete.png") center center no-repeat;}
 a.menu-icon-copy  i.psmenu-icon {background: url("assets/images/Copy.png") center center no-repeat;}
 a.menu-icon-paste i.psmenu-icon {background: url("assets/images/Paste.png") center center no-repeat;}
 a.menu-icon-save i.psmenu-icon {background: url("assets/images/Save.png") center center no-repeat;}

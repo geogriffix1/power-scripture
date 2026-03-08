@@ -198,13 +198,16 @@ export class BibleThemeTreeComponent implements OnInit {
   public static refreshDomNodeFromDb(nodeId: string) {
     console.log("refreshDomNode");
     const themeTree = $('#theme-tree-full').jstree(true);
-    (themeTree as any).redraw_node(nodeId, true);
+    if ((themeTree as any).get_node(nodeId)) {
+      (themeTree as any).refresh_node(nodeId);
+      console.log(themeTree);
+    }
   }
 
   public static refreshDomNode(node: JstreeModel) {
     console.log("refreshDomNode");
     const themeTree = $('#theme-tree-full').jstree(true);
-    (themeTree as any).redraw_node(node, true);
+    (themeTree as any).redraw_node(node);
   }
 
   public static openDomThemeNode(node: JstreeModel) {
@@ -264,7 +267,6 @@ export class BibleThemeTreeComponent implements OnInit {
         );
 
       (async () => {
-        //const citationLabel = await this.service.getCitationLabel(citationId);
         const tree = $('#theme-tree-full').jstree(true) as any;
         if(!tree){ console.error('jsTree instance not found at selector #theme-tree-full'); return; }
 
@@ -278,63 +280,7 @@ export class BibleThemeTreeComponent implements OnInit {
           tree.redraw_node(node);
           console.log('verified model a_attr.title:', tree.get_node(nodeId).a_attr.title);
         });
-
-        // const nodeId = duplicates[0].id; // <-- change this
-        // const node = tree.get_node(nodeId);
-        // console.log('current node object:', node);
-        // if(!node){ console.error('node not found:', nodeId); return; }
-
-        // // Ensure attr objects exist
-        // node.li_attr = duplicates[0].li_attr || {};
-        // node.a_attr  = duplicates[0].a_attr  || {};
-
-        // // New value you want
-        // //const newTitle = 'My updated tooltip: ' + new Date().toISOString();
-
-        // // Update both model copies
-        // //node.li_attr.title = newTitle;
-        // //node.a_attr.title  = newTitle;
-
-        // // Push into internal model to be safe
-        // if((tree as any)._model && (tree as any)._model.data && (tree as any)._model.data[nodeId]){
-        //   (tree as any)._model.data[nodeId].li_attr = node.li_attr;
-        //   (tree as any)._model.data[nodeId].a_attr  = node.a_attr;
-        // }
-
-        // // Update the DOM anchor *without* relying on jQuery selector escaping
-        // const anchor = document.getElementById(nodeId + '_anchor');
-        // if(anchor){
-        //   anchor.setAttribute('title', newTitle);
-        //   console.log('DOM anchor title set directly');
-        // } else {
-        //   console.warn('DOM anchor element not found; calling redraw_node as fallback');
-        //   try {
-        //     (tree as any).redraw_node(node); // fallback
-        //   } catch(e){ console.error('redraw_node failed', e); }
-        // }
-
-        // Verify
       })();
-
-      // duplicates.forEach(node => {
-      //   const domNode: any = tree.get_node(node.id);
-      //   domNode.text = node.text;
-      //   domNode.li_attr.title = node.li_attr?.title ?? '';
-
-      //   //console.log("refreshDomNode");
-      //   //const themeTree = $('#theme-tree-full').jstree(true);
-      //   (tree as any)._model[node.id].li_attr = domNode.li_attr;
-      //   (tree as any)._model[node.id].a_attr.title = domNode.li_attr.title;
-      //   (tree as any).redraw_node(domNode, true);
-      //   $(`#${domNode.id}, #${domNode.id}_anchor`).attr('title', domNode.li_attr.title);
-
-
-
-        //console.log(domNode);
-        // tree.set_id(domNode, node.id);
-        // tree.redraw_node(domNode,true);
-        // $(`#${node.id}_anchor`).attr('title', node.li_attr.title);
-      //});
     }
   }
 }
@@ -371,44 +317,4 @@ export class ServiceDirective {
   public async getCitationLabel(id:number) {
     return await this.provider.getCitationLabel(id);
   }
-
-  // public refreshNode (node:JstreeModel) {
-  //   let id:number = <number><unknown>node.id.replace(/theme|citation/, "");
-  //   if (node.id.startsWith("theme")) {
-  //     this.provider.getTheme(id).then(theme => {
-  //       let node = JstreeModel.getJstreeModelFromExtendedTheme(theme);
-  //       console.log("refreshed theme node");
-  //       console.log(node);
-  //     });
-  //   }
-  //   else if (node.id.startsWith("citation")) {
-  //     let citationId = node.li_attr.citationId;
-  //     this.provider.getThemeTreeCitation(citationId)
-  //       .then(themeToCitation => {
-  //         let node = JstreeModel.getJstreeModelFromThemeToCitation(themeToCitation);
-  //       })
-  //   }
-  // }
-
-  // public async deleteTheme(node:JstreeModel, callback:any) {
-  //   console.log("Delete Theme");
-  //   if (node.parent == "#") {
-  //     callback(false, "Root themes cannot be deleted");
-  //     return;
-  //   }
-
-  //   if (!node.id.startsWith("theme")) {
-  //     callback(false, "Node is not a theme");
-  //     return;
-  //   }
-
-  //   let id = <number><unknown>node.id.replace(/theme(\d+)/, '$1');
-  //   let parent = <number><unknown>node.parent.replace(/theme(\d+)/, '$1');
-  //   console.log(id);
-  //   await this.provider.deleteTheme(id, (success:boolean, message:string) => {
-  //     if (success) {
-  //       callback(success, message);
-  //     }
-  //   });
-  // }
 }

@@ -33,11 +33,14 @@ export class CreateCitationComponent {
   }
 
   ngAfterViewInit() {
-    let viewTop = <number>$("as-split-area.workbench").offset()!.top;
+    let rect = WorkbenchComponent.getWorkbenchSize();
+    $("#description").css('width', (rect.width - 70) + "px");
+    console.log(`description width set to ${(rect.width - 70) + "px"}`);
+    let viewTop  = <number>$("as-split-area.workbench").offset()!.top;
     let viewHeight = <number>$("as-split-area.workbench").innerHeight();
-    let resultsTop = $("section.scrollable-content").offset()!.top;
+    let resultsTop = $("div.search-results").offset()!.top;
     let searchResultsHeight = viewTop + viewHeight - resultsTop;
-
+    
     $("div.search-results").css("height", searchResultsHeight + "px");
 
     if (!CreateCitationComponent.isSubscribed) {

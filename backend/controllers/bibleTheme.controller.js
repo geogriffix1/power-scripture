@@ -170,10 +170,50 @@ exports.chain = (req, res) => {
             "Invalid Parameter",
             child,
             message,
-            "Usage: /theme/chain/{themeId}"
+            "Usage: /themes/chain/{themeId}"
         ));
     }
 }
+
+exports.cascade = (req, res) => {
+  const themeId = Number(req.params.id);
+  if (!Number.isFinite(themeId) || themeId <= 0) {
+    return res.status(400).json({ error: "Invalid theme id" });
+  }
+
+  dbAccess.executeWithConnection((err, conn, done) => {
+    if (err) return res.status(500).json({ error: err.message });
+
+    conn.query("CALL get_bible_theme_cascade(?, @json_out)", [themeId], (err1) => {
+      if (err1) { done(); return res.status(500).json({ error: err1.message }); }
+
+      conn.query("SELECT @json_out AS json_out", (err2, rows) => {
+        done();
+        if (err2) return res.status(500).json({ error: err2.message });
+
+        try {
+          let payload = rows?.[0]?.json_out;
+
+          if (payload == null) payload = { themes: [], themeToCitations: [] };
+          else if (Buffer.isBuffer(payload)) payload = payload.toString("utf8");
+
+          // parse only if it's a string
+          if (typeof payload === "string") {
+            let parsed = JSON.parse(payload);
+            // handle double-encoded case just in case
+            if (typeof parsed === "string") parsed = JSON.parse(parsed);
+            payload = parsed;
+          }
+
+          return res.json(payload);
+        } catch (e) {
+          console.error("Bad JSON from DB:", e);
+          return res.status(500).json({ error: "Invalid JSON from DB" });
+        }
+      });
+    });
+  });
+};
 
 exports.listAll = (req, res) => {
     var parent = undefined;

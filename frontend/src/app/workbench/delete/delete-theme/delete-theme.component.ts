@@ -5,6 +5,7 @@ import { JstreeModel } from '../../../model/jstree.model';
 import { BibleService } from '../../../bible.service';
 import { ThemeModel, ThemeExtendedModel, ThemeModelReference } from '../../../model/theme.model';
 import { ThemeToCitationLinkModel } from '../../../model/themeToCitation.model';
+import { ThemeCascadeModel } from '../../../model/themeCascade.model';
 @Component({
     selector: 'app-delete-theme',
     imports: [],
@@ -18,6 +19,9 @@ export class DeleteThemeComponent {
   resequencingHeight!:number;
   themeListOpen = false;
   citationListOpen = false;
+  themeToDeleteCascade?: ThemeCascadeModel;
+  subthemeCount = 0;
+  citationCount = 0;
 
   jstreeModel!:JstreeModel;
 
@@ -26,37 +30,63 @@ export class DeleteThemeComponent {
 
   parentTheme!: ThemeModelReference;
 
-  DeleteTheme() {
-    console.log("Delete theme clicked");
-    $(".command-message").text("");
-    this.activeTheme.name = <string>$("#name").val();
-    this.activeTheme.description = <string>$("#description").val();
+  constructor(private service: BibleService) {}
 
-    console.log("Deleting");
-    console.log(this.activeTheme.name);
+  DeleteTheme(e?: Event) {
+    e?.preventDefault();
+    e?.stopPropagation();
 
-    let service = new BibleService;
-    
-    //(async (obj:DeleteThemeComponent) => {
-      console.log("preparing to delete theme:");
-      console.log(this.activeTheme);
-      //console.log(obj.activeTheme);
-      // await service.deleteTheme(obj.activeTheme.id, (success:boolean, message:string) => {
-      //   $(".command-message").text(message);
-      //   console.log("deleting dom node");
-      //   BibleThemeTreeComponent.deleteDomNode(`#theme${obj.activeTheme.id}`);
-      // });
+    $(".command-warning").hide(100);
+    $("command-message").text("");
 
-      // console.log("preparing to resequence:");
-      // await service.normalizeThemeSequence(obj.activeTheme.parent, (success:boolean, message:string) => {
-      //   console.log(`normalizeThemeSequence success:${success}, ${message}`);
-      // });
+    (async () => {
+      const cascade = await this.service.getThemeCascade(this.activeTheme.id);
 
-      let theme = service.getTheme(this.activeTheme.parent).then();
-      console.log("back from getTheme");
-      console.log(theme);
+      const themes = cascade?.themes ?? [];
+      const links = cascade?.themeToCitations ?? [];
 
-    //})(this);
+      if (themes.length > 1 || links.length > 0) {
+        this.subthemeCount = themes.length - 1;
+        this.citationCount = links.length;
+        $(".command-warning").show(100);
+      }
+      else if (themes.length == 1) {
+        let parentThemeId = this.activeTheme.parent;
+        let success = await this.service.deleteTheme(this.activeTheme.id);
+        if (success) {
+          $(".command-message").text(`Theme ${this.activeTheme.name} deleted successfully`);
+          $(".workbench-theme div.selected.theme").addClass("missing");
+          BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${parentThemeId}`);
+        }
+        else {
+          $(".command-message").text("Delete failed");
+        }
+      }
+    })();
+  }
+
+  DeleteAll() {
+    (async() => {
+      let parentThemeId = this.activeTheme.parent;
+      console.log(`deleting theme ${this.activeTheme.id}`);
+      let success = await this.service.deleteTheme(this.activeTheme.id);
+      $(".command-warning").hide(100);
+      if (success) {
+        $(".command-message").text(`Theme ${this.activeTheme.name} deleted successfully`);
+        $(".workbench-theme div.selected.theme").addClass("missing");
+        BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${parentThemeId}`);
+      }
+      else {
+        $(".command-message").text("Delete failed");
+      }
+
+      $(".command-warning").hide(100);
+    })();
+  }
+
+  Cancel() {
+    $(".command-warning").hide(100);
+    $("command-message").text("");
   }
 
   workbenchDomRect(rect:DOMRectReadOnly) {
@@ -96,11 +126,19 @@ export class DeleteThemeComponent {
           .subscribe((node:any) => {
             if (WorkbenchComponent.activeTheme) {
               console.log("WorkbenchComponent.activeTheme");
-              obj.activeTheme = {
+              let parent = WorkbenchComponent.activeTheme.parent;
+              if (parent.startsWith("theme")) {
+                parent = parent.replace("theme", "");
+              }
+              else {
+                parent = "0";
+              }
+
+              this.activeTheme = {
                 id: <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", ""),
                 name: WorkbenchComponent.activeTheme.text,
                 description: WorkbenchComponent.activeTheme.li_attr.title,
-                parent: <number><unknown>WorkbenchComponent.activeTheme.parent.replace("theme", ""),
+                parent: +parent,
                 sequence: WorkbenchComponent.activeTheme.li_attr.sequence,
                 childCount: 0,
                 path: WorkbenchComponent.activeTheme.data.path,
@@ -110,6 +148,8 @@ export class DeleteThemeComponent {
               $("#name").val(obj.activeTheme.name);
               $("#description").val(obj.activeTheme.description);
               $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
+              $(".command-warning").hide();
+              $(".commandMessage").text("");
             }
             else {
               $(".workbench-theme div.selected.theme").addClass("missing");

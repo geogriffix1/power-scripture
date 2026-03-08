@@ -8,5 +8,6 @@ export interface CitationModel {
 }
 
 export interface CitationExtendedModel extends CitationModel {
+    extended: boolean,
     verses: CitationVerseModel[]
 }

@@ -32,6 +32,8 @@ export class SearchScriptureComponent implements OnInit{
   searchResultsHeight!:number;
   searchResults:ScriptureSearchResultModel[] = [];
   isSubscribedKeystrokes = false;
+  rect!: DOMRect;
+
   callbacks = {
     canSelectAll():boolean { return true; },
     selectAll():void {
@@ -215,6 +217,11 @@ export class SearchScriptureComponent implements OnInit{
   }
 
   ngAfterViewInit() {
+    let rect = WorkbenchComponent.getWorkbenchSize();
+    let commandWidth = rect.width;
+    
+    $("#search-scripture-command").width(commandWidth - 60);
+
     if (!SearchScriptureComponent.isSubscribed) {
       WorkbenchComponent.WorkbenchResizeBroadcaster.subscribe((rect:DOMRectReadOnly) => {
         if (SearchScriptureComponent.isActive) {
@@ -283,36 +290,6 @@ export class SearchScriptureComponent implements OnInit{
    public onScroll(scroll:any) {
     let scrollTop = scroll.target.scrollTop;
   }
-
-  // public showContextMenu(accessKey:any, event:MouseEvent) {
-  //    console.log("showContextMenu event:");
-  //   // console.log(event);
-  //   event.preventDefault();
-
-  //   SearchContextMenuComponent.showContextMenu(accessKey, this.searchResults);
-  //   console.log("after show context menu");
-  //   this.selectedEntry = accessKey;
-
-  //   let domRow = $(`tr[accesskey=${accessKey}]`);
-  //   let context = $("app-search-context-menu");
-  
-  //   let right = domRow.innerWidth()!;
-  //   let bottom = domRow.innerHeight()!;
-  //   let contextTop = bottom;
-  //   domRow.append(context);
-
-  //   let contextLeft = right - context.innerWidth()!;
-
-  //   context.css({
-  //     position: "absolute",
-  //     top: contextTop + "px",
-  //     left: contextLeft + "px",
-  //     display: "block",
-  //     zIndex: 1
-  //   });
-
-  //   $("div.context-menu.hidden").removeClass("hidden");
-  // }
 
   public showModalContextMenu(event:MouseEvent) {
     event.preventDefault();

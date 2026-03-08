@@ -85,7 +85,8 @@ export class CiteScriptureComponent {
   }
 
   CreateCitation() {
-    $("div.command-message").text("").hide(100);    
+    console.log("CreateCitation clicked!");
+    $("div.command-message").text("").hide(100);
     if (!this.scriptureRanges || this.scriptureRanges.length == 0) {
       $("div.command-message").text("Citation not created - No scriptures have been selected").show(100);
       return;
@@ -107,6 +108,11 @@ export class CiteScriptureComponent {
       }
     }
 
+    console.log("calling service.createCitation");
+    console.log(`description: ${description}`);
+    console.log(`parentThemeId: ${parentThemeId}`);
+    console.log("scriptures:");
+    console.log(scriptures);
     service.createCitation(description, parentThemeId, scriptures);
     $('#theme-tree-full').jstree('refresh');
   }
@@ -167,7 +173,7 @@ export class CiteScriptureComponent {
     this.sectionHeight = rect.height;
     this.widthBook = `${Math.floor((rect.width - 24) / 2.5)}px`;
     this.widthChapter = `${Math.floor((rect.width - 24) / 5.0)}px`;
-    this.widthDescription = 90; //rect.width - 20;
+    this.widthDescription = rect.width - 54;
   }
 
   onHoverLi(event:any) {
@@ -573,6 +579,22 @@ export class CiteScriptureComponent {
   }
 
   ngAfterViewInit() {
+    let rect = WorkbenchComponent.getWorkbenchSize();
+    this.workbenchDomRect(rect);
+
+    $(".command-label.book,.command.book").css('width', `${this.widthBook}`);
+    $("#booklist").css('width', this.widthBook);
+    $("#chapterlist,#verselist,#endverselist").css('width', this.widthChapter);
+    $(".command-label.chapter,.command-label.verse,.command-label.end-verse").css('width', `${this.widthChapter}`);
+    $(".command.chapter,.command.verse,.command.end-verse").css('width', `${this.widthChapter}`);
+    $(".command-line").css('width', this.widthDescription);
+    
+    let viewHeight = <number>$("as-split-area.workbench").innerHeight();
+    $("as-split-area.workbench").css("overflow-y", "unset");
+    let resultsTop = $("section.scrollable-content").offset()!.top;
+    let searchResultsHeight = viewHeight - resultsTop;
+    $("div.search-results").css("height", searchResultsHeight + "px");
+
     if (!CiteScriptureComponent.isSubscribed) {
       WorkbenchComponent.WorkbenchResizeBroadcaster
         .subscribe((rect:DOMRectReadOnly) => {
@@ -583,6 +605,7 @@ export class CiteScriptureComponent {
             $("#chapterlist,#verselist,#endverselist").css('width', this.widthChapter);
             $(".command-label.chapter,.command-label.verse,.command-label.end-verse").css('width', `${this.widthChapter}`);
             $(".command.chapter,.command.verse,.command.end-verse").css('width', `${this.widthChapter}`);
+            $(".command-line").css('width', this.widthDescription);
             
             let viewHeight = <number>$("as-split-area.workbench").innerHeight();
             $("as-split-area.workbench").css("overflow-y", "unset");
