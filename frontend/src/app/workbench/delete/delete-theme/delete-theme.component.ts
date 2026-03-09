@@ -27,6 +27,7 @@ export class DeleteThemeComponent {
 
   static isSubscribed = false;
   static isActive = false;
+  missingThemeText = "Please select the <b>Theme</b> from the <b>Bible Theme Tree</b>";
 
   parentTheme!: ThemeModelReference;
 
@@ -54,9 +55,14 @@ export class DeleteThemeComponent {
         let parentThemeId = this.activeTheme.parent;
         let success = await this.service.deleteTheme(this.activeTheme.id);
         if (success) {
+          console.log("Delete successful");
           $(".command-message").text(`Theme ${this.activeTheme.name} deleted successfully`);
-          $(".workbench-theme div.selected.theme").addClass("missing");
+          $("div.selected.theme").addClass("missing").html(this.missingThemeText);
           BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${parentThemeId}`);
+          WorkbenchComponent.activeTheme = JstreeModel.null;
+          $("#name").val("");
+          $("#description").val("");
+          $(".command-warning").hide();
         }
         else {
           $(".command-message").text("Delete failed");
@@ -72,11 +78,17 @@ export class DeleteThemeComponent {
       let success = await this.service.deleteTheme(this.activeTheme.id);
       $(".command-warning").hide(100);
       if (success) {
+        console.log("Delete success");
         $(".command-message").text(`Theme ${this.activeTheme.name} deleted successfully`);
         $(".workbench-theme div.selected.theme").addClass("missing");
         BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${parentThemeId}`);
+        WorkbenchComponent.activeTheme = JstreeModel.null;
+        $("#name").val("");
+        $("#description").val("");
+        $(".command-warning").hide();
       }
       else {
+        console.log("Delete Failed");
         $(".command-message").text("Delete failed");
       }
 
@@ -149,7 +161,7 @@ export class DeleteThemeComponent {
               $("#description").val(obj.activeTheme.description);
               $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
               $(".command-warning").hide();
-              $(".commandMessage").text("");
+              $(".command-message").text("");
             }
             else {
               $(".workbench-theme div.selected.theme").addClass("missing");

@@ -1,24 +1,22 @@
 <div class="workbench-delete">
     <div class="header">Delete Citation</div>
-    @if (!activeCitation) {
-    <div class="citatation citation-icon"><img src="/assets/images/Script.png" title="Navigate by Theme Tree to the target citation"></div>
+    <div class="citation citation-icon"><img src="/assets/images/Script.png" title="Navigate by Theme Tree to the target citation"></div>
     <div class="citation selected missing">
         Please select an active <b>Citation</b> from the <b>Bible Theme Tree</b>
     </div>
-    }
     <nav class="cite-scripture">
-        <div class="workbench-settings">
+        <div class="form-grid">
             <button
                 type="button"
-                class="menu menu-icon-delete"
+                class="icon-button menu menu-icon-delete"
                 (click)="DeleteCitationLink()"
                 title="Click to Delete"
             >
-                <i class="theme psmenu-icon"></i>
+                <i class="citation psmenu-icon"></i>
             </button>
+            <input id="label" #label type="text" class="text-input" placeholder="Citation Link" title="The Citation Label" disabled>
+            <input id="citation-description" type="text" class="text-input" placeholder="Citation Description" title="The description of the citation" disabled>
         </div>
-        <input id="label" #label type="text" class="command-line" placeholder="Citation Link" title="The Citation Label" disabled>
-        <input id="description" #description type="text" class="command-line" placeholder="Citation Description" title="The description of the citation" disabled>
         <div class="command-message"></div>
     </nav>
 </div>

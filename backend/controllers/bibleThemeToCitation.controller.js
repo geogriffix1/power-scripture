@@ -389,59 +389,80 @@ exports.create = (req, res) => {
     }
 }
 
+// exports.delete = (req, res) => {
+//     var linkId = eval(req.params.id);
+//     var themeToCitation = new bibleThemeToCitation;
+//     themeToCitation.values = { id: linkId };
+
+//     if (typeof linkId !== "number") {
+//         res.status(400).send(errorMessage(
+//             400,
+//             "Invalid Parameter",
+//             req.path,
+//             "Query argument must be the numeric themeToCitation id",
+//             "Usage (e.g. /themeToCitation/2000) deletes the themeToCitation whose id equates to 2000.",
+//             ""
+//         ));
+//     }
+
+//     const execute = (deleteString, context) => {
+//         return new Promise((resolve, reject) => {
+//             dbAccess.execute(deleteString, (err, results) => {
+//                 if (err) {
+//                     reject(err);
+//                 }
+//                 else {
+//                     resolve({ results: results, context: context });
+//                 }
+//             });
+//         });
+//     }
+
+//     var deleteString = `CALL delete_bible_theme_to_citation(${linkId})`;
+//     var context = { themeToCitationToDeleteId: linkId };
+
+//     // This deletes the theme_to_citation and also the citation itself if the citation has no other links to themes
+//     execute(deleteString, context)
+//         .then(data => {
+//             res.send({ deletedThemeToCitationId: context.themeToCitationToDeleteId });
+//         })
+//     .catch(err => {
+//         var message = err;
+//         if (err.message) {
+//             message = err.message;
+//         }
+
+//         res.status(500).send(errorMessage(
+//             500,
+//             "Server Error",
+//             req.path,
+//             message,
+//             ""
+//         ));
+//     });
+
+//     return;
+// }
+
 exports.delete = (req, res) => {
-    var linkId = eval(req.params.id);
-    var themeToCitation = new bibleThemeToCitation;
-    themeToCitation.values = { id: linkId };
-
-    if (typeof linkId !== "number") {
-        res.status(400).send(errorMessage(
-            400,
-            "Invalid Parameter",
-            req.path,
-            "Query argument must be the numeric themeToCitation id",
-            "Usage (e.g. /themeToCitation/2000) deletes the themeToCitation whose id equates to 2000.",
-            ""
-        ));
-    }
-
-    const execute = (deleteString, context) => {
-        return new Promise((resolve, reject) => {
-            dbAccess.execute(deleteString, (err, results) => {
-                if (err) {
-                    reject(err);
-                }
-                else {
-                    resolve({ results: results, context: context });
-                }
-            });
+    var themeToCitationId = req.params.id;
+    (async (themeToCitationId) => {
+        await dbAccess.execute(`CALL delete_bible_theme_to_citation(${themeToCitationId})`, (err, results) => {
+            if (err) {
+                res.status(500).send(errorMessage(
+                    500,
+                    "Server Error",
+                    req.path,
+                    `Error attempting to delete theme_to_citation: ${err.message}`,
+                    ""
+                ));
+                return;
+            }
+            else {
+                res.send({ deleted: themeToCitationId });
+            }
         });
-    }
-
-    var deleteString = `CALL delete_bible_theme_to_citation(${linkId})`;
-    var context = { themeToCitationToDeleteId: linkId };
-
-    // This deletes the theme_to_citation and also the citation itself if the citation has on other links to themes
-    execute(deleteString, context)
-        .then(data => {
-            res.send({ deletedThemeToCitationId: context.themeToCitationToDeleteId });
-        })
-    .catch(err => {
-        var message = err;
-        if (err.message) {
-            message = err.message;
-        }
-
-        res.status(500).send(errorMessage(
-            500,
-            "Server Error",
-            req.path,
-            message,
-            ""
-        ));
-    });
-
-    return;
+    })(themeToCitationId);
 }
 
 exports.update = (req, res) => {

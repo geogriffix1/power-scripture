@@ -43,7 +43,9 @@ export class JstreeModel {
         this.children = <string[]>[];
         this.data = { path: path };
     }
-            
+    
+    static null = new JstreeModel("0", "", "", "", 0, "", {});
+
     static getJstreeModel(node: any): JstreeModel {
         let pattern = /(theme|citation)(\d+)/;
         let icon = node.id.replace(pattern, '$1');

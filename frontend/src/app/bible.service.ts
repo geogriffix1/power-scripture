@@ -378,52 +378,78 @@ const data = await fetch(url, {
   }
  }
 
-async deleteTheme(themeId:number) {
-  var url = `${this.ROOT_URL}themes/${themeId}`;
-  var data:any;
-  try {
-    console.log("fetching result");
-    data = await fetch(url, {
-      method: "DELETE",
+  async deleteTheme(themeId:number) {
+    var url = `${this.ROOT_URL}themes/${themeId}`;
+    var data:any;
+    try {
+      console.log("fetching result");
+      data = await fetch(url, {
+        method: "DELETE",
+        cache: "no-cache",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+    }
+    catch (e) {
+      console.log("delete theme failed");
+      console.log(e);
+      return false;
+    }
+
+    const result:any = await data.json();
+    if (result && result.deleted) {
+      return true;
+    }
+
+    return false;
+  }
+
+  async normalizeThemeSequence(parentId:number, callback:any) {
+    var url = `${this.ROOT_URL}themes/normalize-themes/${parentId}`;
+    const data = await fetch(url, {
+      method: "PUT",
       cache: "no-cache",
       headers: {
         "Content-Type": "application/json"
       }
     });
+
+    const result:any = await data.json();
+    if (result && result.message && result.message == "Success" ) {
+      callback(true, "Themes resequenced successfully.");
+    }
+    else {
+      callback(false, "Theme resequence failed.");
+    }
   }
-  catch (e) {
-    console.log("delete theme failed");
-    console.log(e);
+
+  async deleteThemeToCitation(themeToCitationId:number) {
+    var url = `${this.ROOT_URL}themeToCitations/${themeToCitationId}`;
+    var data:any;
+    try {
+      console.log("fetching result");
+      data = await fetch(url, {
+        method: "DELETE",
+        cache: "no-cache",
+        headers: {
+          "Content-Type": "application/json"
+        }
+      });
+    }
+    catch (e) {
+      console.log("delete theme failed");
+      console.log(e);
+      return false;
+    }
+
+    const result:any = await data.json();
+    if (result && result.deleteted) {
+      return true;
+    }
+
     return false;
   }
-
-  const result:any = await data.json();
-  if (result !== null && result.deleteted !== null) {
-    console.log("calling back success");
-    return true;
-  }
-
-  return false;
- }
-
-async normalizeThemeSequence(parentId:number, callback:any) {
-  var url = `${this.ROOT_URL}themes/normalize-themes/${parentId}`;
-  const data = await fetch(url, {
-    method: "PUT",
-    cache: "no-cache",
-    headers: {
-      "Content-Type": "application/json"
-    }
-  });
-
-  const result:any = await data.json();
-  if (result && result.message && result.message == "Success" ) {
-    callback(true, "Themes resequenced successfully.");
-  }
-  else {
-    callback(false, "Theme resequence failed.");
-  }
- }
 
   async citeScriptures(cite:string) : Promise<ScriptureModel[]> {
     var url = `${this.ROOT_URL}scriptures/${cite}`;
