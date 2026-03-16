@@ -2,31 +2,37 @@
   height: 100%;
   min-height: 0;
   overflow: hidden;
-
   display: flex;
   flex-direction: column;
   justify-content: flex-start;
 }
 
-header.bible-workbench,
-nav.bible-workbench {
-    flex: 0 0 auto;
+header.bible-workbench h2 {
+  color: white;
+  text-align: center;
+  font-size: medium;
+  margin: 0;
 }
 
 nav.bible-workbench {
-    height: auto;
-    min-height: 0;
+  display:flex;
+  flex: 0 0 auto;
+  height: auto;
+  min-height:0;
+  padding: 4px 6px;
+  overflow: hidden;
+  justify-content: center;
+  width: 100%;
 }
 
-nav.bible-workbench > div.bible-workbench {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    gap: 6px;
-    flex-wrap: nowrap;
+.bible-workbench .bible-workbench-menu {
+  display: inline;
+  /* flex-direction: row; */
+  gap: 6px;
+  flex-wrap: nowrap;
 }
 
-section.bible-workbench {   /* use your actual wrapper class if you have one */
+section.bible-workbench {
   flex: 1 1 auto;
   min-height: 0;
   overflow: hidden;
@@ -34,6 +40,125 @@ section.bible-workbench {   /* use your actual wrapper class if you have one */
   flex-direction: column;
 }
 
-/* app-create { display: block; }
-app-edit { display: block; }
-app-import {display: block; } */
+/* button shell */
+nav.bible-workbench > .bible-workbench-menu > .menu {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  margin: 0;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.18);
+  background: linear-gradient(to bottom, #181818, #050505);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+
+  transform: translateY(0) scale(1);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease,
+    filter 120ms ease;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.45),
+    0 1px 2px rgba(0,0,0,0.65);
+}
+
+/* icon box */
+nav.bible-workbench > .bible-workbench-menu > .menu > .psmenu-icon {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  display: block;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  pointer-events: none;
+  transition:
+    transform 120ms ease,
+    filter 120ms ease,
+    opacity 120ms ease;
+}
+
+/* icon image mapping */
+nav.bible-workbench > .bible-workbench-menu > .menu-icon-search  > .psmenu-icon {
+  background-image: url('/assets/images/Search.png');
+}
+
+nav.bible-workbench > .bible-workbench-menu > .menu-icon-create  > .psmenu-icon {
+  background-image: url('/assets/images/Create.png');
+}
+
+nav.bible-workbench > .bible-workbench-menu > .menu-icon-edit    > .psmenu-icon {
+  background-image: url('/assets/images/Edit page.png');
+}
+
+nav.bible-workbench > .bible-workbench-menu > .menu-icon-delete  > .psmenu-icon {
+  background-image: url('/assets/images/Delete.png');
+}
+
+nav.bible-workbench > .bible-workbench-menu > .menu-icon-import  > .psmenu-icon {
+  background-image: url('/assets/images/Import.png');
+}
+
+nav.bible-workbench > .bible-workbench-menu > .menu-icon-publish > .psmenu-icon {
+  background-image: url('/assets/images/Scenario.png');
+}
+
+nav.bible-workbench > .bible-workbench-menu > .menu-icon-help    > .psmenu-icon {
+  background-image: url('/assets/images/Help.png');
+}
+
+/* hover */
+nav.bible-workbench > .bible-workbench-menu > .menu:hover:not(.is-active) {
+  transform: translateY(-2px) scale(1.08);
+  border-color: rgba(255, 215, 0, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 0 8px rgba(255, 215, 0, 0.22),
+    0 3px 10px rgba(0,0,0,0.70);
+}
+
+nav.bible-workbench > .bible-workbench-menu > .menu:hover:not(.is-active) > .psmenu-icon {
+  filter: brightness(1.12) drop-shadow(0 0 3px rgba(255, 225, 120, 0.45));
+}
+
+/* pressed */
+nav.bible-workbench > .bible-workbench-menu > .menu:active {
+  transform: translateY(1px) scale(0.96);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,0.75),
+    inset 0 0 6px rgba(255,255,255,0.04);
+}
+
+nav.bible-workbench > .bible-workbench-menu > .menu:active > .psmenu-icon {
+  transform: scale(0.96);
+  filter: brightness(0.92);
+}
+
+/* active */
+nav.bible-workbench > .bible-workbench-menu > .menu.is-active {
+  transform: translateY(1px) scale(1);
+  background: linear-gradient(to bottom, #2d2812, #161102);
+  border-color: rgba(255, 215, 90, 0.55);
+  box-shadow:
+    inset 0 2px 6px rgba(0,0,0,0.72),
+    inset 0 0 10px rgba(255,215,90,0.14),
+    0 0 8px rgba(255,215,90,0.28);
+}
+
+nav.bible-workbench > .bible-workbench-menu > .menu.is-active > .psmenu-icon {
+  filter: brightness(1.15) drop-shadow(0 0 4px rgba(255,220,120,0.65));
+}
+
+nav.bible-workbench > .bible-workbench-menu > .menu.is-active:hover {
+  transform: translateY(1px) scale(1);
+}
