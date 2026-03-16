@@ -111,9 +111,10 @@ export class CiteScriptureComponent {
     console.log("calling service.createCitation");
     console.log(`description: ${description}`);
     console.log(`parentThemeId: ${parentThemeId}`);
+    console.log("sequence: 0")
     console.log("scriptures:");
     console.log(scriptures);
-    service.createCitation(description, parentThemeId, scriptures);
+    service.createCitation(description, parentThemeId, 0, scriptures);
     $('#theme-tree-full').jstree('refresh');
   }
 

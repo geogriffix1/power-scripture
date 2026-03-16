@@ -334,11 +334,10 @@ exports.create = (req, res) => {
 
             var nextSequence = data[2][0].nextSequence;
 
-            //console.log(`nextSequence: ${nextSequence}`);
-
-            context.insert.sequence = nextSequence;
-            //console.log("context:");
-            console.log(JSON.stringify(context));
+            console.log(`nextSequence: ${nextSequence}`);
+            if (!context.insert.sequence) {
+                context.insert.sequence = nextSequence;
+            }
 
             tasks = [];
             tasks.push(addContext(context));
@@ -877,6 +876,54 @@ exports.resequenceCitations = (req, res) => {
     })();
 }
 
+exports.pasteTheme = (req, res) => {
+    var copyThemeId = req.params.copyId;
+    var pasteThemeId = req.params.pasteId;
+
+    (async () => {
+        await dbAccess.execute(`call paste_bible_theme(${copyThemeId}, ${pasteThemeId})`, (err, results) => {
+            if (err) {
+                res.status(500).send(errorMessage(
+                    500,
+                    "Server Error",
+                    req.path,
+                    `Error trying to paste theme node: ${err.message}`,
+                    "Usage: PUT /themes/paste-theme/1/2 copies theme id=1 to theme id=2"
+                ));
+
+                res.send();
+            }
+            else {
+                refreshThemePaths();
+                res.send({message: "Success"});
+            }
+        });
+    })();
+}
+
+exports.pasteThemeToCitation = (req, res) => {
+    var copyThemeToCitationId = req.params.copyId;
+    var pasteThemeId = req.params.pasteId;
+
+    (async () => {
+        await dbAccess.execute(`call paste_bible_theme_to_citation(${copyThemeToCitationId}, ${pasteThemeId})`, (err, results) => {
+            if (err) {
+                res.status(500).send(errorMessage(
+                    500,
+                    "Server Error",
+                    req.path,
+                    `Error trying to paste theme node: ${err.message}`,
+                    "Usage: PUT /themes/paste-themeToCitation/1/2 copies themeToCitation id=1 to theme id=2"
+                ));
+
+                res.send();
+            }
+            else {
+                res.send({message: "Success"});
+            }
+        });
+    })();
+}
 
 exports.normalizeCitations = (req, res) => {
     var parentId = req.params.id;

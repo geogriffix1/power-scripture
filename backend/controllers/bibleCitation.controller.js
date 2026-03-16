@@ -209,6 +209,7 @@ exports.create = (req, res) => {
     var scriptureIds = [];
     var scriptures = [];
     var foundVerse = null;
+    var sequence = 0;
     console.log("== Create Citation ==")
     if (req.body) {
         try {
@@ -221,6 +222,8 @@ exports.create = (req, res) => {
                 }
 
                 obj.description = (obj.description ?? "").padEnd(80).substring(0, 80).trim();
+                sequence = obj.sequence ?? 0;
+                delete obj.sequence;
 
                 if (!message && obj.scriptureIds && Array.isArray(obj.scriptureIds)) {
                     methodType = "scripture ids";
@@ -434,6 +437,7 @@ exports.create = (req, res) => {
 
     context = {};
     context.themeId = themeId;
+    context.sequence = sequence;
     context.citation = citation;
     context.methodType = methodType;
     context.scriptures = scriptures;
@@ -478,7 +482,13 @@ exports.create = (req, res) => {
 
             tasks = [];
             context.scriptures = scriptures;
-            context.nextSequence = data[1][0].nextSequence;
+            if (!context.sequence) {
+                context.nextSequence = data[1][0].nextSequence;
+            }
+            else {
+                context.nextSequence = context.sequence;
+            }
+
             console.log(`nextSequence: ${context.nextSequence}`);
 
             tasks.push(addContext(context));
@@ -552,8 +562,11 @@ exports.create = (req, res) => {
                                 citationVerses[i].scripture = context.scriptures.find(s => s.id == citationVerses[i].scriptureId);
                             }
 
-                            context.themeToCitation = themeToCitation;
+                            context.themeToCitation = themeToCitation.themeToCitation;
                             context.citationVerses = citationVerses;
+                            delete context.themeToCitation.path;
+                            delete context.themeToCitation.theme;
+                            delete context.themeToCitation.citation;
 
                             tasks = [];
 
@@ -567,10 +580,13 @@ exports.create = (req, res) => {
                             Promise.all(tasks)
                                 .then(data => {
                                     var context = data[0].context;
-                                    var citation = data[1];
+                                    var citation = data[1][0]; 
 
                                     citation.themeToCitation = context.themeToCitation;
                                     citation.verses = context.citationVerses;
+
+                                    console.log("Just before send:");
+                                    console.log(citation);
 
                                     res.send(citation);
                                 });

@@ -25,6 +25,9 @@ export class WorkbenchComponent {
   static activeScriptureRange: string;
   static activeCitationVerse: CitationVerseExtendedModel;
   static WorkbenchResizeBroadcaster:Subject<DOMRectReadOnly>;
+
+  activeTool: string | null = null;
+
   static getWorkbenchSize() {
     let section = $("section.bible-workbench");
     let position = section.position();
@@ -33,6 +36,10 @@ export class WorkbenchComponent {
     return rect;
   }
 
+  setActiveTool(tool: string): void {
+    this.activeTool = tool;
+  }
+  
   static setScriptureRanges(citation: CitationExtendedModel) {
     const unicodeSuperscriptNumbers = [
       "\u2070",
@@ -57,7 +64,7 @@ export class WorkbenchComponent {
 
       return ss;
     }
-
+    
     WorkbenchComponent.scriptureRanges = [];
     const forCitations = <CitationVerseExtendedModel[]>citation?.verses ?? [];
     forCitations.sort((a,b) => a.scripture.bibleOrder - b.scripture.bibleOrder);

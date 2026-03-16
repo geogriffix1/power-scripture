@@ -239,6 +239,30 @@ export class BibleService {
     return response && response.message && response.message == "Success";
   }
 
+  async pasteTheme(copyId: number, pasteId: number, callback:any) {
+    var url = `${this.ROOT_URL}themes/paste-theme/${copyId}/${pasteId}`;
+    const data = await fetch(url, {
+      method: "PUT",
+      cache: "no-cache",
+      headers: { "content-type": "application/json" }
+    });
+
+    const response = (await data.json() ?? null)
+    callback(response);
+  }
+
+  async pasteCitation(copyId: number, pasteId: number, callback:any) {
+    var url = `${this.ROOT_URL}themes/paste-themeToCitation/${copyId}/${pasteId}`;
+    const data = await fetch(url, {
+      method: "PUT",
+      cache: "no-cache",
+      headers: { "content-type": "application/json" }
+    });
+
+    const response = (await data.json() ?? null)
+    callback(response);
+  }
+
   // The theme chain is a the theme heirarchy expressed as a directory structure
   async getThemeChain(id:number, callback:any) {
     var url = `${this.ROOT_URL}themes/${id}/chain`;
@@ -256,7 +280,7 @@ export class BibleService {
     return await resp.json();
   }
 
-  async createTheme(parentId:number, name:string, description:string) {
+  async createTheme(parentId:number, name:string, description:string, sequence:number) {
     var url = `${this.ROOT_URL}themes`;
     const data = await fetch(url, {
       method: "POST",
@@ -264,7 +288,7 @@ export class BibleService {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({parent: parentId, name: name, description: description})
+      body: JSON.stringify({parent: parentId, name: name, description: description, sequence: sequence})
     });
 
     let theme = await data.json();
@@ -517,17 +541,18 @@ const data = await fetch(url, {
     return +result.maxVerse;
   }
 
-  async createCitation(description:string, parentTheme:number, scriptures:number[]): Promise<ThemeToCitationLinkModel> {
+  async createCitation(description:string, parentTheme:number, sequence:number, scriptures:number[]): Promise<ThemeToCitationLinkModel> {
     console.log("createCitation");
     var url = `${this.ROOT_URL}citations`;
     let payload = {
       "themeId": parentTheme,
       "description": description,
-      "scriptureIds": scriptures
+      "scriptureIds": scriptures,
+      "sequence": sequence
     };
 
     console.log("payload sent to create a citation");
-    console.log(JSON.stringify(payload));
+    console.log(payload);
 
     const data = await fetch (url, {
       method: "POST",
@@ -541,13 +566,13 @@ const data = await fetch(url, {
     const creationResults = (await data.json() ?? []);
 
     if (creationResults)
-      console.log(JSON.stringify(creationResults));
+      console.log(creationResults);
 
     return <ThemeToCitationLinkModel>creationResults;
   }
 
 
-  async createCitationFromScriptureLabel(description:string, parentTheme:number, label:string): Promise<CitationModel | null> {
+  async createCitationFromScriptureLabel(description:string, parentTheme:number, sequence: number, label:string): Promise<CitationModel | null> {
     console.log("createCitation");
     var url = `${this.ROOT_URL}citations`;
 
@@ -570,7 +595,8 @@ const data = await fetch(url, {
     let payload = {
       "themeId": parentTheme,
       "description": description,
-      "scriptures": scriptures
+      "scriptures": scriptures,
+      "sequence" : sequence
     };
 
     console.log("payload sent to create a citation");
@@ -588,9 +614,9 @@ const data = await fetch(url, {
     const creationResults = (await data.json() ?? []);
 
     if (creationResults)
-      console.log(JSON.stringify(creationResults));
+      console.log(creationResults);
 
-    return <CitationModel>creationResults[0];
+    return <CitationModel>creationResults;
   }
 
   async createCitationVerse(citationId:number, scriptureId:number): Promise<CitationVerseExtendedModel> {

@@ -11,13 +11,14 @@ import { WorkbenchComponent } from "../../workbench.component";
 import { ThemeExtendedModel } from "../../../model/theme.model";
 import { CitationExtendedModel } from "../../../model/citation.model";
 import { CitationVerseExtendedModel, CitationVerseRange } from "../../../model/citationVerse.model";
+import { ThemeToCitationModel } from "../../../model/themeToCitation.model";
 import { ThemeChainModel } from "../../../model/themeChain.model";
 import { JstreeModel } from "../../../model/jstree.model";
 import { parseCitationToRanges } from "../citation-range-parser";
 import { BibleBooksService, BookInfo } from "../../../bible-books.service";
 import { BibleService } from "../../../bible.service";
 import { BibleThemeTreeComponent } from "../../../bible-theme-tree/bible-theme-tree.component";
-import { ScriptExecutionService } from "../../../script-execution.service";
+// import { ScriptExecutionService } from "../../../script-execution.service";
 import { HttpClient } from '@angular/common/http';
 import { firstValueFrom } from 'rxjs';
 //import { BookCodeToName } from "../bookCodeToName";
@@ -458,7 +459,10 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
         }
 
         let childThemes = this.childThemes.get(this.openTheme.id) ?? [];
+        console.log("create childThemes:");
+        console.log(childThemes);
         let sequence = childThemes.length > 0 ? Math.max(...childThemes.map(t => t.sequence)) + 1 : 1;
+        console.log(`sequence: ${sequence}`);
 
         let newTheme = {
           id: this.nextThemeId--,
@@ -475,6 +479,8 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
         } as ThemeExtendedModel;
 
         this.childThemes.set(this.openTheme.id, [...(this.childThemes.get(this.openTheme.id) ?? []), newTheme]);
+        console.log("added Child Theme:");
+        console.log(this.childThemes.get(this.openTheme.id));
         this.pendingSave = true;
         this.writeLine(`theme ${newTheme.name} entered ("save" to complete)`, "info");
       }
@@ -679,38 +685,79 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
         let themeIds = [...this.childCitations.keys()];
         const unsavedCitations: {
           themeId: number;
+          lastSequence: number;
           citations: CitationExtendedModel[];
         }[] = [];
 
         themeIds.forEach(themeId => {
           let unsaved = (this.childCitations.get(themeId) ?? [])
             .filter(cite => cite.id < 0);
+          
+          let previouslySaved = (this.childCitations.get(themeId) ?? [])
+            .filter(cite => cite.id > 0);
+          
           if (unsaved && unsaved.length) {
-            unsavedCitations.push({ themeId:<number> themeId, citations:<CitationExtendedModel[]>[...unsaved]});
+            unsavedCitations.push({ themeId:<number> themeId, lastSequence: previouslySaved.length, citations:<CitationExtendedModel[]>[...unsaved]});
           }
         });
 
         let tasks = <any>[];
+        let sequence = 1;
         unsavedCitations.forEach(cite => {
           for (var citation of <CitationExtendedModel[]>cite.citations) {
-            tasks.push(this.service.createCitationFromScriptureLabel(citation.description, cite.themeId, citation.citationLabel ?? ""));
+            tasks.push(this.service.createCitationFromScriptureLabel(citation.description, cite.themeId, cite.lastSequence + sequence, citation.citationLabel ?? ""));
+            sequence++;
           }
 
-          console.log(`parent theme of citation: ${cite.themeId}`);
           themesToRefresh.add(cite.themeId);
         });
 
         Promise.all(tasks)
-          .then((citations) => {
-            console.log("after creation citations:");
+          .then(results => {
+            // replace all the unsaved temporary (negative) ids with saved ids.
+            let citations = results as [{
+              themeId: number;
+              lastSequence: number;
+              citations: CitationExtendedModel[]
+            }];
+
+            console.log("after save - citations:");
             console.log(citations);
-            themesToRefresh.forEach(themeId => BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${themeId}`));
-          })
 
+            let themesWithNewCitations = new Set<number>;
+            citations.forEach(cite => themesWithNewCitations.add(cite.themeId));
 
-        this.pendingSave = false;
-        this.writeLine("Updates have been saved", "info");
-        this.readyForInput();
+            themesWithNewCitations.forEach(themeId => {
+
+              console.log("theme citations BEFORE");
+              let themeCitations = this.childCitations.get(themeId) ?? [];
+              console.log(themeCitations);
+
+              let previouslySavedCitations = (this.childCitations.get(themeId) ?? []).filter(cite => cite.id > 0);
+
+              let savedCitations = [
+                ...previouslySavedCitations,
+                ...citations
+                  .filter(cite => cite.themeId == themeId)
+                  .map(cite => cite.citations)
+                  .flat()
+              ];
+
+              this.childCitations.set(themeId, savedCitations);
+
+              console.log("theme citations AFTER");
+              themeCitations = this.childCitations.get(themeId) ?? [];
+              console.log(themeCitations);
+            });
+          
+          themesToRefresh.forEach(themeId => {
+            BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${themeId}`);
+          });
+
+          this.pendingSave = false;
+          this.writeLine("Updates have been saved", "info");
+          this.readyForInput();
+        });
       }
       else if (/^(\?|help)/i.test(raw)) {
         let match = /^(\?|help)\s+(.*)/i.exec(raw);
@@ -936,15 +983,38 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
   private async createThemeLayer(themes: ThemeExtendedModel[]): Promise<ThemeExtendedModel[]> {
     let tasks = <any>[];
 
-    themes.forEach(theme => 
-      tasks.push(this.service.createTheme(theme.parent, theme.name, theme.description)));
+    console.log("CREATE THEME LAYER");
 
-    let returnValue = <ThemeExtendedModel[]>[];
-    await Promise.all(tasks).then(data => {
-      returnValue = <ThemeExtendedModel[]>data;
+    // Accumulate the parent themes of the themes to be saved
+    let parentThemes = new Set<number>;
+    themes.forEach(theme => parentThemes.add(theme.parent));
+
+    console.log("parent themes:");
+    console.log(parentThemes);
+
+    // For each unique parent theme, assemble the child themes that are to be saved and assign them a the next sequence number.
+    parentThemes.forEach(parentTheme => {
+      let lastSequence = (this.childThemes.get(parentTheme)!.filter(child => child.id > 0) ?? []).length;
+      let sequence = 1;
+      themes
+        .filter(theme => theme.parent == parentTheme)
+        .forEach(theme => {
+          console.log(`creating a theme parent: ${theme.parent}, name: ${theme.name}, description: ${theme.description}, sequence: ${lastSequence + sequence}`);
+          tasks.push(this.service.createTheme(theme.parent, theme.name, theme.description, lastSequence + sequence++))});
     });
 
-    return Promise.resolve(returnValue);
+    let returnValue = await Promise.all(tasks as Array<ThemeExtendedModel>);
+
+    parentThemes.forEach(parentTheme => {
+      let savedThemes = [
+        ...(this.childThemes.get(parentTheme) ?? []).filter(child => child.id > 0),
+        ...(returnValue.filter(newTheme => newTheme.parent == parentTheme) ?? [])
+      ];
+
+      this.childThemes.set(parentTheme, savedThemes);
+    });
+
+    return returnValue;
   }
 
   private setThemeChildren(parentTheme: ThemeExtendedModel): void {

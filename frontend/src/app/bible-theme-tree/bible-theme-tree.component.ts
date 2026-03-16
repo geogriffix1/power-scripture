@@ -24,6 +24,7 @@ export class BibleThemeTreeComponent implements OnInit {
   static ClipboardSelector: Subject<JstreeModel>;
   static ngZone: NgZone;
   static LoadNodeCallback: any;
+  static ClipboardNode?: JstreeModel;
   constructor(ngzone: NgZone) {
     const bibleService = inject(BibleService);
     BibleThemeTreeComponent.service = new ServiceDirective(bibleService);
@@ -46,6 +47,10 @@ export class BibleThemeTreeComponent implements OnInit {
 
   ngOnInit(): void {
     var service = BibleThemeTreeComponent.service;
+    BibleThemeTreeComponent.ClipboardSelector.subscribe((node:JstreeModel) => {
+      BibleThemeTreeComponent.ClipboardNode = node;
+    });
+
     $('#theme-tree-full').jstree({
       core: {
         multiple: false,
@@ -128,7 +133,12 @@ export class BibleThemeTreeComponent implements OnInit {
         },
         pasteItem: {
           label: "Paste",
-          action: () =>  { }
+          action: () =>  {
+            if (BibleThemeTreeComponent.ClipboardNode && BibleThemeTreeComponent.ClipboardNode.id.startsWith("theme")) {
+              let copyThemeId = +BibleThemeTreeComponent.ClipboardNode.id.replace("theme", "");
+              service.pasteTheme(copyThemeId, node);
+            }
+          }
         },
         createThemeItem: {
           label: "Create Subtheme",
@@ -316,5 +326,23 @@ export class ServiceDirective {
 
   public async getCitationLabel(id:number) {
     return await this.provider.getCitationLabel(id);
+  }
+
+  public async pasteTheme(copyId: number, pasteNode: JstreeModel) {
+    let pasteId = +pasteNode.id.replace("theme", "");
+    return await this.provider.pasteTheme(copyId, pasteId, (result: any) => {
+      console.log("pasteTheme callback function");
+      console.log(result);
+      BibleThemeTreeComponent.refreshDomNodeFromDb(pasteNode.id);
+    });
+  }
+
+  public async pasteCitation(copyId: number, pasteNode: JstreeModel) {
+    let pasteId = +pasteNode.id.replace("theme", "");
+    return await this.provider.pasteCitation(copyId, pasteId, (result: any) => {
+      console.log("pasteCitation callback function");
+      console.log(result);
+      BibleThemeTreeComponent.refreshDomNodeFromDb(pasteNode.id);
+    });
   }
 }

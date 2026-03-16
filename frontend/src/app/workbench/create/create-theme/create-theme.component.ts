@@ -40,7 +40,7 @@ export class CreateThemeComponent {
       let service = new BibleService;
       if (WorkbenchComponent.activeTheme) {
         let id = <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", "");
-        service.createTheme(id, this.nameField.nativeElement.value.trim(), this.descriptionField.nativeElement.value.trim())
+        service.createTheme(id, this.nameField.nativeElement.value.trim(), this.descriptionField.nativeElement.value.trim(), 0)
           .then(theme => {
             console.log("after create theme attempt");
             console.log(theme);

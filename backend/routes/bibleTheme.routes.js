@@ -9,6 +9,8 @@ module.exports = app => {
     router.get("/:id(\\d+)/cascade", bibleTheme.cascade);
     router.post("/", bibleTheme.create);
     router.put("/", bibleTheme.edit);
+    router.put("/paste-theme/:copyId(\\d+)/:pasteId(\\d+)", bibleTheme.pasteTheme);
+    router.put("/paste-themeToCitation/:copyId(\\d+)/:pasteId(\\d+)", bibleTheme.pasteThemeToCitation);
     router.put("/:id/sequence/:sequence", bibleTheme.setSequence);
     router.put("/resequence-themes/:id", bibleTheme.resequenceThemes);
     router.put("/normalize-themes/:id", bibleTheme.normalizeThemes);
@@ -17,7 +19,4 @@ module.exports = app => {
     router.delete("/:id", bibleTheme.delete);
 
     app.use("/themes", router);
-    //app.use("/themes/chain", router);
-    //app.use("/theme/scripture", router);
-    //app.use("/theme/scripture/path", router);
 };
