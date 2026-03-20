@@ -56,12 +56,11 @@
       type="button"
       class="menu menu-icon-help"
       [class.is-active]="activeTool === 'help'"
-      (click)="setActiveTool('help')">
+      (click)="setActiveTool('help'); onHelpClick()">
       <i class="psmenu-icon" title="Help"></i>
     </button>
   </div>
 </nav>
-
-<section class="bible-workbench">
+<div class="ps-workbench-body">
   <router-outlet></router-outlet>
-</section>
+</div>

@@ -1,33 +1,39 @@
 :host {
+    display: grid;
+    grid-template-rows: auto 1fr;
     height: 100%;
     min-height: 0;
     overflow: hidden;
-
-    display: flex;
-    flex-direction: column;
 }
 
-header, nav {
+header {
+    display: none;
+}
+
+nav {
     flex: 0 0 auto;
 }
 
 section.scrollable {
-    flex: 1 1 auto;
+    height: 100%;
+    min-height: 0;
+    overflow: hidden;
+    display: block;
+}
+
+.scrollable > app-import-console,
+.scrollable > app-import-file,
+.scrollable > div {
+    display: block;
+    height: 100%;
     min-height: 0;
     overflow: hidden;
 }
 
-section.scrollable > app-import-console,
-section.scrollable > app-import-file,
-section.scrollable > * {
-    flex: 1 1 auto;
+.workbench-import {
     min-height: 0;
-    overflow: hidden;
-}
-
-workbench-import {
-background-color: black;
-  color:white;
+    background-color: black;
+    color:white;
 }
 
 
@@ -39,4 +45,10 @@ background-color: black;
 
 nav.workbench-import i.settings {
    margin-left: 4px;
+}
+
+app-import-console {
+    display:block;
+    height: 100%;
+    min-height: 0;
 }

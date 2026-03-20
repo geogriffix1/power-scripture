@@ -1,7 +1,9 @@
 import { Component, Directive, inject, OnInit, NgZone } from '@angular/core';
+import { Router } from '@angular/router';
 import { CommonModule } from '@angular/common';
 import { BibleService } from '../bible.service';
 import { AppComponent } from '../app.component';
+import { MainShellComponent } from '../mainshell/mainshell.component';
 import { JstreeModel, JstreeState } from '../model/jstree.model';
 import { ThemeChainModel } from '../model/themeChain.model';
 import { ThemeModel, ThemeExtendedModel } from '../model/theme.model';
@@ -19,19 +21,21 @@ export class BibleThemeTreeComponent implements OnInit {
   static service: ServiceDirective;
   activeTheme!:JstreeModel;
   activeCitation!:JstreeModel;
+  router!: Router;
   static ActiveThemeSelector: Subject<JstreeModel>;
   static ActiveCitationSelector: Subject<JstreeModel>;
   static ClipboardSelector: Subject<JstreeModel>;
   static ngZone: NgZone;
   static LoadNodeCallback: any;
   static ClipboardNode?: JstreeModel;
-  constructor(ngzone: NgZone) {
+  constructor( ngzone: NgZone, router: Router ) {
     const bibleService = inject(BibleService);
     BibleThemeTreeComponent.service = new ServiceDirective(bibleService);
     BibleThemeTreeComponent.ActiveThemeSelector = new Subject<JstreeModel>();
     BibleThemeTreeComponent.ActiveCitationSelector = new Subject<JstreeModel>();
     BibleThemeTreeComponent.ClipboardSelector = new Subject<JstreeModel>();
     BibleThemeTreeComponent.ngZone = ngzone;
+    this.router = router;
   }
 
   broadcastActiveThemeChange(theme:JstreeModel) {
@@ -120,7 +124,7 @@ export class BibleThemeTreeComponent implements OnInit {
         editThemeItem: {
           label: "Edit",
           action: () => {
-            BibleThemeTreeComponent.ngZone.run(() => AppComponent.router.navigate(["edit/theme"]));
+            BibleThemeTreeComponent.ngZone.run(() => this.router.navigate(["edit/theme"]));
           }
         },
         copyThemeItem: {
@@ -144,21 +148,21 @@ export class BibleThemeTreeComponent implements OnInit {
           label: "Create Subtheme",
           action: () => {
             console.log("createSubtheme action in AppComponent");
-            BibleThemeTreeComponent.ngZone.run(() => AppComponent.router.navigate(["create/theme"]));
+            BibleThemeTreeComponent.ngZone.run(() => this.router.navigate(["create/theme"]));
           }
         },
         createCitationItem: {
           label: "Create Citation",
           action: () => {
             console.log("createSubtheme action in AppComponent");
-            BibleThemeTreeComponent.ngZone.run(() => AppComponent.router.navigate(["create/citation"]));                    
+            BibleThemeTreeComponent.ngZone.run(() => this.router.navigate(["create/citation"]));                    
           }
         },
         deleteThemeItem: {
           label: "Delete",
           action: () =>  {
             console.log(`Delete theme ${node.id}`);
-            BibleThemeTreeComponent.ngZone.run(() => AppComponent.router.navigate(["delete/theme"]));
+            BibleThemeTreeComponent.ngZone.run(() => this.router.navigate(["delete/theme"]));
            }
         }
       }
@@ -174,8 +178,8 @@ export class BibleThemeTreeComponent implements OnInit {
         editCitationItem: {
           label: "Edit",
           action: () =>  {
-            AppComponent.editObject = node;
-            BibleThemeTreeComponent.ngZone.run(() => AppComponent.router.navigate(["edit/citation"]));
+            MainShellComponent.editObject = node;
+            BibleThemeTreeComponent.ngZone.run(() => this.router.navigate(["edit/citation"]));
            }
       },
         copyCitationItem: {

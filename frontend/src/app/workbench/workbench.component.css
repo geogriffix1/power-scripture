@@ -15,29 +15,16 @@ header.bible-workbench h2 {
 }
 
 nav.bible-workbench {
-  display:flex;
   flex: 0 0 auto;
-  height: auto;
-  min-height:0;
-  padding: 4px 6px;
-  overflow: hidden;
-  justify-content: center;
-  width: 100%;
+  padding-bottom: 2px;
 }
 
 .bible-workbench .bible-workbench-menu {
-  display: inline;
-  /* flex-direction: row; */
-  gap: 6px;
-  flex-wrap: nowrap;
-}
-
-section.bible-workbench {
-  flex: 1 1 auto;
-  min-height: 0;
-  overflow: hidden;
   display: flex;
-  flex-direction: column;
+  gap: 4px;
+  flex-wrap: nowrap;
+  justify-content: center;
+  align-items: center;
 }
 
 /* button shell */
@@ -161,4 +148,12 @@ nav.bible-workbench > .bible-workbench-menu > .menu.is-active > .psmenu-icon {
 
 nav.bible-workbench > .bible-workbench-menu > .menu.is-active:hover {
   transform: translateY(1px) scale(1);
+}
+
+.ps-workbench-body {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }

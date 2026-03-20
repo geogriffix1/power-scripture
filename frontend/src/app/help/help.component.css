@@ -1,0 +1,163 @@
+.ps-help-page {
+  padding: 16px 20px 24px;
+  color: #222;
+}
+
+.ps-help-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 16px;
+  margin-bottom: 20px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #d6d6d6;
+}
+
+.ps-help-header h1 {
+  margin: 0 0 6px 0;
+  font-size: 28px;
+  line-height: 1.2;
+}
+
+.ps-help-subtitle {
+  margin: 0;
+  color: #666;
+}
+
+.ps-help-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.ps-help-layout {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 20px;
+}
+
+.ps-help-sidebar {
+  border: 1px solid #d7d7d7;
+  border-radius: 8px;
+  padding: 14px;
+  background: #fafafa;
+  height: fit-content;
+  position: sticky;
+  top: 12px;
+}
+
+
+.ps-help-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: flex-start;
+}
+.ps-help-actions > .menu.menu-icon-definitions  > .psmenu-icon {
+background-image: url('/assets/images/Help book.png');
+}
+
+.ps-help-actions > .menu.menu-icon-search  > .psmenu-icon {
+background-image: url('/assets/images/Search.png');
+}
+
+.ps-help-actions > .menu.menu-icon-create  > .psmenu-icon {
+background-image: url('/assets/images/Create.png');
+}
+
+.ps-help-actions > .menu.menu-icon-edit    > .psmenu-icon {
+background-image: url('/assets/images/Edit page.png');
+}
+
+.ps-help-actions > .menu.menu-icon-delete  > .psmenu-icon {
+background-image: url('/assets/images/Delete.png');
+}
+
+.ps-help-actions > .menu.menu-icon-import  > .psmenu-icon {
+background-image: url('/assets/images/Import.png');
+}
+
+.ps-help-actions > .menu.menu-icon-publish > .psmenu-icon {
+background-image: url('/assets/images/Scenario.png');
+}
+
+.ps-help-actions > .menu.menu-icon-help    > .psmenu-icon {
+background-image: url('/assets/images/Help.png');
+}
+
+.ps-help-sidebar h2 {
+  margin: 0 0 12px 0;
+  font-size: 18px;
+}
+
+.ps-help-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.ps-help-sidebar a {
+  text-decoration: none;
+  color: #1b4f9c;
+}
+
+.ps-help-sidebar a:hover {
+  text-decoration: underline;
+}
+
+.ps-help-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.ps-help-card {
+  border: 1px solid #d7d7d7;
+  border-radius: 10px;
+  background: white;
+  overflow: hidden;
+}
+
+.ps-help-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #e5e5e5;
+  background: #f7f9fc;
+}
+
+.ps-help-card-header h2 {
+  margin: 0;
+  font-size: 22px;
+  line-height: 1.2;
+}
+
+.ps-help-card-body {
+  padding: 16px;
+  line-height: 1.55;
+}
+
+.ps-help-card-body p:first-child {
+  margin-top: 0;
+}
+
+.ps-help-card-body p:last-child,
+.ps-help-card-body ol:last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 900px) {
+  .ps-help-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .ps-help-sidebar {
+    position: static;
+  }
+
+  .ps-help-header {
+    flex-direction: column;
+  }
+}

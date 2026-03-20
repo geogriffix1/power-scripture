@@ -1,7 +1,7 @@
 import { Component } from '@angular/core';
 import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
 import { Subject } from 'rxjs';
-import { AppComponent } from '../app.component';
+import { MainShellComponent } from '../mainshell/mainshell.component';
 import { BibleThemeTreeComponent } from '../bible-theme-tree/bible-theme-tree.component';
 import { CiteScriptureRangeModel } from '../model/citeScriptureRangeModel';
 import { CitationExtendedModel } from '../model/citation.model';
@@ -11,8 +11,8 @@ import { JstreeModel } from '../model/jstree.model';
 
 @Component({
     selector: 'app-workbench',
-    imports: [RouterOutlet],
     templateUrl: './workbench.component.html',
+    imports: [RouterOutlet],
     styleUrl: './workbench.component.css'
 })
 
@@ -27,6 +27,7 @@ export class WorkbenchComponent {
   static WorkbenchResizeBroadcaster:Subject<DOMRectReadOnly>;
 
   activeTool: string | null = null;
+  helpWindow: any = null;
 
   static getWorkbenchSize() {
     let section = $("section.bible-workbench");
@@ -145,7 +146,7 @@ export class WorkbenchComponent {
   }
 
   onSearchClick() {
-    this.router.navigate(['search']);
+    this.router.navigate(['/search']);
   }
 
   onCreateClick() {
@@ -153,20 +154,36 @@ export class WorkbenchComponent {
   }
 
   onImportClick() {
-    this.router.navigate(['import']);
+    this.router.navigate(['/import']);
   }
 
   onEditClick() {
     console.log("edit clicked!");
-    AppComponent.editObject = undefined;
-    this.router.navigate(['edit']);
+    MainShellComponent.editObject = undefined;
+    this.router.navigate(['/edit']);
   }
 
   onDeleteClick() {
-    AppComponent.editObject = undefined;
-    this.router.navigate(['delete']);
+    MainShellComponent.editObject = undefined;
+    this.router.navigate(['/delete']);
   }
 
+  onHelpClick(): void {
+    const url = `${window.location.origin}/help`;
+
+    if (this.helpWindow && !this.helpWindow.closed) {
+      this.helpWindow.focus();
+      return;
+    }
+
+    this.helpWindow = window.open(
+      url,
+      'powerScriptureHelp',
+      'width=1100,height=850,resizable=yes,scrollbars=yes'
+    );
+
+    this.helpWindow?.focus();
+  }
 
   resizeObserver = new ResizeObserver(elements => {
     let element = elements[0];

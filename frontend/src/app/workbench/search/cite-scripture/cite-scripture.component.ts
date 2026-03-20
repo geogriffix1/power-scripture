@@ -2,7 +2,7 @@ import { Component, ViewChild, ElementRef } from '@angular/core';
 import { Subscription, fromEvent } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
 import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel';
-import { AppComponent } from '../../../app.component';
+import { MainShellComponent } from '../../../mainshell/mainshell.component';
 import { WorkbenchComponent } from '../../workbench.component';
 import { BibleService } from '../../../bible.service';
 import { CiteContextMenuComponent } from '../../../context-menu/cite-context-menu.component';
@@ -554,7 +554,7 @@ export class CiteScriptureComponent {
     this.workbenchDomRect(rect);
 
     if (!CiteScriptureComponent.isSubscribed) {
-      AppComponent.mouseupBroadcaster.subscribe(event => {
+      MainShellComponent.mouseupBroadcaster.subscribe(event => {
         if (CiteScriptureComponent.isActive) {
           console.log("mouse event:");
           let targetId:string = event.target?.id ?? ""

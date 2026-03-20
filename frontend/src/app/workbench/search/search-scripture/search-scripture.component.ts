@@ -5,7 +5,7 @@ import { ScriptureModel, ScriptureSearchResultModel } from '../../../model/scrip
 import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel';
 import { SearchContextMenuComponent } from '../../../context-menu/search-context-menu.component';
 import { SearchScriptureReportComponent } from '../../../reports/search-scripture-report/search-scripture-report.component';
-import { AppComponent } from '../../../app.component';
+import { MainShellComponent } from '../../../mainshell/mainshell.component';
 import { WorkbenchComponent } from '../../workbench.component';
 import * as wordList from './BibleWordlist.json';
 import $ from 'jquery';
@@ -432,7 +432,7 @@ export class SearchScriptureComponent implements OnInit{
     $("div.search-results tbody").show(100);
 
     if (!this.isSubscribedKeystrokes) {
-      AppComponent.keystrokeBroadcaster.subscribe(event => {
+      MainShellComponent.keystrokeBroadcaster.subscribe(event => {
         this.isSubscribedKeystrokes = true;
 
         if (event.target.localName === "body") {
@@ -456,7 +456,7 @@ export class SearchScriptureComponent implements OnInit{
   ngOnInit():void {
     SearchScriptureComponent.isActive = true;
     if (!SearchScriptureComponent.isSubscribed) {
-      AppComponent.mouseupBroadcaster.subscribe(event => {
+      MainShellComponent.mouseupBroadcaster.subscribe(event => {
         if (SearchScriptureComponent.isActive) {
           let context = $("app-search-context-menu");
           context.addClass("hidden");
