@@ -1,4 +1,5 @@
 import { Component, Input, Signal, signal, effect, ElementRef, ViewChild } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { WorkbenchComponent } from '../../workbench.component';
 import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-tree.component';
 import { JstreeModel } from '../../../model/jstree.model';
@@ -20,12 +21,12 @@ import { ThemeToCitationLinkModel } from '../../../model/themeToCitation.model';
 
 export class EditThemeComponent {
   @Input({required: true})
-    activeThemeNode!: Signal<JstreeModel>;
+    activeThemeNode!: Signal<JstreeModel|null>;
   @ViewChild("scrollableContent", { static: false })
     scrollableContent!: ElementRef<HTMLElement>
   previousThemeModel: JstreeModel | null = null;
   activeTheme!: ThemeExtendedModel;
-  editedTheme!: ThemeExtendedModel;
+  editedTheme: ThemeExtendedModel | null = null;
 
   isEdited = false;
   sectionWidth!:number;
@@ -38,6 +39,7 @@ export class EditThemeComponent {
 
   static isSubscribed = false;
   static isActive = false;
+  private subscriptions = new Subscription;
 
   childthemes!: ThemeModelReference[];
   citations!: ThemeToCitationLinkModel[];
@@ -48,10 +50,9 @@ export class EditThemeComponent {
   draggingClass?:string;
 
   constructor(private service: BibleService) {
-      effect(()=>{
-      
+      effect(()=>{      
       if (this.activeThemeNode()) {
-        let id = <number><unknown>this.activeThemeNode().id.replace("theme", "");
+        let id = <number><unknown>this.activeThemeNode()?.id?.replace("theme", "");
         service.getTheme(id)
           .then(theme => {
             this.activeTheme = theme;
@@ -147,14 +148,14 @@ export class EditThemeComponent {
 
   EditTheme() {
     $(".command-message").text("");
-    this.editedTheme.name = (<string>$("#name").val() ?? "").trim();
-    this.editedTheme.description = (<string>$("#description").val() ?? "").trim();
+    this.editedTheme!.name = (<string>$("#name").val() ?? "").trim();
+    this.editedTheme!.description = (<string>$("#description").val() ?? "").trim();
 
-    this.isEdited = this.editedTheme.name != this.activeTheme.name;
-    this.isEdited ||= this.editedTheme.description != this.activeTheme.description;
+    this.isEdited = this.editedTheme!.name != this.activeTheme.name;
+    this.isEdited ||= this.editedTheme!.description != this.activeTheme.description;
 
     if (this.isEdited) {
-      if (!this.editedTheme.name) {
+      if (!this.editedTheme!.name) {
         $(".command-message").text("Name is required");
         return;
       }
@@ -162,10 +163,10 @@ export class EditThemeComponent {
       (async (obj:EditThemeComponent) => {
         let service = new BibleService;
         var parentTheme:ThemeExtendedModel;
-        if (obj.editedTheme.name != obj.activeTheme.name) {
-          parentTheme = await service.getTheme(obj.editedTheme.id);
+        if (obj.editedTheme!.name != obj.activeTheme.name) {
+          parentTheme = await service.getTheme(obj.editedTheme!.id);
           parentTheme.themes.map(child => {
-            if (child.theme.name == obj.editedTheme.name) {
+            if (child.theme.name == obj.editedTheme!.name) {
               $(".command-message").text("Error: There is already a theme with that name here");
               return;
             }
@@ -173,23 +174,23 @@ export class EditThemeComponent {
         }
 
         try {
-          let response = await service.editTheme(obj.editedTheme);
+          let response = await service.editTheme(obj.editedTheme!);
           if (response.message == "Success") {
             let node = <JstreeModel>BibleThemeTreeComponent.getDomNode(`theme${obj.activeTheme.id}`);
-            node.text = obj.editedTheme.name;
-            node.li_attr.title = obj.editedTheme.description;
-            node.data.path = obj.editedTheme.path;
+            node.text = obj.editedTheme!.name;
+            node.li_attr.title = obj.editedTheme!.description;
+            node.data.path = obj.editedTheme!.path;
 
             obj.activeTheme = <ThemeExtendedModel> {
-              id: obj.editedTheme.id,
-              name: obj.editedTheme.name,
-              description: obj.editedTheme.description,
-              parent: obj.editedTheme.parent,
-              sequence: obj.editedTheme.sequence,
-              path: obj.editedTheme.path,
-              extended: obj.editedTheme.extended,
-              themes: obj.editedTheme.themes,
-              themeToCitationLinks: obj.editedTheme.themeToCitationLinks
+              id: obj.editedTheme!.id,
+              name: obj.editedTheme!.name,
+              description: obj.editedTheme!.description,
+              parent: obj.editedTheme!.parent,
+              sequence: obj.editedTheme!.sequence,
+              path: obj.editedTheme!.path,
+              extended: obj.editedTheme!.extended,
+              themes: obj.editedTheme!.themes,
+              themeToCitationLinks: obj.editedTheme!.themeToCitationLinks
             };
 
             BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${obj.activeTheme.id}`);
@@ -247,55 +248,56 @@ export class EditThemeComponent {
 
   ngOnInit() {
     console.log("initializing edit theme component");
+    this.subscriptions = new Subscription;
     EditThemeComponent.isActive = true;
-    let rect = WorkbenchComponent.getWorkbenchSize();
-
-    this.workbenchDomRect(rect);
-    this.sectionWidth = rect.width;
-    $("app-edit-theme").width(rect.width);
-    $("#description").width(rect.width - 60);
-
-    this.updateScrollingHeight();
-
     if (WorkbenchComponent.activeTheme) {
       this.activeThemeNode = signal(WorkbenchComponent.activeTheme);
     }
   }
 
   ngAfterViewInit() {
+    console.log("after view int of theme edit");
     if (!EditThemeComponent.isSubscribed) {
-      // subscribe to resizing events and to changes of active theme and active citation first time through
-      WorkbenchComponent.WorkbenchResizeBroadcaster
-        .subscribe((rect:DOMRectReadOnly) => {
-          this.workbenchDomRect(rect);
-          if(EditThemeComponent.isActive) {
-            this.workbenchDomRect(rect);
-            this.sectionWidth - rect.width - 4;
-            $("app-edit-theme").width(rect.width);
-            $("#description").width(rect.width - 60);
 
-            this.updateScrollingHeight();
-          }
-        });
+      this.subscriptions.add(
+        BibleThemeTreeComponent.ActiveThemeSelector
+          .subscribe((node: JstreeModel|null) => {
+            if (node) {
+              let themeId = +node.id.replace("theme", "");
+              this.service.getTheme(themeId)
+                .then(theme => {
+                  console.log("EditThemeComponent - fetching active theme");
+                  console.log(theme);
+                  this.activeTheme = theme;
+                  this.editedTheme = JSON.parse(JSON.stringify(theme));
+
+                  let themes:ThemeModelReference[] = [];
+                  let themeToCitationLinks:ThemeToCitationLinkModel[] = [];
+                  this.activeTheme.themes
+                    .sort((a, b) => a.theme.sequence - b.theme.sequence)
+                    .forEach(theme => themes.push(theme)); 
+                  this.activeTheme.themeToCitationLinks
+                    .sort((a, b) => a.themeToCitation.sequence - b.themeToCitation.sequence)
+                    .forEach(link => themeToCitationLinks.push(link));
+
+                  this.childthemes = themes;
+                  this.citations = themeToCitationLinks;
+                });    
+            }
+            else {
+              this.editedTheme = null;
+            }
+          }));
 
 
       EditThemeComponent.isSubscribed = true;
     }
   }
 
-  updateScrollingHeight() {
-    const scrollingEl = this.scrollableContent.nativeElement;
-    const areaEl = scrollingEl.closest('as-split-area') as HTMLElement;
-
-    if (areaEl) {
-      const areaRect = areaEl.getBoundingClientRect();
-      const scrollRect = scrollingEl.getBoundingClientRect();
-      const newHeight = areaRect.height - (scrollRect.top - areaRect.top);
-      scrollingEl.style.height = `${newHeight}px`;
-    }
-  }
-
   ngOnDestroy() {
+    console.log("destroying theme edit");
     EditThemeComponent.isActive = false;
+    EditThemeComponent.isSubscribed = false;
+    this.subscriptions.unsubscribe();
   }
 }

@@ -20,33 +20,42 @@ import 'jstree';
 export class BibleThemeTreeComponent implements OnInit {
   static service: ServiceDirective;
   activeTheme!:JstreeModel;
-  activeCitation!:JstreeModel;
-  router!: Router;
-  static ActiveThemeSelector: Subject<JstreeModel>;
-  static ActiveCitationSelector: Subject<JstreeModel>;
+  activeCitation:JstreeModel|null = null;
+  static router: Router;
+  static ActiveThemeSelector: Subject<JstreeModel|null>;
+  static ActiveCitationSelector: Subject<JstreeModel|null>;
   static ClipboardSelector: Subject<JstreeModel>;
   static ngZone: NgZone;
   static LoadNodeCallback: any;
   static ClipboardNode?: JstreeModel;
+  static ThemeSwitchTrigger: Subject<void>;
+
   constructor( ngzone: NgZone, router: Router ) {
     const bibleService = inject(BibleService);
     BibleThemeTreeComponent.service = new ServiceDirective(bibleService);
-    BibleThemeTreeComponent.ActiveThemeSelector = new Subject<JstreeModel>();
-    BibleThemeTreeComponent.ActiveCitationSelector = new Subject<JstreeModel>();
+    BibleThemeTreeComponent.ActiveThemeSelector = new Subject<JstreeModel|null>();
+    BibleThemeTreeComponent.ActiveCitationSelector = new Subject<JstreeModel|null>();
     BibleThemeTreeComponent.ClipboardSelector = new Subject<JstreeModel>();
+    BibleThemeTreeComponent.ThemeSwitchTrigger = new Subject<void>();
     BibleThemeTreeComponent.ngZone = ngzone;
-    this.router = router;
+    BibleThemeTreeComponent.router = router;
+    console.log("BibleThemeTreeComponent constructor - router:");
+    console.log(BibleThemeTreeComponent.router);
   }
 
-  broadcastActiveThemeChange(theme:JstreeModel) {
+  broadcastActiveThemeChange(theme:JstreeModel|null) {
     BibleThemeTreeComponent.ActiveThemeSelector.next(theme);
     console.log("broadcast active theme change");
     console.log(theme);
   }
 
-  broadcastActiveCitationChange(citation:JstreeModel ) {
+  broadcastActiveCitationChange(citation:JstreeModel|null) {
     BibleThemeTreeComponent.ActiveCitationSelector.next(citation);
     console.log("broadcast active citation change");
+  }
+
+  public static triggerEditThemeSwitch() {
+    BibleThemeTreeComponent.ThemeSwitchTrigger.next();
   }
 
   ngOnInit(): void {
@@ -124,7 +133,7 @@ export class BibleThemeTreeComponent implements OnInit {
         editThemeItem: {
           label: "Edit",
           action: () => {
-            BibleThemeTreeComponent.ngZone.run(() => this.router.navigate(["edit/theme"]));
+              BibleThemeTreeComponent.ngZone.run(() => BibleThemeTreeComponent.router.navigate(["/edit/theme"]));
           }
         },
         copyThemeItem: {
@@ -148,21 +157,21 @@ export class BibleThemeTreeComponent implements OnInit {
           label: "Create Subtheme",
           action: () => {
             console.log("createSubtheme action in AppComponent");
-            BibleThemeTreeComponent.ngZone.run(() => this.router.navigate(["create/theme"]));
+            BibleThemeTreeComponent.ngZone.run(() => BibleThemeTreeComponent.router.navigate(["/create/theme"]));
           }
         },
         createCitationItem: {
           label: "Create Citation",
           action: () => {
             console.log("createSubtheme action in AppComponent");
-            BibleThemeTreeComponent.ngZone.run(() => this.router.navigate(["create/citation"]));                    
+            BibleThemeTreeComponent.ngZone.run(() => BibleThemeTreeComponent.router.navigate(["/create/citation"]));                    
           }
         },
         deleteThemeItem: {
           label: "Delete",
           action: () =>  {
             console.log(`Delete theme ${node.id}`);
-            BibleThemeTreeComponent.ngZone.run(() => this.router.navigate(["delete/theme"]));
+            BibleThemeTreeComponent.ngZone.run(() => BibleThemeTreeComponent.router.navigate(["/delete/theme"]));
            }
         }
       }
@@ -179,7 +188,7 @@ export class BibleThemeTreeComponent implements OnInit {
           label: "Edit",
           action: () =>  {
             MainShellComponent.editObject = node;
-            BibleThemeTreeComponent.ngZone.run(() => this.router.navigate(["edit/citation"]));
+            BibleThemeTreeComponent.ngZone.run(() => BibleThemeTreeComponent.router.navigate(["/edit/citation"]));
            }
       },
         copyCitationItem: {

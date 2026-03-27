@@ -24,7 +24,7 @@ export class EditComponent {
     private router: Router,
     private injector: EnvironmentInjector
    ) {
-    BibleThemeTreeComponent.ActiveCitationSelector.subscribe((node: JstreeModel) => {
+    BibleThemeTreeComponent.ActiveCitationSelector.subscribe((node: JstreeModel | null) => {
       runInInjectionContext(this.injector, () => {
         this.activeCitationNode.set(node);
       });
@@ -88,27 +88,11 @@ export class EditComponent {
       this.settingsActive = false;
       this.onClickSettings();
     }
-
-    let rect = WorkbenchComponent.getWorkbenchSize();
-    this.workbenchDomRect(rect);
-    this.sectionWidth = rect.width;
-    $("app-edit").width(rect.width);
-    $("#description").width(rect.width - 60);
   }
 
   ngAfterViewInit() {
     if (!EditComponent.isSubscribed) {
-      WorkbenchComponent.WorkbenchResizeBroadcaster
-        .subscribe((rect:DOMRectReadOnly) => {
-          if (EditComponent.isActive) {
-            this.workbenchDomRect(rect);            
-            this.sectionWidth = rect.width - 4;
-            $("app-edit").width(rect.width);
-            $("#description").width(rect.width - 60);
-          }      
-        });
-
-      BibleThemeTreeComponent.ActiveThemeSelector.subscribe((themeNode:JstreeModel) => {
+      BibleThemeTreeComponent.ActiveThemeSelector.subscribe((themeNode:JstreeModel | null) => {
         this.activeThemeNode.set(themeNode);
       });
 

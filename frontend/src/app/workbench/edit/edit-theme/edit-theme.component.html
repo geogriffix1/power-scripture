@@ -1,18 +1,22 @@
 <div class="workbench-edit">
-    <div class="header">Edit Theme</div>
-    <div class="theme theme-icon"><img src="/assets/images/Folder.png" title="Navigate by Theme Tree to the target folder"></div>
+    <div class="no-icon"></div><div class="header">Edit Theme</div>
+    <div class="theme icon icon-folder"><i class="psmenu-icon" title="Navigate by Theme Tree to the target folder"></i></div>
     <div class="theme selected missing">
         Please select the <b>Theme</b> from the <b>Bible Theme Tree</b>
     </div>
-</div>
-<nav class="cite-scripture">
-    <div class="workbench-settings">
-        <i class="theme edit-icon" (click)="EditTheme()" title="Click to Save Changes"></i>
+    <div class="icon icon-edit">
+        <button
+            type="button"
+            class="icon-edit"
+            (click)="EditTheme()"
+            title="Click to save changes to Name or Description">
+            <i class="psmenu-icon"></i>
+        </button>
     </div>
-    <input id="name" #name type="text" class="command-line" placeholder="Theme Name" title="The name of the theme">
-    <input id="description" #description type="text" class="command-line" placeholder="Theme Description" title="The description of the theme">
+    <div class="field1"><input id="name" #name type="text" placeholder="Theme Name" title="The name of the theme"></div>
+    <div class="field2"><input id="description" #description type="text" placeholder="Theme Description" title="The description of the theme"></div>
     <div class="command-message"></div>
-</nav>
+</div>
 <section class="scrollable-content">
     <div class="scrolling" #scrollableContent>
     @if (editedTheme) {

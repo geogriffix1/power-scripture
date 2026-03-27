@@ -18,8 +18,8 @@ import { JstreeModel } from '../model/jstree.model';
 
 export class WorkbenchComponent {
 
-  static activeCitation:JstreeModel;
-  static activeTheme:JstreeModel;
+  static activeCitation:JstreeModel|null = null;
+  static activeTheme:JstreeModel|null = null;
   static clipboardNode:JstreeModel;
   static scriptureRanges: CiteScriptureRangeModel[];
   static activeScriptureRange: string;
@@ -194,11 +194,11 @@ export class WorkbenchComponent {
     WorkbenchComponent.WorkbenchResizeBroadcaster = new Subject<DOMRectReadOnly>;
     this.resizeObserver.observe($("section.bible-workbench")[0]);
 
-    BibleThemeTreeComponent.ActiveCitationSelector.subscribe((citation:JstreeModel) => {
+    BibleThemeTreeComponent.ActiveCitationSelector.subscribe((citation:JstreeModel|null) => {
       WorkbenchComponent.activeCitation = citation;
     });
 
-    BibleThemeTreeComponent.ActiveThemeSelector.subscribe((theme:JstreeModel) => {
+    BibleThemeTreeComponent.ActiveThemeSelector.subscribe((theme:JstreeModel|null) => {
       WorkbenchComponent.activeTheme = theme;
     });
 

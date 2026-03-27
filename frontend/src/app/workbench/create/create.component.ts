@@ -99,20 +99,22 @@ export class CreateComponent {
       }
 
       if (!CreateComponent.isSubscribed) {
-        BibleThemeTreeComponent.ActiveThemeSelector.subscribe((theme: JstreeModel) => {
-          let id = +theme.id.replace("theme", "");
-          obj.activeTheme = <ThemeModel>{
-            id: +theme.id.replace("theme", ""),
-            name: theme.text,
-            description: theme.li_attr.title,
-            parent: +theme.parent.replace("theme", ""),
-            sequence: theme.li_attr.sequence,
-            childCount: Array.isArray(theme.children) ? theme.children.length : 0,
-            path: theme.data.path
-          };
+        BibleThemeTreeComponent.ActiveThemeSelector.subscribe((theme: JstreeModel|null) => {
+          if (theme !== null) {
+            let id = +theme.id.replace("theme", "");
+            obj.activeTheme = <ThemeModel>{
+              id: +theme.id.replace("theme", ""),
+              name: theme.text,
+              description: theme.li_attr.title,
+              parent: +theme.parent.replace("theme", ""),
+              sequence: theme.li_attr.sequence,
+              childCount: Array.isArray(theme.children) ? theme.children.length : 0,
+              path: theme.data.path
+            };
 
-          $("div.theme.selected-theme").text(obj.activeTheme.path);
-          $(".workbench-parent-theme div.selected-theme").removeClass("missing");
+            $("div.theme.selected-theme").text(obj.activeTheme.path);
+            $(".workbench-parent-theme div.selected-theme").removeClass("missing");
+          }
         });
       }
     })(this);

@@ -1,10 +1,13 @@
-<header></header>
 <nav class="workbench-edit">
     @if (activeType > 0) {
     <div class="workbench-settings">
-        <a class="settings" title="Settings" (click)=onClickSettings()>
-            <i class="settings active"></i>
-        </a>
+        <button
+            type="button"
+            class="icon-settings"
+            (click)="onClickSettings()"
+            title="Settings for editing - Theme or Citation">
+            <i class="psmenu-icon" title="Settings for editing"></i>
+        </button>
     </div>
     }
     <div class="workbench-title">
