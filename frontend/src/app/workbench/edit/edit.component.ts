@@ -1,5 +1,6 @@
 import { Router, ActivatedRoute } from '@angular/router'
-import { Component, signal, EnvironmentInjector, runInInjectionContext } from '@angular/core';
+import { Component, signal, EnvironmentInjector, WritableSignal, runInInjectionContext } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { BibleThemeTreeComponent } from '../../bible-theme-tree/bible-theme-tree.component';
 import { WorkbenchComponent } from '../workbench.component';
@@ -23,13 +24,7 @@ export class EditComponent {
     private actRoute: ActivatedRoute,
     private router: Router,
     private injector: EnvironmentInjector
-   ) {
-    BibleThemeTreeComponent.ActiveCitationSelector.subscribe((node: JstreeModel | null) => {
-      runInInjectionContext(this.injector, () => {
-        this.activeCitationNode.set(node);
-      });
-    });
-  }
+   ) { }
 
   paths = ["edit", "edit/theme", "edit/citation", "edit/citation/range", "edit/citation/verse", "edit/citation/verse/markup"];
   
@@ -41,8 +36,9 @@ export class EditComponent {
 
   static isSubscribed = false;
   static isActive = false;
-  activeThemeNode = signal(WorkbenchComponent.activeTheme);
-  activeCitationNode = signal(WorkbenchComponent.activeCitation);
+  activeThemeNode!: WritableSignal<JstreeModel | null>;
+  activeCitationNode!: WritableSignal<JstreeModel | null>;
+  private subscriptions = new Subscription;
 
   activeType = 0;
 
@@ -83,6 +79,10 @@ export class EditComponent {
 
     this.activeType = this.paths.indexOf(this.actRoute.snapshot.routeConfig?.path ?? "edit");
     this.editType = this.editTypes[this.activeType];
+    this.subscriptions = new Subscription;
+    
+    this.activeThemeNode = signal(WorkbenchComponent.activeTheme);
+    this.activeCitationNode = signal(WorkbenchComponent.activeCitation);
 
     if (this.activeType == 0) {
       this.settingsActive = false;
@@ -92,15 +92,26 @@ export class EditComponent {
 
   ngAfterViewInit() {
     if (!EditComponent.isSubscribed) {
-      BibleThemeTreeComponent.ActiveThemeSelector.subscribe((themeNode:JstreeModel | null) => {
-        this.activeThemeNode.set(themeNode);
-      });
+      this.subscriptions.add(
+        BibleThemeTreeComponent.ActiveCitationSelector.subscribe((node: JstreeModel | null) => {
+            this.activeCitationNode.set(node);
+        })
+      );
+
+      this.subscriptions.add(
+        BibleThemeTreeComponent.ActiveThemeSelector.subscribe((themeNode:JstreeModel | null) => {
+          console.log("active theme changed");
+          this.activeThemeNode.set(themeNode);
+        })
+      );
 
       EditComponent.isSubscribed = true;
     }
   }
 
   ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+    EditComponent.isSubscribed = false;
     EditComponent.isActive = false;
   }
 }

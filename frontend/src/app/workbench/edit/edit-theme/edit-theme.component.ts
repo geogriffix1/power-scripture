@@ -1,6 +1,4 @@
-import { Component, Input, Signal, signal, effect, ElementRef, ViewChild } from '@angular/core';
-import { Subscription } from 'rxjs';
-import { WorkbenchComponent } from '../../workbench.component';
+import { Component, Input, Signal, effect, ElementRef, ViewChild } from '@angular/core';
 import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-tree.component';
 import { JstreeModel } from '../../../model/jstree.model';
 import { CdkDrag, CdkDropList, CdkDropListGroup, CdkDragSortEvent, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
@@ -39,8 +37,7 @@ export class EditThemeComponent {
 
   static isSubscribed = false;
   static isActive = false;
-  private subscriptions = new Subscription;
-
+  
   childthemes!: ThemeModelReference[];
   citations!: ThemeToCitationLinkModel[];
 
@@ -50,6 +47,7 @@ export class EditThemeComponent {
   draggingClass?:string;
 
   constructor(private service: BibleService) {
+    console.log('EditThemeComponent ctor');
       effect(()=>{      
       if (this.activeThemeNode()) {
         let id = <number><unknown>this.activeThemeNode()?.id?.replace("theme", "");
@@ -196,7 +194,6 @@ export class EditThemeComponent {
             BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${obj.activeTheme.id}`);
           }
           else {
-            console.log(response.message);
             throw "Failed";
           }
         }
@@ -210,7 +207,6 @@ export class EditThemeComponent {
 
   OpenCloseThemeList() {
     if (this.themeListOpen) {
-      console.log("closing themelist");
       $(".childThemes .spin-arrow-icon").animate({rotate: "0deg"}, 500);
       $(".themes-container").slideUp(500);
     }
@@ -236,68 +232,8 @@ export class EditThemeComponent {
     this.citationListOpen = !this.citationListOpen;
   }
 
-  workbenchDomRect(rect:DOMRectReadOnly) {
-    this.sectionWidth = rect.width;
-    this.sectionHeight = rect.height;
-  }
-
   async getDbTheme(id:number) : Promise<ThemeExtendedModel> {
     const service = new BibleService;
     return await service.getTheme(id);
-  }
-
-  ngOnInit() {
-    console.log("initializing edit theme component");
-    this.subscriptions = new Subscription;
-    EditThemeComponent.isActive = true;
-    if (WorkbenchComponent.activeTheme) {
-      this.activeThemeNode = signal(WorkbenchComponent.activeTheme);
-    }
-  }
-
-  ngAfterViewInit() {
-    console.log("after view int of theme edit");
-    if (!EditThemeComponent.isSubscribed) {
-
-      this.subscriptions.add(
-        BibleThemeTreeComponent.ActiveThemeSelector
-          .subscribe((node: JstreeModel|null) => {
-            if (node) {
-              let themeId = +node.id.replace("theme", "");
-              this.service.getTheme(themeId)
-                .then(theme => {
-                  console.log("EditThemeComponent - fetching active theme");
-                  console.log(theme);
-                  this.activeTheme = theme;
-                  this.editedTheme = JSON.parse(JSON.stringify(theme));
-
-                  let themes:ThemeModelReference[] = [];
-                  let themeToCitationLinks:ThemeToCitationLinkModel[] = [];
-                  this.activeTheme.themes
-                    .sort((a, b) => a.theme.sequence - b.theme.sequence)
-                    .forEach(theme => themes.push(theme)); 
-                  this.activeTheme.themeToCitationLinks
-                    .sort((a, b) => a.themeToCitation.sequence - b.themeToCitation.sequence)
-                    .forEach(link => themeToCitationLinks.push(link));
-
-                  this.childthemes = themes;
-                  this.citations = themeToCitationLinks;
-                });    
-            }
-            else {
-              this.editedTheme = null;
-            }
-          }));
-
-
-      EditThemeComponent.isSubscribed = true;
-    }
-  }
-
-  ngOnDestroy() {
-    console.log("destroying theme edit");
-    EditThemeComponent.isActive = false;
-    EditThemeComponent.isSubscribed = false;
-    this.subscriptions.unsubscribe();
   }
 }
