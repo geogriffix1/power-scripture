@@ -1,3 +1,117 @@
+.workbench-edit {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 1px 5px;
+    width: 100%;
+    background-color: black;
+    color:white;
+}
+
+.workbench-edit .header {
+    grid-column: 2;
+    font-weight: medium;
+}
+
+.workbench-edit .citation.icon {
+    grid-column: 1;
+}
+
+.workbench-edit .citation.selected {
+    grid-column: 2;
+    color:gold;
+    font-weight:500;
+}
+
+.workbench-edit .citation.selected.missing {
+    grid-column: 2;
+    color: red;
+    font-weight:500;
+}
+
+input #description {
+    width: 100%;
+    border-right: 2px solid black;
+    border-radius: 6px;
+}
+
+
+.workbench-edit .citation {
+    grid-column: 2;
+}
+
+.workbench-edit .field1 {
+    grid-column: 2;
+}
+
+ /* icon shell */
+.workbench-edit .icon {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  margin: 0;
+  gap: 4px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.18);
+  background: linear-gradient(to bottom, #181818, #050505);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+
+  transform: translateY(0) scale(1);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease,
+    filter 120ms ease;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.45),
+    0 1px 2px rgba(0,0,0,0.65);
+}
+
+/* icon */
+.workbench-edit  .icon-script  .psmenu-icon {
+    width: 24px;
+    height: 24px;
+    margin-left: 6px;
+    padding: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    transition:
+      transform 120ms ease,
+      filter 120ms ease,
+      opacity 120ms ease;
+
+    background-image: url("/assets/images/Script.png");
+}
+
+.workbench-edit  .icon-save  .psmenu-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    transition:
+      transform 120ms ease,
+      filter 120ms ease,
+      opacity 120ms ease;
+
+    cursor: pointer;
+    background-image: url("/assets/images/Save.png");
+}
+
 .static {
     position: relative;
     background: rgba(255, 255, 255, 0.76);
@@ -10,7 +124,7 @@
     font: verdana;
 }
 
-.workbench-edit {
+/* .workbench-edit {
     background-color: black;
     color:white;
 }
@@ -38,7 +152,7 @@
 .workbench-edit .header {
     margin-left: 36px;
     font-weight: bold;
-}
+} */
 
 
 .scrollable-content .header {
@@ -52,6 +166,13 @@
     color: red;
     background-color: black;
 }
+
+#description {
+    width: 100%;
+    border-right: 2px solid black;
+    border-radius: 6px;
+}
+
 .theme-member , .scripture-range, .citation-verse {
     border: 2px solid darkslategray;
     background-color:field;
@@ -174,6 +295,10 @@ ul.command-suggestions, ul.command-numbers {
     border-top: 1px solid white;
     border-right: 1px solid black;
     border-bottom: 1px solid black;
+}
+
+.icon {
+    background-color: black;
 }
 
 .command-numbers li.hover {
