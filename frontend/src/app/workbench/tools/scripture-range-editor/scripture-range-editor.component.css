@@ -1,4 +1,131 @@
+nav.scripture-range-editor {
+  padding: 4px;
+  background-color: black;
+}
+
+.command-section {
+  background-color: black;
+}
+
+.command-labels,
+.command-fields {
+  display: grid;
+  grid-template-columns: 24px minmax(12rem, 2.2fr) repeat(3, minmax(6rem, 1fr));
+  column-gap: 8px;
+  align-items: start;
+  width: 100%;
+}
+
 .command-labels {
+  margin-bottom: 4px;
+}
+
+.command-label {
+  color: white;
+  font-weight: bold;
+  font-family: Verdana, sans-serif;
+  font-size: 12pt;
+  padding: 0;
+  background-color: black;
+}
+
+.command {
+  position: relative;
+  min-width: 0;
+}
+
+.command input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+  color: black;
+}
+
+.command.icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.command.icon img,
+.add-icon {
+  width: 24px;
+  height: 24px;
+  display: block;
+}
+
+.modal {
+  display: none;
+  position: absolute;
+  z-index: 20;
+  top: calc(100% + 2px);
+  left: 0;
+  width: 100%;
+  height: 250px;
+  overflow-y: auto;
+  background-color: lightgray;
+  color: darkslategray;
+  font-weight: normal;
+  border-radius: 4px;
+}
+
+.modal-content {
+  background-color: #fefefe;
+  padding: 5px;
+  border: 1px solid #888;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+ul.command-suggestions,
+ul.command-numbers {
+  list-style-type: none;
+  cursor: pointer;
+  padding-left: 10px;
+  margin: 0;
+}
+
+.command-suggestions li.hover,
+.command-numbers li.hover {
+  border-left: 1px solid white;
+  border-top: 1px solid white;
+  border-right: 1px solid black;
+  border-bottom: 1px solid black;
+}
+
+.command-numbers li {
+  text-align: center;
+}
+
+.illegal {
+  color: rgb(172, 0, 0);
+  font-weight: bold;
+}
+
+.legal {
+  color: rgb(0, 0, 172);
+  font-weight: bold;
+}
+
+.command.icon img.hover {
+  cursor: pointer;
+  border-left: 1px solid white;
+  border-top: 1px solid white;
+}
+
+@media (max-width: 800px) {
+  .command-labels,
+  .command-fields {
+    grid-template-columns: 24px 1fr 1fr;
+  }
+
+  .command-label.end-verse,
+  .command.end-verse {
+    grid-column: 2 / 4;
+  }
+}
+
+
+/* .command-labels {
     display: table;
 }
 .command-labels > div {
@@ -34,16 +161,16 @@ div.command-label {
 .command input[type=text] {
     width: 100%;
     color: black;
-}
+} */
 
 section.scrollable-content {
     height:calc(100vh);
     width:100%;
 }
 div.search-results { width:100%; overflow-y: scroll; }
-.search-results table {
+/* .search-results table {
     width: 100%;
-}
+} */
 /* a.cite-menu-add i.psmenu-icon {
     background: url("/assets/images/Add.png") center center no-repeat;
     background-size: 24px 24px;
@@ -67,7 +194,7 @@ tbody input[type=text] {
 
 tbody a { cursor: pointer; }
 
-.modal {
+/* .modal {
     display: none;
     position: relative;
     z-index: 1;
@@ -88,8 +215,8 @@ tbody a { cursor: pointer; }
     border: 1px solid #888;
     width: 80%;
 }
-
-ul.command-suggestions, ul.command-numbers {
+ */
+/* ul.command-suggestions, ul.command-numbers {
     list-style-type: none;
     cursor: pointer;
     padding-left: 10px;
@@ -132,9 +259,9 @@ ul.command-suggestions, ul.command-numbers {
 div.search-results { width:100%; overflow-y: scroll; }
 .search-results table {
     width: 100%;
-}
+} */
 
-thead th  {
+/* thead th  {
     background:rgb(1, 1, 110); border-top: 1px solid white;
     color:white;
     font-weight: bold;
@@ -150,9 +277,9 @@ tbody th, tbody td {
     color: black;
 }
 .prevent-text-select {
-    -webkit-user-select: none; /* Safari */
-    -ms-user-select: none; /* IE 10 and IE 11 */
-    user-select: none; /* Standard syntax */
+    -webkit-user-select: none; 
+    -ms-user-select: none; 
+    user-select: none; 
 }
 
 th.citation-label {
@@ -172,15 +299,12 @@ th.scripture-label {
 
 tr[aria-checked="true"] { cursor: pointer; background-color: rgba(3, 213, 250, 0.719); position: relative;}
 tr[aria-checked="false"] { cursor: pointer; background-color: none; position: relative;}
+*/
 
 app-cite-context-menu.modal-context {position:relative; display:block; top: 80px; left: 100px; z-index: 1}
 app-cite-context-menu.modal-context.hidden {position:relative; display:none; z-index:1}
 app-cite-context-menu {position:relative;}
 div.modal-context {position:absolute;}
-nav.scripture-range-editor {
-    padding: 4px;
-    background-color: black;
-}
 .description {
     background-color: black;
 }

@@ -315,15 +315,15 @@ export class EditCitationComponent {
 
   ngOnInit() {
     EditCitationComponent.isActive = true;
-    let rect = WorkbenchComponent.getWorkbenchSize();
+    // let rect = WorkbenchComponent.getWorkbenchSize();
 
-    this.workbenchDomRect(rect);
-    this.sectionWidth = rect.width;
-    this.activeScriptureRange.set(new NullCiteScriptureRange);
-    $("app-edit-theme").width(rect.width);
-    $("#citationDescription").width(rect.width - 60);
+    // this.workbenchDomRect(rect);
+    // this.sectionWidth = rect.width;
+    // this.activeScriptureRange.set(new NullCiteScriptureRange);
+    // $("app-edit-theme").width(rect.width);
+    // $("#citationDescription").width(rect.width - 60);
 
-    this.updateScrollingHeight();
+    // this.updateScrollingHeight();
 
     console.log(this.actRoute.snapshot);
 
@@ -333,17 +333,17 @@ export class EditCitationComponent {
   ngAfterViewInit() {
     this.activeRoute = this.actRoute.snapshot.routeConfig?.path ?? "";
     if (!EditCitationComponent.isSubscribed) {
-      WorkbenchComponent.WorkbenchResizeBroadcaster
-        .subscribe((rect:DOMRectReadOnly) => {
-          if(EditCitationComponent.isActive) {
-            this.workbenchDomRect(rect);
-            this.sectionWidth - rect.width - 4;
-            $("app-edit-theme").width(rect.width);
-            $("#citationDescription").width(rect.width - 60);
+      // WorkbenchComponent.WorkbenchResizeBroadcaster
+      //   .subscribe((rect:DOMRectReadOnly) => {
+      //     if(EditCitationComponent.isActive) {
+      //       this.workbenchDomRect(rect);
+      //       this.sectionWidth - rect.width - 4;
+      //       $("app-edit-theme").width(rect.width);
+      //       $("#citationDescription").width(rect.width - 60);
 
-            this.updateScrollingHeight();
-          }
-        });
+      //       this.updateScrollingHeight();
+      //     }
+      //   });
       }
 
     EditCitationComponent.isSubscribed = true;

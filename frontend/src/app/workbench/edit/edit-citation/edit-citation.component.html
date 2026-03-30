@@ -1,35 +1,37 @@
 <!-- Edit Citation header and warning message -->
 <div class="workbench-edit">
-    <div class="header">Edit Citation</div>
-    <div class="citation citation-icon"><img src="/assets/images/Script.png" title="Navigate by Theme Tree to the target citation"></div>
+    <div class="no-icon"></div><div class="header">Edit Citation</div>
+    <div class="citation icon icon-script"><img src="/assets/images/Script.png" title="Navigate by Theme Tree to the target citation"></div>
     <div class="citation selected missing">
         Please select the <b>Citation</b> from the <b>Bible Theme Tree</b>
     </div>
-</div>
+
 @if (activeCitationNode()) {
     <!-- A citation has been selected -->
     @if (!activeScriptureRange().citationId) {
         <!-- Discription Editor -->
-<nav class="cite-scripture">
-    <div class="workbench-settings">
-        <i class="citation save-icon" (click)="EditCitationDescription()" title="Click to Save changes to the Citation Description"></i>
+    <div class="icon icon-save">
+        <button
+            type="button"
+            class="icon icon-save"
+            (click)="EditCitationDescription()"
+            title="Click to save changes to Citation Description">
+            <i class="psmenu-icon"></i>
+        </button>
     </div>
-    <div class="input">
-        <input
-            id="citationDescription"
-            type="text"
-            title="Enter citation description"
-            placeholder="Type description here"
-        >
-    </div>
-    <div class="command-message"></div>
-</nav>
-        <!-- Range List Editor (adds new ranges to the citation) -->
+    <div class="field1"><input id="description" #description type="text" placeholder="Citation Description" title="The description of the citation"></div>
+    <div class="no-icon"></div><div class="command-message"></div>
+    }
+}
+</div>
+@if (activeCitationNode() && !activeScriptureRange().citationId) {
+
+<!-- Range List Editor (adds new ranges to the citation) -->
 <div class="scripture-range-editor">
     <app-scripture-range-editor [citation]="editedCitation" (rangeAdded)="onRangeAdded($event)"></app-scripture-range-editor>
 </div>
-    }
-    @else if (activeScriptureRange().citationId == editedCitation.id && activeVerse().id == 0) {
+}
+@else if (activeCitationNode() && activeScriptureRange().citationId == editedCitation.id && activeVerse().id == 0) {
         <!-- Markup Selector header -->
 <div id="activeScriptureRange" class="scripture-range container">
     <div class="text">Select Verse for Markup - {{activeScriptureRange().citation}}</div>
@@ -37,9 +39,9 @@
         <i class="close-icon" (click)="OnCloseSelectedRange()" title="Close Scripture Range"></i>
     </div>
 </div>
-    }
-    @else {
-        <!-- Markup Editor mode -->
+}
+@else if (activeCitationNode()) {
+    <!-- Markup Editor mode -->
 <div id="activeVerse" class="citation-verse container">
     <div class="text">Markup Editor - {{activeVerse().verseCitationLabel}}</div>
     <div class="right-icons">
@@ -47,8 +49,9 @@
         <i class="close-icon" (click)="OnCancelMarkups()" title="Cancel Citation Verse Markup Editor"></i>
     </div>
 </div>
-    }
 }
+
+
 <!-- Markup Selector/Editor body (content is scrollable) -->
 <section class="scrollable-content">
     <div class="await"></div>

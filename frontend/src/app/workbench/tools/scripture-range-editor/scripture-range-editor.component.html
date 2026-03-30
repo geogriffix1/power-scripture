@@ -8,76 +8,88 @@
     <!-- <app-search-context-menu class="modal-context hidden" [callbacks]=callbacks [selectedEntry]=selectedEntry></app-search-context-menu> -->
     <div class="command-message"></div>
 </nav>
-<section class="command-Section">
-        <div class="command-labels">
-        <div class="command-label" style="width:24px;">&nbsp;</div>
-        <div class="command-label book" [ngStyle]="{ width: widthBook }"><label>Book</label></div>
-        <div class="command-label chapter" [ngStyle]="{ width: widthChapter }"><label>Chapter</label></div>
-        <div class="command-label verse" [ngStyle]="{ width: widthChapter }"><label>Verse</label></div>
-        <div class="command-label end-verse" [ngStyle]="{ width: widthChapter }"><label>End Verse</label></div>
+<section class="command-section">
+  <div class="command-labels">
+    <div class="command-label icon-spacer">&nbsp;</div>
+    <div class="command-label book"><label>Book</label></div>
+    <div class="command-label chapter"><label>Chapter</label></div>
+    <div class="command-label verse"><label>Verse</label></div>
+    <div class="command-label end-verse"><label>End Verse</label></div>
+  </div>
+
+  <div class="command-fields">
+    <div class="command icon">
+      <img
+        class="add-icon"
+        title="Add Scripture Range to Citation"
+        src="/assets/images/Add.png"
+        (click)="addRange()"
+        (mouseover)="onHoverImg($event)"
+        (mouseleave)="onNormalImg($event)"
+      >
     </div>
-    <div class="command-fields">
-            <div class="command icon" style="width:24px;">
-            <img 
-                class="add-icon"
-                title="Add Scripture Range to Citation"
-                style="width:24px;"
-                src="/assets/images/Add.png"
-                (click)=addRange()
-                (mouseover)=onHoverImg($event)
-                (mouseleave)=onNormalImg($event)
-            >
+
+    <div class="command book">
+      <input id="book" #book type="text" title="Enter Bible book" (focus)="onFocusBook()">
+      <div id="booklist" class="modal book-modal">
+        <div class="modal-content">
+          <ul class="command-suggestions">
+            @for (book of bookList; track book) {
+              <li (click)="onClickBook(book.book)" (mouseover)="onHoverLi($event)" (mouseleave)="onNormalLi($event)">
+                {{book.book}}
+              </li>
+            }
+          </ul>
         </div>
-        <div class="command book" [ngStyle]="{ width: widthBook }">
-            <input id="book" #book type="text" title="Enter Bible book" (focus)=onFocusBook()>
-            <div id="booklist" class="modal">
-                <div class="modal-content">
-                    <ul class="command-suggestions">
-                    @for (book of bookList; track book) {
-                        <li (click)=onClickBook(book.book) (mouseover)=onHoverLi($event) (mouseleave)=onNormalLi($event)>{{book.book}}</li>
-                    }
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="command chapter" [ngStyle]=" {width: widthChapter }">
-            <input id="chapter" #chapter type="text" title="Enter chapter number" (focus)=onFocusChapter() [disabled]=isChapterDisabled>
-            <div id="chapterlist" class="modal">
-                <div class="modal-content">
-                    <ul class="command-numbers">
-                    @for (chapter of chapterList; track chapter) {
-                        <li (click)=onClickChapter(chapter) (mouseover)=onHoverLi($event) (mouseleave)=onNormalLi($event)>{{chapter}}</li>
-                    }
-                    </ul>
-                </div>
-            </div>
-        </div>
-        <div class="command verse" [ngStyle]="{ width: widthChapter }">
-            <input id="verse" #verse type="text" title="Enter starting verse number" (focus)=onFocusVerse() [disabled]=isVerseDisabled>
-            <div id="verselist" class="modal">
-                <div class="modal-content">
-                    <ul class="command-numbers">
-                    @for (verse of verseList; track verse) {
-                        <li (click)=onClickVerse(verse) (mouseover)=onHoverLi($event) (mouseleave)=onNormalLi($event)>{{verse}}</li>
-                    }
-                    </ul>
-                </div>
-            </div>    </div>
-        <div class="command end-verse" [ngStyle]="{ width: widthChapter }">
-            <input id="endVerse" #endVerse type="text" title="Enter ending verse number" (focus)=onFocusEndVerse() [disabled]=isEndVerseDisabled>
-            <div id="endverselist" class="modal">
-                <div class="modal-content">
-                    <ul class="command-numbers">
-                    @for (endVerse of endVerseList; track endVerse) {
-                        <li (click)=onClickEndVerse(endVerse) (mouseover)=onHoverLi($event) (mouseleave)=onNormalLi($event)>{{endVerse}}</li>
-                    }
-                    </ul>
-                </div>
-            </div>
-        </div>
+      </div>
     </div>
-</section>
-@if (activeScriptureRange) {
+
+    <div class="command chapter">
+      <input id="chapter" #chapter type="text" title="Enter chapter number" (focus)="onFocusChapter()" [disabled]="isChapterDisabled">
+      <div id="chapterlist" class="modal number-modal">
+        <div class="modal-content">
+          <ul class="command-numbers">
+            @for (chapter of chapterList; track chapter) {
+              <li (click)="onClickChapter(chapter)" (mouseover)="onHoverLi($event)" (mouseleave)="onNormalLi($event)">
+                {{chapter}}
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="command verse">
+      <input id="verse" #verse type="text" title="Enter starting verse number" (focus)="onFocusVerse()" [disabled]="isVerseDisabled">
+      <div id="verselist" class="modal number-modal">
+        <div class="modal-content">
+          <ul class="command-numbers">
+            @for (verse of verseList; track verse) {
+              <li (click)="onClickVerse(verse)" (mouseover)="onHoverLi($event)" (mouseleave)="onNormalLi($event)">
+                {{verse}}
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="command end-verse">
+      <input id="endVerse" #endVerse type="text" title="Enter ending verse number" (focus)="onFocusEndVerse()" [disabled]="isEndVerseDisabled">
+      <div id="endverselist" class="modal number-modal">
+        <div class="modal-content">
+          <ul class="command-numbers">
+            @for (endVerse of endVerseList; track endVerse) {
+              <li (click)="onClickEndVerse(endVerse)" (mouseover)="onHoverLi($event)" (mouseleave)="onNormalLi($event)">
+                {{endVerse}}
+              </li>
+            }
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>@if (activeScriptureRange) {
     <table class="row-clickable">
         <thead>
             <tr>

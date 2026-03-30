@@ -1,6 +1,5 @@
 import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { Subscription, fromEvent } from 'rxjs';
-import { NgStyle } from '@angular/common';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BibleService } from '../../../bible.service';
 import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel';
@@ -12,9 +11,6 @@ import $ from 'jquery';
 
 @Component({
     selector: 'app-scripture-range-editor',
-    imports: [
-      NgStyle
-    ],
     templateUrl: './scripture-range-editor.component.html',
     styleUrl: './scripture-range-editor.component.css'
 })
@@ -75,11 +71,6 @@ export class ScriptureRangeEditorComponent {
 
   scriptureRanges:CiteScriptureRangeModel[] = [];
   selectedEntry: any = [];
-  sectionWidth!:number;
-  sectionHeight!:number;
-  widthBook!:string;
-  widthChapter!:string;
-  widthDescription!:number;
 
   activeBook!:any;
   activeChapter!:any;
@@ -100,14 +91,6 @@ export class ScriptureRangeEditorComponent {
   }
 
   CreateCitation() {}
-
-  workbenchDomRect(rect:DOMRectReadOnly) {
-    this.sectionWidth = rect.width;
-    this.sectionHeight = rect.height;
-    this.widthBook = `${Math.floor((rect.width - 24) / 2.5)}px`;
-    this.widthChapter = `${Math.floor((rect.width - 24) / 5.0)}px`;
-    this.widthDescription = 90; //rect.width - 20;
-  }
 
   onHoverLi(event:any) {
     $(event.target).addClass("hover");
@@ -490,8 +473,6 @@ export class ScriptureRangeEditorComponent {
   ngOnInit() {
     ScriptureRangeEditorComponent.isActive = true;
     this.scriptureRanges = <CiteScriptureRangeModel[]>[];
-    let rect = WorkbenchComponent.getWorkbenchSize();
-    this.workbenchDomRect(rect);
     if (!ScriptureRangeEditorComponent.isSubscribed) {
       ScriptureRangeEditorComponent.inputElement = $("#book")[0];
       MainShellComponent.mouseupBroadcaster.subscribe(event => {
@@ -517,17 +498,6 @@ export class ScriptureRangeEditorComponent {
 
   ngAfterViewInit() {
     if (!ScriptureRangeEditorComponent.isSubscribed) {
-      WorkbenchComponent.WorkbenchResizeBroadcaster
-        .subscribe((rect:DOMRectReadOnly) => {
-          if (ScriptureRangeEditorComponent.isActive) {
-            this.workbenchDomRect(rect);
-            $(".command-label.book,.command.book").css('width', `${this.widthBook}`);
-            $("#booklist").css('width', this.widthBook);
-            $("#chapterlist,#verselist,#endverselist").css('width', this.widthChapter);
-            $(".command-label.chapter,.command-label.verse,.command-label.end-verse").css('width', `${this.widthChapter}`);
-            $(".command.chapter,.command.verse,.command.end-verse").css('width', `${this.widthChapter}`);
-          }
-      });
 
       ScriptureRangeEditorComponent.isSubscribed = true;
     }
