@@ -13,13 +13,21 @@
     <div class="workbench-title">
         {{editType}}
         <div class="settings">
-            <h3>Edit Element Type:</h3>
+            <h3>Choose Edit Type:</h3>
             <div class="settings-selector" *ngFor="let item of editTypes; index as i">
                 @if (i > 0) {
-                <a class="menu-radio-{{i === activeType ? 'checked' : 'unchecked'}}" (click)=onRadioClickSettings(i)>
+                <button
+                    type="button"
+                    class="icon-circle-{{i == activeType ? 'checked' : 'unchecked'}}"
+                    (click)="onRadioClickSettings(i)">
+                        <i class="psmenu-icon"></i>
+    
+                <!-- <a class="menu-radio-{{i === activeType ? 'checked' : 'unchecked'}}" (click)=onRadioClickSettings(i)>
                     <i class="radio-icon"></i>
                     <span>{{item}}</span>
-                </a>
+                </a> -->
+                </button>
+                <span>{{item}}</span>
                 }
             </div>
         </div>

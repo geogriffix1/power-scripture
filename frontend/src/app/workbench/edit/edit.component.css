@@ -1,9 +1,3 @@
-.workbench-title {
-    color: white;
-    font-size: medium;
-    text-align: left;
-}
-
 .workbench-edit {
   display: flex;
   flex: 0 0 auto;
@@ -14,6 +8,10 @@
   flex-wrap: nowrap;
   justify-content: left;
   align-items: left;
+}
+
+div.settings.settings-active {
+    border-left: gray solid 1px;
 }
 
  /* icon shell */
@@ -48,7 +46,10 @@
     0 1px 2px rgba(0,0,0,0.65);
 }
 
-/* icon */
+.workbench-edit .workbench-title button{
+    background-color: rgb(1, 1, 110);
+}
+
 .workbench-edit  .icon-settings  .psmenu-icon {
     width: 24px;
     height: 24px;
@@ -67,6 +68,43 @@
     background-image: url("/assets/images/Pinion.png");
 }
 
+
+.workbench-title  .icon-circle-checked  .psmenu-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    transition:
+      transform 120ms ease,
+      filter 120ms ease,
+      opacity 120ms ease;
+
+    background-image: url("/assets/images/Circle checked.png");
+}
+
+.workbench-title  .icon-circle-unchecked  .psmenu-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    transition:
+      transform 120ms ease,
+      filter 120ms ease,
+      opacity 120ms ease;
+
+    background-image: url("/assets/images/Circle unchecked.png");
+}
+
 /* hover */
 .workbench-edit button.icon-settings:hover:not(.is-active) {
   transform: translateY(-2px) scale(1.08);
@@ -75,6 +113,20 @@
     inset 0 1px 0 rgba(255,255,255,0.12),
     0 0 8px rgba(255, 215, 0, 0.22),
     0 3px 10px rgba(0,0,0,0.70);
+}
+
+.workbench-title {
+    color: white;
+    font-size: medium;
+    text-align: left;
+    width: 100%;
+    justify-content: left;
+}
+
+.workbench-title h3 {
+    font-size: medium;
+    text-align: left;
+    color: white;
 }
 
 

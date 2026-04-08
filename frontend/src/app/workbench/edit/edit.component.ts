@@ -64,14 +64,22 @@ export class EditComponent {
     this.settingsActive = !this.settingsActive;
   }
   onRadioClickSettings(index:number) {
-    if (this.activeType != index) {
-      this.router.navigate([this.paths[index]]);
-    }
+    (async() => {
+      $("div.settings").hide(500).removeClass("settings-active");
+      await this.delay(500)
+      if (this.activeType != index) {
+        this.router.navigate([this.paths[index]]);
+      }
 
-    $("div.settings.settings-active").hide(500).removeClass("settings-active");
-    this.settingsActive = false;
+      //$("div.settings.settings-active").hide(500).removeClass("settings-active");
+      this.settingsActive = false;
 
-    this.activeType = index;
+      this.activeType = index;
+    })();
+  }
+
+  delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   ngOnInit() {
