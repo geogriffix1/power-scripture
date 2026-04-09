@@ -64,11 +64,19 @@ export class CreateComponent {
   }
 
   onRadioClickSettings(index:number) {
-    if (this.activeType != index) {
-      this.router.navigate([this.paths[index]]);
-    }
-    $("div.settings.settings-active").hide(500).removeClass("settings-active");
-    this.settingsActive = false; 
+    (async() => {
+      $("div.settings.settings-active").hide(500).removeClass("settings-active");
+      await this.delay(500);
+      
+      if (this.activeType != index) {
+        this.router.navigate([this.paths[index]]);
+      }
+      this.settingsActive = false; 
+    })();
+  }
+
+  delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   ngOnInit() {
