@@ -1,8 +1,16 @@
-<nav class="cite-scripture">
-    <div class="workbench-settings">
-        <i class="theme save-icon" (click)="CreateTheme()" title="Create a new theme"></i>
+<div class="workbench-create">
+    <div class="no-icon"></div><div class="header">Create Theme</div>
+    <div class="icon icon-save">
+        <button
+            type="button"
+            class="icon-save"
+            (click)="CreateTheme()"
+            title="Click to save, creating a new theme">
+            <i class="psmenu-icon" title="Create and save a new theme"></i>
+        </button>
     </div>
-    <input id="name" #name type="text" class="command-line" placeholder="Theme Name" title="The name of the theme">
-    <input id="description" #description type="text" class="command-line" placeholder="Theme Description" title="The description of the theme">
+    <div class="field1"><input id="name" #name type="text" class="command-line" placeholder="Theme Name" title="The name of the theme"></div>
+    <div class="field2"><input id="description" #description type="text" class="command-line" placeholder="Theme Description" title="The description of the theme"></div>
     <div class="command-message"></div>
-</nav>
+</div>
+

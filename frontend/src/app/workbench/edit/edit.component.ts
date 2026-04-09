@@ -48,11 +48,6 @@ export class EditComponent {
   sectionHeight!:number;
   instance = this;
 
-  workbenchDomRect(rect:DOMRectReadOnly) {
-    this.sectionWidth = rect.width;
-    this.sectionHeight = rect.height;
-  }
-  
   onClickSettings() {
     if (this.settingsActive) {
       $("div.settings").hide(500).removeClass("settings-active");
@@ -71,9 +66,7 @@ export class EditComponent {
         this.router.navigate([this.paths[index]]);
       }
 
-      //$("div.settings.settings-active").hide(500).removeClass("settings-active");
       this.settingsActive = false;
-
       this.activeType = index;
     })();
   }
@@ -91,14 +84,14 @@ export class EditComponent {
     
     this.activeThemeNode = signal(WorkbenchComponent.activeTheme);
     this.activeCitationNode = signal(WorkbenchComponent.activeCitation);
+  }
 
+  ngAfterViewInit() {
     if (this.activeType == 0) {
       this.settingsActive = false;
       this.onClickSettings();
     }
-  }
-
-  ngAfterViewInit() {
+    
     if (!EditComponent.isSubscribed) {
       this.subscriptions.add(
         BibleThemeTreeComponent.ActiveCitationSelector.subscribe((node: JstreeModel | null) => {

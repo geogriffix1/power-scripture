@@ -1,22 +1,36 @@
-<header></header>
 <nav class="workbench-create">
-    @if (activeType > 0) {
     <div class="workbench-settings">
+        <button
+            type="button"
+            class="icon-settings"
+            (click)="onClickSettings()"
+            title="Settings for creating - Theme or Citation">
+            <i class="psmenu-icon" title="Settings for editing"></i>
+        </button>
+    </div>
+    <!-- <div class="workbench-settings">
         <a class="settings" title="Settings" (click)=onClickSettings()>
             <i class="settings active"></i>
         </a>
-    </div>
-    }
+    </div> -->
     <div class="workbench-title">
         {{createType}}
         <div class="settings">
-            <h3>Create Saved Element Type:</h3>
+            <h3>Choose Create Type:</h3>
             <div class="settings-selector" *ngFor="let item of createTypes; index as i">
                 @if (i > 0) {
-                <a class="menu-radio-{{i === activeType ? 'checked' : 'unchecked'}}" (click)=onRadioClickSettings(i)>
+                <button
+                    type="button"
+                    class="icon-circle-{{i == activeType ? 'checked' : 'unchecked'}}"
+                    (click)="onRadioClickSettings(i)">
+                        <i class="psmenu-icon"></i>
+    
+                <!-- <a class="menu-radio-{{i === activeType ? 'checked' : 'unchecked'}}" (click)=onRadioClickSettings(i)>
                     <i class="radio-icon"></i>
                     <span>{{item}}</span>
-                </a>
+                </a> -->
+                </button>
+                <span>{{item}}</span>
                 }
             </div>
         </div>
@@ -24,9 +38,9 @@
 </nav>
 <section>
     <div class="workbench-parent-theme">
-        <div class="header">Parent Theme</div>
+        <div class="empty-grid"></div><div class="header">Parent Theme</div>
         <div class="theme theme-icon"><img src="/assets/images/Folder.png" title="Navigate by Theme Tree to the parent folder"></div>
-        <div class="theme selected-theme">
+        <div class="theme selected-theme{{ activeTheme ? '' : ' missing'}}">
             @if (activeTheme) {
                 {{activeTheme.path}}
             } @else {

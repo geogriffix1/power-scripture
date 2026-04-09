@@ -7,7 +7,6 @@ import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-t
 
 @Component({
     selector: 'app-create-theme',
-    imports: [],
     templateUrl: './create-theme.component.html',
     styleUrl: './create-theme.component.css'
 })
