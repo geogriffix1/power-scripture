@@ -7,6 +7,8 @@ import { SearchContextMenuComponent } from '../../../context-menu/search-context
 import { SearchScriptureReportComponent } from '../../../reports/search-scripture-report/search-scripture-report.component';
 import { MainShellComponent } from '../../../mainshell/mainshell.component';
 import { WorkbenchComponent } from '../../workbench.component';
+import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-tree.component';
+import { JstreeModel } from '../../../model/jstree.model';
 import * as wordList from './BibleWordlist.json';
 import $ from 'jquery';
 
@@ -23,6 +25,7 @@ export class SearchScriptureComponent implements OnInit{
   static isActive:boolean = false;
   static isSubscribed:boolean = false;
   service:ServiceDirective;
+  bibleService: BibleService = inject(BibleService);
   suggestions:string[] = [];
   context:any = {
     showSearchScriptureReport: Boolean
@@ -35,6 +38,7 @@ export class SearchScriptureComponent implements OnInit{
   rect!: DOMRect;
 
   callbacks = {
+    bibleService: new BibleService(),
     canSelectAll():boolean { return true; },
     selectAll():void {
       $("tbody > tr[aria-checked=false]").attr('aria-checked', 'true');
@@ -59,28 +63,10 @@ export class SearchScriptureComponent implements OnInit{
     canCreateCitation():boolean { return true; },
     createCitation(searchResults:any, context:any):void {
       console.log("create citation context menu action");
-      let unicodeSuperscriptNumbers = [
-        "\u2070",
-        "\u00B9",
-        "\u00B2",
-        "\u00B3",
-        "\u2074",
-        "\u2075",
-        "\u2076",
-        "\u2077",
-        "\u2078",
-        "\u2079",
-      ];
-
-      function superscript(n:number): string {
-        let s = n.toString();
-        let ss = "";
-        for (let i=0; i<s.length; i++) {
-          let c = s.charCodeAt(i) - "0".charCodeAt(0);
-          ss += unicodeSuperscriptNumbers[c];
-        }
-
-        return ss;
+      let activeTheme = WorkbenchComponent.activeTheme;
+      if (!activeTheme) {
+        $("div.command-message").text("Please select a Theme to add the Citation to.").show(500);
+        return;
       }
 
       let selected = $("tbody > tr[aria-checked=true]");
@@ -103,86 +89,142 @@ export class SearchScriptureComponent implements OnInit{
         }
       }
 
-      let book = "";
-      let chapter = 0;
-      let verse = 0;
-      let startVerse = 0;
-      let endVerse = 0;
-      let verses = "";
-      let scriptures: ScriptureModel[] = [];
+      console.log("searchResults:");
+      console.log(searchResults);
+      console.log("forCitations:");
+      console.log(forCitations);
 
-      for (let i=0; i<forCitations.length; i++) {
-        let result = forCitations[i];
-        if (
-          result.book == book &&
-          result.chapter == chapter &&
-          result.verse == endVerse + 1) {
-            verses = `${verses} ${superscript(result.verse)}${result.text}`;
-            scriptures.push({
-              id: forCitations[i].id,
-              book: forCitations[i].book,
-              chapter: forCitations[i].chapter,
-              verse: forCitations[i].verse,
-              text: forCitations[i].text,
-              bibleOrder: forCitations[i].bibleOrder
-            });
-            endVerse++;
-        }
-        else {
-          if (book != "") {
-            let isSingleChapterBook = book.match(/Obadiah|Philemon|2 John|3 John|Jude/);
-            let firstVerse = `${book} ${chapter}:${startVerse}`;
-            if (isSingleChapterBook) {
-              firstVerse = `${book} ${startVerse}`;
-            }
-
-            let citation = firstVerse;
-            if (endVerse > startVerse) {
-              citation = `${citation}-${endVerse}`;
-            }
-            
-            let scriptureRange:CiteScriptureRangeModel = {
-              citation: citation,
-              verses: verses,
-              scriptures: scriptures
-            };
-
-            WorkbenchComponent.scriptureRanges.push(scriptureRange)
+      let scriptures: number[] = forCitations.map((result) => result.id);
+      
+      let activeThemeId = +activeTheme.id.replace("theme", "");
+      this.bibleService.getTheme(activeThemeId)
+        .then(parentTheme => {
+          var sequence: number;
+          if (parentTheme.themeToCitationLinks.length == 0) {
+            sequence = 1;
           }
+          else {
+            sequence = Math.max(...parentTheme.themeToCitationLinks.map(link => link.themeToCitation.sequence)) + 1;
+          }   
 
-          book = result.book;
-          chapter = result.chapter;
-          verse = result.verse;
-          startVerse = result.verse;
-          endVerse = result.verse;
-          verses = result.text;
-          scriptures = [];
-        }
-      }
+          this.bibleService.createCitation("", activeThemeId, sequence, scriptures)
+            .then(result => {
+                BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${parentTheme.id}`);
+                let theme = BibleThemeTreeComponent.getDomNode(`theme${parentTheme.id}`) as JstreeModel;
+                BibleThemeTreeComponent.openDomThemeNode(theme);
+                let citationNode = BibleThemeTreeComponent.getDomNode(`citation${result.themeToCitation.id}`) as JstreeModel;
+                BibleThemeTreeComponent.ActiveCitationSelector.next(citationNode);
+                let router = inject(Router);
+                router.navigate(['/edit/citation']);
+            });
+        });
 
-      if (forCitations.length > 0) {
-        let isSingleChapterBook = book.match(/Obadiah|Philemon|2 John|3 John|Jude/);
-        let firstVerse = `${book} ${chapter}:${startVerse}`;
-        if (isSingleChapterBook) {
-          firstVerse = `${book} ${startVerse}`;
-        }
 
-        let citation = firstVerse;
-        if (endVerse > startVerse) {
-          citation = `${citation}-${endVerse}`;
-        }
+      // let unicodeSuperscriptNumbers = [
+      //   "\u2070",
+      //   "\u00B9",
+      //   "\u00B2",
+      //   "\u00B3",
+      //   "\u2074",
+      //   "\u2075",
+      //   "\u2076",
+      //   "\u2077",
+      //   "\u2078",
+      //   "\u2079",
+      // ];
+
+      // function superscript(n:number): string {
+      //   let s = n.toString();
+      //   let ss = "";
+      //   for (let i=0; i<s.length; i++) {
+      //     let c = s.charCodeAt(i) - "0".charCodeAt(0);
+      //     ss += unicodeSuperscriptNumbers[c];
+      //   }
+
+      //   return ss;
+      // }
+
+
+
+      // let book = "";
+      // let chapter = 0;
+      // let verse = 0;
+      // let startVerse = 0;
+      // let endVerse = 0;
+      // let verses = "";
+      // let scriptures: ScriptureModel[] = [];
+
+      // for (let i=0; i<forCitations.length; i++) {
+      //   let result = forCitations[i];
+      //   if (
+      //     result.book == book &&
+      //     result.chapter == chapter &&
+      //     result.verse == endVerse + 1) {
+      //       verses = `${verses} ${superscript(result.verse)}${result.text}`;
+      //       scriptures.push({
+      //         id: forCitations[i].id,
+      //         book: forCitations[i].book,
+      //         chapter: forCitations[i].chapter,
+      //         verse: forCitations[i].verse,
+      //         text: forCitations[i].text,
+      //         bibleOrder: forCitations[i].bibleOrder
+      //       });
+      //       endVerse++;
+      //   }
+      //   else {
+      //     if (book != "") {
+      //       let isSingleChapterBook = book.match(/Obadiah|Philemon|2 John|3 John|Jude/);
+      //       let firstVerse = `${book} ${chapter}:${startVerse}`;
+      //       if (isSingleChapterBook) {
+      //         firstVerse = `${book} ${startVerse}`;
+      //       }
+
+      //       let citation = firstVerse;
+      //       if (endVerse > startVerse) {
+      //         citation = `${citation}-${endVerse}`;
+      //       }
+            
+      //       let scriptureRange:CiteScriptureRangeModel = {
+      //         citation: citation,
+      //         verses: verses,
+      //         scriptures: scriptures
+      //       };
+
+      //       WorkbenchComponent.scriptureRanges.push(scriptureRange)
+      //     }
+
+      //     book = result.book;
+      //     chapter = result.chapter;
+      //     verse = result.verse;
+      //     startVerse = result.verse;
+      //     endVerse = result.verse;
+      //     verses = result.text;
+      //     scriptures = [];
+      //   }
+      // }
+
+      // if (forCitations.length > 0) {
+      //   let isSingleChapterBook = book.match(/Obadiah|Philemon|2 John|3 John|Jude/);
+      //   let firstVerse = `${book} ${chapter}:${startVerse}`;
+      //   if (isSingleChapterBook) {
+      //     firstVerse = `${book} ${startVerse}`;
+      //   }
+
+      //   let citation = firstVerse;
+      //   if (endVerse > startVerse) {
+      //     citation = `${citation}-${endVerse}`;
+      //   }
         
-        let scriptureRange:CiteScriptureRangeModel = {
-          citation: citation,
-          verses: verses,
-          scriptures: scriptures
-        };
+      //   let scriptureRange:CiteScriptureRangeModel = {
+      //     citation: citation,
+      //     verses: verses,
+      //     scriptures: scriptures
+      //   };
 
-        WorkbenchComponent.scriptureRanges.push(scriptureRange)
-      }
+      //   WorkbenchComponent.scriptureRanges.push(scriptureRange)
+      // }
 
-      context.searchResults = WorkbenchComponent.scriptureRanges;
-      context.router.navigate(['/create/citation']);     
+      // context.searchResults = WorkbenchComponent.scriptureRanges;
     },
     canExportSelected():boolean { return true; },
     exportSelected(searchResults:any, context:any):void {
@@ -272,13 +314,13 @@ export class SearchScriptureComponent implements OnInit{
   }
   public onClickSuggestion(text:string):void {
     const pattern = /^(.*?)[a-z0-9]*$/i;
-    let commandLine = $("input[type=text].command-line");
-    let command = <string>commandLine.val();
+    let searchString = $("input[type=text].search-string");
+    let command = <string>searchString.val();
     command = command.replace(pattern, "$1") + text + " ";
     this.automodified = true;
     $("#command-wordlist").hide();
-    commandLine.val(command);
-    commandLine.trigger('focus');
+    searchString.val(command);
+    searchString.trigger('focus');
     this.automodified = false;
   }
 
@@ -287,9 +329,9 @@ export class SearchScriptureComponent implements OnInit{
     $(`tr[accessKey=${accessKey}]`).attr("aria-checked", checked === "false" ? "true" : "false");
   }
 
-   public onScroll(scroll:any) {
-    let scrollTop = scroll.target.scrollTop;
-  }
+  //  public onScroll(scroll:any) {
+  //   let scrollTop = scroll.target.scrollTop;
+  // }
 
   public showModalContextMenu(event:MouseEvent) {
     event.preventDefault();
@@ -319,14 +361,14 @@ export class SearchScriptureComponent implements OnInit{
   }
 
   public runSearch(event:any) {
-    this.searchCommand = (<string>$("input[type=text].command-line").val()).trim();
+    this.searchCommand = (<string>$("input[type=text].search-string").val()).trim();
     if (!this.searchCommand) {
-      $("div.command-message").text("Please enter a search command").show(100);
+      $("div.command-message").text("Please enter a search string").show(500);
     }
     else {
-      $("div.command-message").text("").hide(100);
+      $("div.command-message").text("").hide(500);
       $("#command-wordlist").hide(100);
-      $("div.search-results tbody").hide(100);
+      $("div.search-results tbody").hide(500);
       $("div.settings.settings-active").removeClass("settings-active");
 
       let pattern:RegExp|null = null;
@@ -468,7 +510,6 @@ export class SearchScriptureComponent implements OnInit{
   ngOnDestroy():void {
     SearchScriptureComponent.isActive = false;
   }
-
 }
 
 @Directive()

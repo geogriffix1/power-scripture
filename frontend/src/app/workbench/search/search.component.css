@@ -1,0 +1,194 @@
+.workbench-search {
+  display: flex;
+  flex: 0 0 auto;
+  width: 100%;
+  padding-bottom: 4px;
+  color: white;
+  font-size: medium;
+  flex-wrap: nowrap;
+  justify-content: left;
+  align-items: left;
+}
+
+div.settings.settings-active {
+    border-left: gray solid 1px;
+}
+
+ /* icon shell */
+.workbench-search .icon {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  margin: 0;
+  gap: 4px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.18);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+
+  transform: translateY(0) scale(1);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease,
+    filter 120ms ease;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.45),
+    0 1px 2px rgba(0,0,0,0.65);
+}
+
+.workbench-search .icon button.icon-settings {
+    background-color: black;
+}
+
+.settings-selector button.icon {
+    background-color: rgb(1, 1, 110);
+}
+
+
+.workbench-search .icon .psmenu-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    transition:
+      transform 120ms ease,
+      filter 120ms ease,
+      opacity 120ms ease;
+
+    background-image: url("/assets/images/Pinion.png");
+}
+
+.workbench-title  .icon-circle-checked  .psmenu-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    transition:
+      transform 120ms ease,
+      filter 120ms ease,
+      opacity 120ms ease;
+
+    background-image: url("/assets/images/Circle checked.png");
+}
+
+.workbench-title  .icon-circle-unchecked  .psmenu-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    transition:
+      transform 120ms ease,
+      filter 120ms ease,
+      opacity 120ms ease;
+
+    background-image: url("/assets/images/Circle unchecked.png");
+}
+
+.workbench-search  .icon-search  .psmenu-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    transition:
+      transform 120ms ease,
+      filter 120ms ease,
+      opacity 120ms ease;
+
+    background-image: url("/assets/images/Search.png");
+}
+
+/* hover */
+.workbench-search button.icon-settings:hover {
+  transform: translateY(-2px) scale(1.08);
+  border-color: rgba(255, 215, 0, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 0 8px rgba(255, 215, 0, 0.22),
+    0 3px 10px rgba(0,0,0,0.70);
+}
+
+/* pressed */
+.workbench-search button.icon-settings {
+  transform: translateY(1px) scale(0.96);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,0.75),
+    inset 0 0 6px rgba(255,255,255,0.04);
+}
+
+.workbench-title {
+    color: white;
+    font-size: medium;
+    text-align: left;
+    width: 100%;
+    justify-content: left;
+}
+
+.workbench-title h3 {
+    font-size: medium;
+    text-align: left;
+    color: white;
+}
+
+/* 
+.workbench-edit div.theme {
+    display: inline;
+    overflow-x: auto;
+    overflow-y: none;
+    color:gold;
+    font-weight:500;
+}
+.workbench-edit div.selected.missing {
+    color: red;
+    background-color: black;
+}
+div.search-results { width:100%; overflow-y: scroll; }
+.search-results table {
+    width: 100%;
+}
+
+.search-results thead th  {
+    background:rgb(1, 1, 110); border-top: 1px solid white;
+    color:white;
+    font-weight: bold;
+    font-family:Verdana,sans-serif;font-size:12pt;
+    overflow-x:auto;
+    display:table-cell;
+}
+
+.search-results tbody th,.search-results tbody td {
+    border-top: 1px solid rgb(1, 1, 110);
+    border-right: 1px solid rgb(1, 1, 110);
+}
+
+nav.create {
+    padding: 1px;
+} */

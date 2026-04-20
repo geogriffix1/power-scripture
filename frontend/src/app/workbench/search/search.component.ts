@@ -17,8 +17,8 @@ import $ from 'jquery';
 export class SearchComponent {
     searchTypes = [
     "Pull scripture citing Book, Chapter, Verse-Range",
-    "Search for matching Scriptures (Regular Expressions permitted)",
-    "Search for matching Scriptures (% and _ Wildcard characters permitted)"
+    "Scripture Search (Regular Expressions))",
+    "Scripture Search (% and _ Wildcards)"
   ];
 
   activeType = 2;

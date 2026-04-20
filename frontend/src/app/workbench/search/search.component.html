@@ -1,21 +1,36 @@
-<header></header>
 <nav class="workbench-search">
-    <div class="workbench-settings">
-        <a class="settings" title="Settings" (click)="onClickSettings()">
-            <i class="settings active"></i>
-        </a>
+    <div class="workbench-settings icon">
+        <button
+            type="button"
+            class="icon-settings"
+            (click)="onClickSettings()"
+            title="Settings for editing - Theme or Citation">
+            <i class="psmenu-icon" title="Settings for editing"></i>
+        </button>
     </div>
     <div class="workbench-title">
         {{searchType}}
         <div class="settings">
             <h3>Search Type:</h3>
             <div class="settings-selector" *ngFor="let item of searchTypes; index as i">
+                @if (i > 0) {
+                <button
+                    type="button"
+                    class="icon icon-circle-{{i == activeType ? 'checked' : 'unchecked'}}"
+                    (click)="onRadioClickSettings(i)">
+                        <i class="psmenu-icon"></i>    
+                </button>
+                <span>{{item}}</span>
+                }
+            </div>
+        </div>
+            <!-- <div class="settings-selector" *ngFor="let item of searchTypes; index as i">
                 <a class="menu-radio-{{i === activeType ? 'checked' : 'unchecked'}}" (click)="onRadioClickSettings(i)">
                     <i class="radio-icon"></i>
                     <span>{{item}}</span>
                 </a>
             </div>
-        </div>
+        </div> -->
     </div>
 </nav>
 <section>

@@ -1,12 +1,11 @@
 <nav class="scripture-range-editor">
-    @if (createCitation) {
+    <!-- @if (createCitation) {
     <div class="workbench-settings">
         <i class="citation save-icon" (click)="CreateCitation()" title="Create a new citation"></i>
     </div>
     <input id="description" type="text" class="command-line" placeholder="Citation Description" title="The description of the Citation">
-    }
+    } -->
     <!-- <app-search-context-menu class="modal-context hidden" [callbacks]=callbacks [selectedEntry]=selectedEntry></app-search-context-menu> -->
-    <div class="command-message"></div>
 </nav>
 <section class="command-section">
   <div class="command-labels">
@@ -19,14 +18,13 @@
 
   <div class="command-fields">
     <div class="command icon">
-      <img
-        class="add-icon"
-        title="Add Scripture Range to Citation"
-        src="/assets/images/Add.png"
-        (click)="addRange()"
-        (mouseover)="onHoverImg($event)"
-        (mouseleave)="onNormalImg($event)"
-      >
+        <button
+            type="button"
+            class="icon icon-search"
+            (click)="runShow()"
+            title="Find scripture range by Book, Chapter, and range of Verses">
+            <i class="psmenu-icon"></i>
+        </button>
     </div>
 
     <div class="command book">
@@ -89,6 +87,7 @@
       </div>
     </div>
   </div>
+  <div class="range-editor-message"></div>
 </section>@if (activeScriptureRange) {
     <table class="row-clickable">
         <thead>

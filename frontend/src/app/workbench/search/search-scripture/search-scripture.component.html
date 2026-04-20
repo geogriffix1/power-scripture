@@ -1,8 +1,26 @@
-<nav class="command-line">
-    <div class="workbench-settings">
-        <i class="search-icon" (click)=runSearch($event)></i>
+<nav class="workbench-search">
+    <div class="icon">
+        <button
+            type="button"
+            class="icon-search"
+            (click)="runSearch($event)"
+            title = "Search Scripture"
+            placeholder="Enter search string"
+            (input)=onChange($event)
+            (keyup.enter)=runSearch($event)>
+            <i class="psmenu-icon"></i>
+        </button>
     </div>
-    <input class="command-line" type="text" id="search-scripture-command" placeholder="Enter search string" (input)=onChange($event) (keyup.enter)=runSearch($event)>
+    <div class="command-line">
+        <input
+            class="search-string"
+            type="text"
+            id="search-scripture-command"
+            placeholder="Enter search string"
+            (input)=onChange($event)
+            (keyup.enter)=runSearch($event)>
+    </div>
+    <div class="spacing"></div>
     <div class="command-message"></div>
     <app-search-context-menu class="modal-context hidden" [callbacks]=callbacks [selectedEntry]=selectedEntry></app-search-context-menu>
 @if (context.showSearchScriptureReport) {

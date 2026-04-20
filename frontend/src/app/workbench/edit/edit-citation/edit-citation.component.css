@@ -44,7 +44,8 @@ input #description {
 }
 
  /* icon shell */
-.workbench-edit .icon {
+.workbench-edit .icon,
+.scripture-range .icon {
   appearance: none;
   -webkit-appearance: none;
   width: 34px;
@@ -54,7 +55,6 @@ input #description {
   gap: 4px;
   border-radius: 6px;
   border: 1px solid rgba(255, 215, 0, 0.18);
-  background: linear-gradient(to bottom, #181818, #050505);
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -93,7 +93,7 @@ input #description {
     background-image: url("/assets/images/Script.png");
 }
 
-.workbench-edit  .icon-save  .psmenu-icon {
+.workbench-edit .icon-save .psmenu-icon {
     width: 24px;
     height: 24px;
     margin: 0;
@@ -122,6 +122,28 @@ input #description {
     padding: 20px;
     font-weight: bold;
     font: verdana;
+}
+
+/* hover */
+.workbench-edit button.icon-save:hover:not(.is-active) {
+  transform: translateY(-2px) scale(1.08);
+  border-color: rgba(255, 215, 0, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 0 8px rgba(255, 215, 0, 0.22),
+    0 3px 10px rgba(0,0,0,0.70);
+}
+
+/* pressed */
+.workbench-edit button.icon-save:active {
+  transform: translateY(1px) scale(0.96);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,0.75),
+    inset 0 0 6px rgba(255,255,255,0.04);
+}
+
+.icon button {
+    background-color: black;
 }
 
 /* .workbench-edit {
@@ -405,6 +427,69 @@ div.scripture-range span, div.citation-verse span {
     gap: 5px;
     flex-shrink: 0;
 }
+
+.scripture-range .right-icons .icon-edit .psmenu-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    transition:
+      transform 120ms ease,
+      filter 120ms ease,
+      opacity 120ms ease;
+
+    cursor: pointer;
+    background-image: url("/assets/images/Edit page.png");
+}
+
+.scripture-range .right-icons .icon-delete .psmenu-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    transition:
+      transform 120ms ease,
+      filter 120ms ease,
+      opacity 120ms ease;
+
+    cursor: pointer;
+    background-image: url("/assets/images/Delete.png");
+}
+
+.scripture-range .right-icons button {
+    background-color: field;
+    border: 1px solid lightgray;
+    border-radius: 4px;
+}
+
+/* hover */
+.scripture-range .right-icons button:hover:not(.is-active) {
+  transform: translateY(-2px) scale(1.08);
+  border-color: rgba(255, 215, 0, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 0 8px rgba(255, 215, 0, 0.22),
+    0 3px 10px rgba(0,0,0,0.70);
+}
+
+/* pressed */
+.scripture-range .right-icons button:active {
+  transform: translateY(1px) scale(0.96);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,0.75),
+    inset 0 0 6px rgba(255,255,255,0.04);
+}
+
 
 tr[aria-checked="true"] { cursor: pointer; background-color: rgba(3, 213, 250, 0.719); position: relative;}
 tr[aria-checked="false"] { cursor: pointer; background-color: none; position: relative;}

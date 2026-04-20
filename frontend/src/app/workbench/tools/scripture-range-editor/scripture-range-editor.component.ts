@@ -117,7 +117,7 @@ export class ScriptureRangeEditorComponent {
 
   runShow() {
     if ($("#endVerse.legal").length > 0) {
-      $("div.command-message").text('').hide(100);
+      $("div.range-editor-message").text('').hide(100);
       (async () => {
         let range = `${this.bookField.nativeElement.value} ` + 
           `${this.chapterField.nativeElement.value}:` +
@@ -161,9 +161,10 @@ export class ScriptureRangeEditorComponent {
       })();
     }
     else {
-      $("div.command-message").text("Please complete the verse range.").show(100);
+      $("div.range-editor-message").text("Please complete the verse range.").show(100);
     }
   }
+
 
   addRange() {
    if (this.activeScriptureRange) {

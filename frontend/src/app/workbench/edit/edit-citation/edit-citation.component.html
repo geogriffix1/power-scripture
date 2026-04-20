@@ -1,7 +1,7 @@
 <!-- Edit Citation header and warning message -->
 <div class="workbench-edit">
     <div class="no-icon"></div><div class="header">Edit Citation</div>
-    <div class="citation icon icon-script"><img src="/assets/images/Script.png" title="Navigate by Theme Tree to the target citation"></div>
+    <div class="citation icon icon-script"><i class="psmenu-icon" title="Navigate by Theme Tree to the target citation"></i></div>
     <div class="citation selected missing">
         Please select the <b>Citation</b> from the <b>Bible Theme Tree</b>
     </div>
@@ -51,7 +51,6 @@
 </div>
 }
 
-
 <!-- Markup Selector/Editor body (content is scrollable) -->
 <section class="scrollable-content">
     <div class="await"></div>
@@ -91,8 +90,27 @@
             </div>
             <div class="text">{{range.citation}}</div>
             <div class="right-icons">
+                <div class="right-icon">
+                    <button
+                        type="button"
+                        class="icon-edit"
+                        (click)="EditScriptureRange(i)"
+                        title="Edit this scripture range for markup">
+                        <i class="psmenu-icon"></i>
+                    </button>
+                </div>
+                <div class="right-icon">
+                    <button
+                        type="button"
+                        class="icon-delete"
+                        (click)="DeleteScriptureRange(i)"
+                        title="Delete this scripture range">
+                        <i class="psmenu-icon"></i>
+                    </button>
+                </div>
+<!-- 
                 <i class="edit-icon" (click)="EditScriptureRange(i)" title="Edit this scripture range"></i>
-                <i class="delete-icon" (click)="DeleteScriptureRange(i)" title="Delete this scripture range"></i>
+                <i class="delete-icon" (click)="DeleteScriptureRange(i)" title="Delete this scripture range"></i> -->
             </div>
         </div>
         <div id="range_{{i}}_content" class="scripture-text" style="display: none;">
