@@ -158,6 +158,8 @@ export class ScriptureRangeEditorComponent {
         this.isChapterDisabled = true;
         this.isVerseDisabled = true;
         this.isEndVerseDisabled = true;
+
+        $(".range-editor-output").show(500);
       })();
     }
     else {
@@ -170,6 +172,7 @@ export class ScriptureRangeEditorComponent {
    if (this.activeScriptureRange) {
       $("app-scripture-range-editor .command-message").text("").hide(500);
       this.rangeAdded.emit(this.activeScriptureRange);
+      setTimeout(() => $(".range-editor-output").hide(500), 500);
       delete this.activeScriptureRange;
     }
     else {
@@ -178,6 +181,10 @@ export class ScriptureRangeEditorComponent {
     }
   }
 
+  cancelRange() {
+    $(".range-editor-output").hide(500);
+    delete this.activeScriptureRange;
+  }
 
   superscript(n:number): string {
     let s = n.toString();

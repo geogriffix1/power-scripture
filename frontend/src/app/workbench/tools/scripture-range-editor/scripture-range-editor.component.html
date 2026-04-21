@@ -88,8 +88,42 @@
     </div>
   </div>
   <div class="range-editor-message"></div>
-</section>@if (activeScriptureRange) {
-    <table class="row-clickable">
+</section>
+<div class="range-editor-output">
+@if (activeScriptureRange) {     
+  <div id="range_editor_title" class="scripture-range container">
+      <!-- <div class="left-icon">
+          <i class="spin-arrow-icon" (click)="OpenCloseScriptureRange($event,i)" title="Expand to view scriptures"></i>
+      </div> -->
+      <div class="side">
+          <div class="icon-add">
+              <button
+                  type="button"
+                  class="icon-add"
+                  (click)="addRange()"
+                  title="Add this scripture range to the Citation">
+                  <i class="psmenu-icon"></i>
+              </button>
+          </div>
+          <div class="icon-close">
+              <button
+                  type="button"
+                  class="icon-close"
+                  (click)="cancelRange()"
+                  title="Cancel">
+                  <i class="psmenu-icon"></i>
+              </button>
+          </div>
+      </div>
+      <div class="citation-text">{{activeScriptureRange.citation}}</div>
+      <div class="side">&nbsp;</div>
+  </div>
+  <div id="range_editor_content" class="scripture-text container">
+      {{activeScriptureRange.verses}}
+  </div>
+  }
+</div>
+    <!-- <table class="row-clickable">
         <thead>
             <tr>
                 <th class="citation">Citation</th>
@@ -102,5 +136,4 @@
                 <td class="verses" title="Click the Plus (+) Icon to add this scripture range to the Citation">{{activeScriptureRange.verses}}</td>
             </tr>
         </tbody>
-    </table>
-}
+    </table> -->
