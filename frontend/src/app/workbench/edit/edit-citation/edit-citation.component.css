@@ -1,3 +1,10 @@
+:host {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
 .workbench-edit {
     display: grid;
     grid-template-columns: auto 1fr;
@@ -5,6 +12,13 @@
     width: 100%;
     background-color: black;
     color:white;
+}
+
+.scripture-range-editor {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
 }
 
 .workbench-edit .header {
@@ -33,7 +47,6 @@ input #description {
     border-right: 2px solid black;
     border-radius: 6px;
 }
-
 
 .workbench-edit .citation {
     grid-column: 2;
@@ -175,6 +188,21 @@ input #description {
     margin-left: 36px;
     font-weight: bold;
 } */
+
+.scrollable-content {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    height: 100vh
+}
+
+
+.scrolling {
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
 
 
 .scrollable-content .header {
@@ -405,7 +433,7 @@ div.scripture-range span, div.citation-verse span {
     align-items: center;
     justify-content: space-between;
     padding: 2px 10px;
-    min-height: 40px;
+    min-height: 0;
     height: auto;
     border-radius: 5px;
 }
@@ -470,6 +498,12 @@ div.scripture-range span, div.citation-verse span {
     background-color: field;
     border: 1px solid lightgray;
     border-radius: 4px;
+}
+
+.citation-verse.container {
+    display: flex;
+    flex: 0 0 auto;
+    min-height: 0;
 }
 
 /* hover */

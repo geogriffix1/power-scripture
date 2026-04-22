@@ -24,37 +24,36 @@
     }
 }
 </div>
-@if (activeCitationNode() && !activeScriptureRange().citationId) {
-
-<!-- Range List Editor (adds new ranges to the citation) -->
-<div class="scripture-range-editor">
-    <app-scripture-range-editor [citation]="editedCitation" (rangeAdded)="onRangeAdded($event)"></app-scripture-range-editor>
-</div>
-}
-@else if (activeCitationNode() && activeScriptureRange().citationId == editedCitation.id && activeVerse().id == 0) {
-        <!-- Markup Selector header -->
-<div id="activeScriptureRange" class="scripture-range container">
-    <div class="text">Select Verse for Markup - {{activeScriptureRange().citation}}</div>
-    <div class="right-icons">
-        <i class="close-icon" (click)="OnCloseSelectedRange()" title="Close Scripture Range"></i>
-    </div>
-</div>
-}
-@else if (activeCitationNode()) {
-    <!-- Markup Editor mode -->
-<div id="activeVerse" class="citation-verse container">
-    <div class="text">Markup Editor - {{activeVerse().verseCitationLabel}}</div>
-    <div class="right-icons">
-        <i class="save-icon" (click)="OnSaveMarkups()" title="Save Citation Verse Markups"></i>
-        <i class="close-icon" (click)="OnCancelMarkups()" title="Cancel Citation Verse Markup Editor"></i>
-    </div>
-</div>
-}
 
 <!-- Markup Selector/Editor body (content is scrollable) -->
 <section class="scrollable-content">
-    <div class="await"></div>
     <div class="scrolling" #scrollableContent>
+@if (activeCitationNode() && !activeScriptureRange().citationId) {
+        <!-- Range List Editor (adds new ranges to the citation) -->
+        <div class="scripture-range-editor">
+            <app-scripture-range-editor [citation]="editedCitation" (rangeAdded)="onRangeAdded($event)"></app-scripture-range-editor>
+        </div>
+}
+@else if (activeCitationNode() && activeScriptureRange().citationId == editedCitation.id && activeVerse().id == 0) {
+        <!-- Markup Selector header -->
+        <div id="activeScriptureRange" class="scripture-range container">
+            <div class="text">Select Verse for Markup - {{activeScriptureRange().citation}}</div>
+            <div class="right-icons">
+                <i class="close-icon" (click)="OnCloseSelectedRange()" title="Close Scripture Range"></i>
+            </div>
+        </div>
+}
+@else if (activeCitationNode()) {
+        <!-- Markup Editor mode -->
+        <div id="activeVerse" class="citation-verse container">
+            <div class="text">Markup Editor - {{activeVerse().verseCitationLabel}}</div>
+            <div class="right-icons">
+                <i class="save-icon" (click)="OnSaveMarkups()" title="Save Citation Verse Markups"></i>
+                <i class="close-icon" (click)="OnCancelMarkups()" title="Cancel Citation Verse Markup Editor"></i>
+            </div>
+        </div>
+}
+        <div class="await"></div>
 @if (activeCitationNode()) {
     <!-- A citation is active for editing -->
     @if (scriptureRanges() && scriptureRanges().length > 0) {
