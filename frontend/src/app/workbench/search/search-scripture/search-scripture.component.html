@@ -23,12 +23,7 @@
     <div class="spacing"></div>
     <div class="command-message"></div>
     <app-search-context-menu class="modal-context hidden" [callbacks]=callbacks [selectedEntry]=selectedEntry></app-search-context-menu>
-@if (context.showSearchScriptureReport) {
-    <app-search-scripture-report [SearchCommand]=searchCommand [Context]=context></app-search-scripture-report>
-}
-</nav>
-<section class="scrollable-content">
-    <div id="command-wordlist" class="modal">
+        <div id="command-wordlist" class="modal">
         <div class="modal-content">
             <ul class="command-suggestions">
             @for (suggestion of suggestions; track suggestion) {
@@ -37,8 +32,46 @@
             </ul>
         </div>
     </div>
+
+@if (context.showSearchScriptureReport) {
+    <app-search-scripture-report [SearchCommand]=searchCommand [Context]=context></app-search-scripture-report>
+}
+</nav>
+<section class="scrollable-content">
     <div class="search-results">
-        <table class="row-clickable">
+        <div class="await"></div>
+    @if (searchResults() && searchResults().length > 0) {
+        @for(result of searchResults(); track result.id) {
+        <div
+            id="result-{{result.id}}"
+            class="search-result-selector"
+            [attr.aria-selected]="result.selected"
+            (click)="toggleSelected(result)"
+            (contextmenu)=showModalContextMenu($event)>
+            <div class="search-result container">
+                <div class="side">
+                    <div class="icon">
+                        <i class="psmenu-icon"></i><span class="select">Select</span>
+                    </div>
+                </div>
+                <div class="scripture-citation">{{result.citationLabel}}</div>
+                <div class="side">&nbsp;</div>
+            </div>
+            <div id="content-{{result.id}}" class="scripture-text container">
+    @for(substring of result.substrings; track substring) {
+        @if (substring.match) {
+                <span class="search-match">{{substring.text}}</span>
+        }
+        @else {
+                <span class="search-text">{{substring.text}}</span>
+        }
+    }
+            </div>
+
+        </div> 
+        }
+    }
+        <!-- <table class="row-clickable">
             <thead>
                 <tr>
                     <th class="citation-label"><div class="await"></div>Verse Citation</th>
@@ -65,6 +98,6 @@
                 </tr>
                 }
             </tbody>
-        </table>
+        </table> -->
     </div>
 </section>

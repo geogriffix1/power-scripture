@@ -24,20 +24,13 @@
                 }
             </div>
         </div>
-            <!-- <div class="settings-selector" *ngFor="let item of searchTypes; index as i">
-                <a class="menu-radio-{{i === activeType ? 'checked' : 'unchecked'}}" (click)="onRadioClickSettings(i)">
-                    <i class="radio-icon"></i>
-                    <span>{{item}}</span>
-                </a>
-            </div>
-        </div> -->
     </div>
 </nav>
 <section>
     @if(activeType == 1 || activeType == 2) {
-    <div><app-search-scripture [activeType]=activeType></app-search-scripture></div>
+    <app-search-scripture [activeType]=activeType></app-search-scripture>
     }
     @else if(activeType == 0) {
-    <div><app-cite-scripture></app-cite-scripture></div>
+    <app-cite-scripture></app-cite-scripture>
     }
 </section>

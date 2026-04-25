@@ -1,6 +1,7 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnInit, WritableSignal } from '@angular/core';
 import { ContextMenu } from './interfaces/context-menu';
 import { ContextMenuItem } from './interfaces/context-menu-item';
+import { ScriptureModel, ScriptureSearchResultModel } from '../model/scripture.model';
 
 @Component({
     selector: 'app-search-context-menu',
@@ -17,13 +18,13 @@ export class SearchContextMenuComponent implements ContextMenu, OnInit {
   @Input()
     selectedEntry!:any;
   @Input()
-    searchResults!:any[];
+    searchResults!: WritableSignal<any[]>;
   @Input()
     context?:any;
 
   ngOnInit() {}
 
-  public static showContextMenu(searchResults:any[], context:any) {
+  public static showContextMenu(searchResults:WritableSignal<ScriptureSearchResultModel[]>, context:any) {
     SearchContextMenuComponent.instance.menuItems = [];
     //console.log(`entry: ${entry}`);
 

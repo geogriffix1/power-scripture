@@ -1,4 +1,4 @@
-import { Component, Directive, Input, OnInit, inject } from '@angular/core';
+import { Component, Directive, Input, OnInit, inject, signal, WritableSignal } from '@angular/core';
 import { BibleService } from '../../../bible.service';
 import { Router } from '@angular/router';
 import { ScriptureModel, ScriptureSearchResultModel } from '../../../model/scripture.model';
@@ -33,7 +33,7 @@ export class SearchScriptureComponent implements OnInit{
   selectedEntry: any = [];
   searchCommand = "";
   searchResultsHeight!:number;
-  searchResults:ScriptureSearchResultModel[] = [];
+  searchResults = signal<ScriptureSearchResultModel[]>([]);
   isSubscribedKeystrokes = false;
   rect!: DOMRect;
 
@@ -41,56 +41,50 @@ export class SearchScriptureComponent implements OnInit{
     bibleService: new BibleService(),
     canSelectAll():boolean { return true; },
     selectAll():void {
-      $("tbody > tr[aria-checked=false]").attr('aria-checked', 'true');
+      $(".search-result-selector").attr('aria-selected', 'true');
     },
     canDeselectAll():boolean { return true; },
     deselectAll():void {
-      $("tbody > tr[aria-checked=true]").attr('aria-checked', 'false');
+      $(".command-message").text('').hide(100);
+      $(".search-result-selector").attr('aria-selected', 'false');
     },
     canRemoveSelected():boolean { return true; },
-    removeSelected(searchResults:any[]):void {
-      let selected = $("tbody > tr[aria-checked=true]");
-      for (let i = 0; i < selected.length; i++) {
-        let scripture = selected[i];
-         for (let j = 0; j < searchResults.length; j++) {
-          if (searchResults[j].id == scripture.accessKey) {
-            searchResults.splice(j, 1);
-            break;
-          }
-        }
-      };
+    removeSelected(searchResults:WritableSignal<ScriptureSearchResultModel[]>):void {
+      $(".command-message").text('').hide(500);
+      let toRemove = Array.from($("div.search-result-selector[aria-selected=true]"))
+        .map(result => +result.id.replace("result-", ""));
+      searchResults.set(
+        searchResults()
+          .filter(result => !toRemove.some(id => result.id == id))
+          .map(res => { res.selected = false; return res; }));
     },
+
     canCreateCitation():boolean { return true; },
-    createCitation(searchResults:any, context:any):void {
+    createCitation(searchResults:WritableSignal<ScriptureSearchResultModel[]>, context:any):void {
       console.log("create citation context menu action");
+      $(".command-message").text('').hide(500);
       let activeTheme = WorkbenchComponent.activeTheme;
       if (!activeTheme) {
-        $("div.command-message").text("Please select a Theme to add the Citation to.").show(500);
+        $("div.command-message").text("Please select the Parent Theme from the Bible Theme Tree").show(500);
         return;
       }
 
-      let selected = $("tbody > tr[aria-checked=true]");
+      let selected = $(".search-result-selector[aria-selected=true]");
       let forCitations = [];
       WorkbenchComponent.scriptureRanges = [];
-      if (selected.length > 0) {
-        for (let i = 0; i < selected.length; i++) {
-          let scripture = selected[i];
-          for (let j = 0; j < searchResults.length; j++) {
-            if (searchResults[j].id == scripture.accessKey) {
-              forCitations.push(searchResults[j]);
-              break;
-            }
-          }
-        }
-      }
-      else {
-        for (let j = 0; j < searchResults.length; j++) {
-          forCitations.push(searchResults[j]);
-        }
+
+      let toAdd = Array.from($("div.search-result-selector[aria-selected=true]"))
+        .map(result => +result.id.replace("result-", ""));
+
+      if (toAdd.length == 0) {
+        $(".command-message").text('Select verses to add to the citation').show(500);
+        return;
       }
 
+      forCitations = searchResults().filter(result => toAdd.some(id => id == result.id));
+
       console.log("searchResults:");
-      console.log(searchResults);
+      console.log(searchResults());
       console.log("forCitations:");
       console.log(forCitations);
 
@@ -118,132 +112,25 @@ export class SearchScriptureComponent implements OnInit{
                 router.navigate(['/edit/citation']);
             });
         });
-
-
-      // let unicodeSuperscriptNumbers = [
-      //   "\u2070",
-      //   "\u00B9",
-      //   "\u00B2",
-      //   "\u00B3",
-      //   "\u2074",
-      //   "\u2075",
-      //   "\u2076",
-      //   "\u2077",
-      //   "\u2078",
-      //   "\u2079",
-      // ];
-
-      // function superscript(n:number): string {
-      //   let s = n.toString();
-      //   let ss = "";
-      //   for (let i=0; i<s.length; i++) {
-      //     let c = s.charCodeAt(i) - "0".charCodeAt(0);
-      //     ss += unicodeSuperscriptNumbers[c];
-      //   }
-
-      //   return ss;
-      // }
-
-
-
-      // let book = "";
-      // let chapter = 0;
-      // let verse = 0;
-      // let startVerse = 0;
-      // let endVerse = 0;
-      // let verses = "";
-      // let scriptures: ScriptureModel[] = [];
-
-      // for (let i=0; i<forCitations.length; i++) {
-      //   let result = forCitations[i];
-      //   if (
-      //     result.book == book &&
-      //     result.chapter == chapter &&
-      //     result.verse == endVerse + 1) {
-      //       verses = `${verses} ${superscript(result.verse)}${result.text}`;
-      //       scriptures.push({
-      //         id: forCitations[i].id,
-      //         book: forCitations[i].book,
-      //         chapter: forCitations[i].chapter,
-      //         verse: forCitations[i].verse,
-      //         text: forCitations[i].text,
-      //         bibleOrder: forCitations[i].bibleOrder
-      //       });
-      //       endVerse++;
-      //   }
-      //   else {
-      //     if (book != "") {
-      //       let isSingleChapterBook = book.match(/Obadiah|Philemon|2 John|3 John|Jude/);
-      //       let firstVerse = `${book} ${chapter}:${startVerse}`;
-      //       if (isSingleChapterBook) {
-      //         firstVerse = `${book} ${startVerse}`;
-      //       }
-
-      //       let citation = firstVerse;
-      //       if (endVerse > startVerse) {
-      //         citation = `${citation}-${endVerse}`;
-      //       }
-            
-      //       let scriptureRange:CiteScriptureRangeModel = {
-      //         citation: citation,
-      //         verses: verses,
-      //         scriptures: scriptures
-      //       };
-
-      //       WorkbenchComponent.scriptureRanges.push(scriptureRange)
-      //     }
-
-      //     book = result.book;
-      //     chapter = result.chapter;
-      //     verse = result.verse;
-      //     startVerse = result.verse;
-      //     endVerse = result.verse;
-      //     verses = result.text;
-      //     scriptures = [];
-      //   }
-      // }
-
-      // if (forCitations.length > 0) {
-      //   let isSingleChapterBook = book.match(/Obadiah|Philemon|2 John|3 John|Jude/);
-      //   let firstVerse = `${book} ${chapter}:${startVerse}`;
-      //   if (isSingleChapterBook) {
-      //     firstVerse = `${book} ${startVerse}`;
-      //   }
-
-      //   let citation = firstVerse;
-      //   if (endVerse > startVerse) {
-      //     citation = `${citation}-${endVerse}`;
-      //   }
-        
-      //   let scriptureRange:CiteScriptureRangeModel = {
-      //     citation: citation,
-      //     verses: verses,
-      //     scriptures: scriptures
-      //   };
-
-      //   WorkbenchComponent.scriptureRanges.push(scriptureRange)
-      // }
-
-      // context.searchResults = WorkbenchComponent.scriptureRanges;
     },
     canExportSelected():boolean { return true; },
-    exportSelected(searchResults:any, context:any):void {
+    exportSelected(searchResults:WritableSignal<any>, context:any):void {
       let selected = $("tbody > tr[aria-checked=true]");
       let forExport = [];
       if (selected.length > 0) {
         for (let i = 0; i < selected.length; i++) {
           let scripture = selected[i];
-          for (let j = 0; j < searchResults.length; j++) {
-            if (searchResults[j].id == scripture.accessKey) {
-              forExport.push(searchResults[j]);
+          for (let j = 0; j < searchResults().length; j++) {
+            if (searchResults()[j].id == scripture.accessKey) {
+              forExport.push(searchResults()[j]);
               break;
             }
           }
         }
       }
       else {
-        for (let j = 0; j < searchResults.length; j++) {
-          forExport.push(searchResults[j]);
+        for (let j = 0; j < searchResults().length; j++) {
+          forExport.push(searchResults()[j]);
         }
       }
 
@@ -258,29 +145,6 @@ export class SearchScriptureComponent implements OnInit{
     this.context = { router: router };
   }
 
-  ngAfterViewInit() {
-    let rect = WorkbenchComponent.getWorkbenchSize();
-    let commandWidth = rect.width;
-    
-    $("#search-scripture-command").width(commandWidth - 60);
-
-    if (!SearchScriptureComponent.isSubscribed) {
-      WorkbenchComponent.WorkbenchResizeBroadcaster.subscribe((rect:DOMRectReadOnly) => {
-        if (SearchScriptureComponent.isActive) {
-          let commandWidth = rect.width;
-          $("#search-scripture-command").width(commandWidth - 60);
-          let viewTop = $("as-split-area.workbench").offset()!.top;
-          let viewHeight = <number>$("as-split-area.workbench").innerHeight();
-          let resultsTop = $("section.scrollable-content").offset()!.top;
-          this.searchResultsHeight = viewHeight - resultsTop + viewTop;
-          $("div.search-results").css("height", this.searchResultsHeight + "px");
-        }
-      });
-    }
-
-    SearchScriptureComponent.isSubscribed = true;
-  }
-
   @Input()
   activeType!:number;
 
@@ -289,7 +153,7 @@ export class SearchScriptureComponent implements OnInit{
   onChange(event:any) {
     const newValue = (event.target as HTMLInputElement).value;
     if (!newValue) {
-      $("#command-wordlist").hide();
+      $("#command-wordlist").hide(100);
     }
     else {
       $("div.command-message").text("").hide(100);
@@ -322,16 +186,12 @@ export class SearchScriptureComponent implements OnInit{
     searchString.val(command);
     searchString.trigger('focus');
     this.automodified = false;
+    this.searchResults.set([]);
   }
 
-  public onSelectItemClick(accessKey:any) {
-    let checked = $(`tr[accessKey=${accessKey}]`).attr("aria-checked");
-    $(`tr[accessKey=${accessKey}]`).attr("aria-checked", checked === "false" ? "true" : "false");
+  public toggleSelected(item:any) {
+    item.selected = !item.selected;
   }
-
-  //  public onScroll(scroll:any) {
-  //   let scrollTop = scroll.target.scrollTop;
-  // }
 
   public showModalContextMenu(event:MouseEvent) {
     event.preventDefault();
@@ -347,8 +207,8 @@ export class SearchScriptureComponent implements OnInit{
     $("tbody tr[aria-checked=true]").each((i, element) => { scriptureIds.push(<number><unknown>$(element).attr('accessKey')); });
 
     for (let i=0; i<scriptureIds.length; i++) {
-      for (let j=0; j<this.searchResults.length; j++) {
-        if (scriptureIds[i] == this.searchResults[j].id) {
+      for (let j=0; j<this.searchResults().length; j++) {
+        if (scriptureIds[i] == this.searchResults()[j].id) {
           indexToRemove.push(j);
         }
       }
@@ -356,7 +216,7 @@ export class SearchScriptureComponent implements OnInit{
 
     while(indexToRemove.length > 0) {
       let index = indexToRemove.pop()!;
-      this.searchResults.splice(index, 1);
+      this.searchResults.set(this.searchResults().splice(index, 1));
     }
   }
 
@@ -383,7 +243,7 @@ export class SearchScriptureComponent implements OnInit{
 
         if (pattern) {
           this.service.processSearchContains(this.searchCommand.replace("\\", "\\\\"), (data:ScriptureSearchResultModel[]) => {
-            this.searchResults = data;
+            this.searchResults.set(data);
             this.processScriptureSearchResults(<RegExp>pattern);
           });
         }
@@ -415,7 +275,7 @@ export class SearchScriptureComponent implements OnInit{
       
         if (pattern) {
           this.service.processSearchLike(this.searchCommand, (data:ScriptureSearchResultModel[]) => {
-            this.searchResults = data;
+            this.searchResults.set(data);
             this.processScriptureSearchResults(<RegExp>pattern);
           });
         }
@@ -428,13 +288,13 @@ export class SearchScriptureComponent implements OnInit{
   }
 
   processScriptureSearchResults(pattern:RegExp) {
-    for (let i=0; i<Math.min(this.searchResults.length, 400); i++) {
-      let prevMatch = <RegExpExecArray>pattern.exec(this.searchResults[i].text);
+    for (let i=0; i<Math.min(this.searchResults().length, 400); i++) {
+      let prevMatch = <RegExpExecArray>pattern.exec(this.searchResults()[i].text);
       let substrings = <any[]>[];
 
       if (prevMatch.index > 0) {
         substrings.push({
-          text: this.searchResults[i].text.substring(0, prevMatch.index),
+          text: this.searchResults()[i].text.substring(0, prevMatch.index),
           match: false
         });
       }
@@ -446,24 +306,26 @@ export class SearchScriptureComponent implements OnInit{
         });
 
         let endMatch = prevMatch.index + prevMatch[0].length;
-        if (endMatch === this.searchResults[i].text.length) {
+        if (endMatch === this.searchResults()[i].text.length) {
           break;
         }
 
-        prevMatch = <RegExpExecArray>pattern.exec(this.searchResults[i].text);
+        prevMatch = <RegExpExecArray>pattern.exec(this.searchResults()[i].text);
         if (prevMatch) {
           substrings.push({
-            text: this.searchResults[i].text.substring(endMatch, prevMatch.index),
+            text: this.searchResults()[i].text.substring(endMatch, prevMatch.index),
             match: false
           });
         }
         else {
           substrings.push({
-            text: this.searchResults[i].text.substring(endMatch, this.searchResults[i].text.length),
+            text: this.searchResults()[i].text.substring(endMatch, this.searchResults()[i].text.length),
             match: false
           });
 
-          this.searchResults[i].substrings = substrings;
+          this.searchResults()[i].substrings = substrings;
+          this.searchResults()[i].citationLabel = this.getCitationLabel(this.searchResults()[i]);
+          this.searchResults()[i].selected = false;
 
           break;
         }
@@ -491,6 +353,15 @@ export class SearchScriptureComponent implements OnInit{
         }
       });
     }
+  }
+
+  getCitationLabel(result: ScriptureSearchResultModel) {
+    let isSingleChapterBook = result.book.match(/Obadiah|Philemon|2 John|3 John|Jude/);
+    if (isSingleChapterBook) {
+      return `${result.book} ${result.verse}`;
+    }
+    
+    return `${result.book} ${result.chapter}:${result.verse}`;
   }
 
   wordList:string[] = <string[]>[];

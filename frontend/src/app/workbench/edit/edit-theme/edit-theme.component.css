@@ -29,8 +29,16 @@
     border-right: 2px solid black;
     border-radius: 6px;
 }
+
 .workbench-edit .command-message {
     grid-column: 2 / span 2;
+    background-color: rgb(172, 0, 0);
+    color: white;
+    font-weight: bold;
+    padding: 4px;
+    text-align: center;
+    display: none;
+
 }
 
 .workbench-settings {

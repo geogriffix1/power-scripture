@@ -1,3 +1,10 @@
+:host, section {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    min-height: 0;
+}
+
 .workbench-search {
   display: flex;
   flex: 0 0 auto;
@@ -156,6 +163,13 @@ div.settings.settings-active {
     font-size: medium;
     text-align: left;
     color: white;
+}
+
+app-search-scripture {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    min-height: 0;
 }
 
 /* 

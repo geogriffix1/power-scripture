@@ -8,5 +8,7 @@ export interface ScriptureModel {
 }
 
 export interface ScriptureSearchResultModel extends ScriptureModel {
+    citationLabel?: string,
+    selected?: boolean,
     substrings: any[]
 }

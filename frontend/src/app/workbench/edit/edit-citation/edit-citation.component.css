@@ -42,6 +42,15 @@
     font-weight:500;
 }
 
+.command-message {
+    background-color: rgb(172, 0, 0);
+    color: white;
+    font-weight: bold;
+    padding: 4px;
+    text-align: center;
+    display: none;
+}
+
 input #description {
     width: 100%;
     border-right: 2px solid black;
@@ -158,36 +167,6 @@ input #description {
 .icon button {
     background-color: black;
 }
-
-/* .workbench-edit {
-    background-color: black;
-    color:white;
-}
-.workbench-edit .header {
-    margin-left: 36px;
-    font-weight: bold;
-}
-
-.workbench-edit div.citation {
-    display: inline;
-    overflow-x: auto;
-    overflow-y: none;
-    color:gold;
-    font-weight:500;
-}
-.workbench-edit div.selected.missing {
-    color: red;
-    background-color: black;
-}
-.workbench-edit {
-    background-color: black;
-    color:white;
-}
-
-.workbench-edit .header {
-    margin-left: 36px;
-    font-weight: bold;
-} */
 
 .scrollable-content {
     display: flex;
