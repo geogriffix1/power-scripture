@@ -1,6 +1,11 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
+import { BibleService } from '../../../bible.service';
 import { WorkbenchComponent } from '../../workbench.component';
-import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel';
+import { ThemeModel } from '../../../model/theme.model';
+import { CitationModel } from '../../../model/citation.model';
+import { ThemeToCitationLinkModel } from '../../../model/themeToCitation.model';
+import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-tree.component';
 
 @Component({
     selector: 'app-create-citation',
@@ -9,60 +14,50 @@ import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel'
     styleUrl: './create-citation.component.css'
 })
 export class CreateCitationComponent {
+  @ViewChild('description', { static: true}) descriptionField!: ElementRef;
+  activeTheme!: ThemeModel;
   selectedFolder!:string;
-  sectionWidth!:number;
-  sectionHeight!:number;
-  citationLabel!:string;
-  scriptureRanges!: CiteScriptureRangeModel[];
 
-  static isActive = false;
-  static isSubscribed = false;
+  constructor(private router: Router) {}
 
-  ngOnInit() {
-    CreateCitationComponent.isActive = true;
-  
-    this.scriptureRanges = WorkbenchComponent.scriptureRanges ?? [];
-    let label = "";
-    let comma = "";
-    for (let i=0; i< this.scriptureRanges.length; i++) {
-      label = `${label}${comma}${this.scriptureRanges[i].citation}`;
-      comma = ", ";
+  CreateCitation() {
+    $("div.command-message").text("");
+    if (WorkbenchComponent.activeTheme == null) {
+      $("div.command-message").text("Citation not created: Parent Theme was not selected.").show(100);
+      return;
     }
 
-    this.citationLabel = label;
-  }
-
-  ngAfterViewInit() {
-    let rect = WorkbenchComponent.getWorkbenchSize();
-    $("#description").css('width', (rect.width - 70) + "px");
-    console.log(`description width set to ${(rect.width - 70) + "px"}`);
-    let viewTop  = <number>$("as-split-area.workbench").offset()!.top;
-    let viewHeight = <number>$("as-split-area.workbench").innerHeight();
-    let resultsTop = $("div.search-results").offset()!.top;
-    let searchResultsHeight = viewTop + viewHeight - resultsTop;
-    
-    $("div.search-results").css("height", searchResultsHeight + "px");
-
-    if (!CreateCitationComponent.isSubscribed) {
-      WorkbenchComponent.WorkbenchResizeBroadcaster
-        .subscribe((rect:DOMRectReadOnly) => {
-          if (CreateCitationComponent.isActive) {
-            $("#description").css('width', (rect.width - 70) + "px");
-            console.log(`description width set to ${(rect.width - 70) + "px"}`);
-            let viewTop  = <number>$("as-split-area.workbench").offset()!.top;
-            let viewHeight = <number>$("as-split-area.workbench").innerHeight();
-            let resultsTop = $("div.search-results").offset()!.top;
-            let searchResultsHeight = viewTop + viewHeight - resultsTop;
-            
-            $("div.search-results").css("height", searchResultsHeight + "px");
-          }
-        });
-
-      CreateCitationComponent.isSubscribed = true;
+    if (this.descriptionField.nativeElement.value.length > 100) {
+      this.descriptionField.nativeElement.value = this.descriptionField.nativeElement.value.substring(0, 100);
     }
+
+    (async () => {
+      let service = new BibleService;
+      if (WorkbenchComponent.activeTheme) {
+        let id = <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", "");
+        service.createCitation(this.descriptionField.nativeElement.value, id, 0, [])
+          .then(link => {
+            const themeToCitation = link.themeToCitation;
+            BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${themeToCitation.themeId}`, parent => {
+              BibleThemeTreeComponent.openDomThemeNode(parent);
+              let newCitation = BibleThemeTreeComponent.getDomNode(`citation${themeToCitation.id}`);
+              BibleThemeTreeComponent.setActiveCitation(newCitation);
+              this.showOptions();
+            });
+          });
+      }
+      else {
+        $(".workbench-parent-theme div.selected-theme").addClass("missing");
+      }
+    })();
   }
 
-  ngOnDestroy() {
-    CreateCitationComponent.isActive = false;
+  EditCitation() {
+    this.router.navigate(['/edit/citation']);
+  }
+
+  showOptions() {
+    console.log("show options!");
+    $(".ps-action-btn").show(500);
   }
 }

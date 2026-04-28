@@ -8,11 +8,6 @@
             <i class="psmenu-icon" title="Settings for editing"></i>
         </button>
     </div>
-    <!-- <div class="workbench-settings">
-        <a class="settings" title="Settings" (click)=onClickSettings()>
-            <i class="settings active"></i>
-        </a>
-    </div> -->
     <div class="workbench-title">
         {{createType}}
         <div class="settings">
@@ -24,11 +19,6 @@
                     class="icon-circle-{{i == activeType ? 'checked' : 'unchecked'}}"
                     (click)="onRadioClickSettings(i)">
                         <i class="psmenu-icon"></i>
-    
-                <!-- <a class="menu-radio-{{i === activeType ? 'checked' : 'unchecked'}}" (click)=onRadioClickSettings(i)>
-                    <i class="radio-icon"></i>
-                    <span>{{item}}</span>
-                </a> -->
                 </button>
                 <span>{{item}}</span>
                 }
@@ -55,6 +45,6 @@
     <app-create-theme></app-create-theme>
     }
     @else if(activeType == 2) {
-    <app-cite-scripture></app-cite-scripture>
+    <app-create-citation></app-create-citation>
     }
 </section>

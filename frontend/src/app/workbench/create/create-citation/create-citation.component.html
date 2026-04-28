@@ -1,34 +1,24 @@
-<div class="header">Citation Description</div>
-<div class="input">
-    <input
-        id="description"
-        #description
-        type="text"
-        title="Enter citation description"
-        placeholder="Type description here"
-    >
-</div>
-<div class="command-message"></div>
-<section class="scrollable-content">
-    <div class="search-results">
-        <table class="row-clickable">
-            <thead>
-                <tr>
-                    <th class="label" colspan="2">{{citationLabel}}</th>
-                </tr>
-                <tr>
-                    <th class="citation">Citation</th>
-                    <th class="verses">Scripture</th>
-                </tr>
-            </thead>
-            <tbody>
-                @for(range of scriptureRanges; track range; let index = $index) {
-                <tr aria-checked="false" id="range_{{index}}" >    
-                    <th class="citation">{{range.citation}}</th>
-                    <td class="verses">{{range.verses}}</td>
-                </tr>
-                }
-            </tbody>
-        </table>
+<div class="workbench-create">
+    <div class="no-icon"></div><div class="header">Create Citation</div>
+    <div class="icon icon-save">
+        <button
+            type="button"
+            class="icon-save"
+            (click)="CreateCitation()"
+            title="Click to save, creating a new citation">
+            <i class="psmenu-icon" title="Create a new citation and enter the editor"></i>
+        </button>
     </div>
-</section>
+    <div class="field1"><input id="description" #description type="text" class="command-line" placeholder="Citation description (optional)" title="The description of the theme"></div>
+    <div class="command-message"></div>
+</div>
+<div class="ps-action-btn" style="display: none;">
+    <button
+        type="button"
+        class="edit-button"
+        (click)="EditCitation()"
+        title="Click to edit new citation">
+        <i class="edit-icon"></i>
+        <span>Edit Citation</span>
+    </button>
+</div>

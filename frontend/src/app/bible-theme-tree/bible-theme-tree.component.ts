@@ -7,6 +7,7 @@ import { MainShellComponent } from '../mainshell/mainshell.component';
 import { JstreeModel, JstreeState } from '../model/jstree.model';
 import { ThemeChainModel } from '../model/themeChain.model';
 import { ThemeModel, ThemeExtendedModel } from '../model/theme.model';
+import { ThemeToCitationLinkModel } from '../model/themeToCitation.model';
 import { Subject } from 'rxjs';
 import $ from 'jquery';
 import 'jstree';
@@ -218,19 +219,49 @@ export class BibleThemeTreeComponent implements OnInit {
     return domNode;
   }
 
-  public static refreshDomNodeFromDb(nodeId: string) {
-    console.log("refreshDomNode");
-    const themeTree = $('#theme-tree-full').jstree(true);
-    if ((themeTree as any).get_node(nodeId)) {
-      (themeTree as any).refresh_node(nodeId);
-      console.log(themeTree);
-    }
+static refreshDomNodeFromDb(nodeId: string, callback?: (node: any) => void): void {
+  const treeRoot = $('#theme-tree-full');
+  const tree = treeRoot.jstree(true) as any;
+
+  if (!tree) {
+    console.warn('jsTree instance not found.');
+    return;
   }
 
+  const handler = (_event: any, data: any) => {
+    if (data?.node?.id !== nodeId) {
+      return;
+    }
+
+    treeRoot.off('refresh_node.jstree', handler);
+
+    const refreshedNode = tree.get_node(nodeId);
+
+    if (refreshedNode) {
+      callback?.(refreshedNode);
+    }
+  };
+
+  treeRoot.on('refresh_node.jstree', handler);
+
+  tree.refresh_node(nodeId);
+}
   public static refreshDomNode(node: JstreeModel) {
     console.log("refreshDomNode");
     const themeTree = $('#theme-tree-full').jstree(true);
     (themeTree as any).redraw_node(node);
+  }
+
+  public static setActiveCitation(node: JstreeModel) {
+    console.log("SET ACTIVE CITATION function - node:");
+    console.log("citation:");
+    console.log(node);
+
+    const themeTree = $('#theme-tree-full').jstree(true);
+   $('#theme-tree-full [id^=citation].jstree-clicked').removeClass('jstree-clicked').attr('aria-selected', 'false');
+    console.log('opening parent:');
+    themeTree.open_node(`theme${node.parent}`);
+    themeTree.select_node(node.id);
   }
 
   public static openDomThemeNode(node: JstreeModel) {
@@ -247,37 +278,6 @@ export class BibleThemeTreeComponent implements OnInit {
     let themeTree = $('#theme-tree-full').jstree(true);
     themeTree.move_node(child, parent, toIndex);
   }
-
-  public static appendTheme(theme: ThemeModel) {
-    let model: JstreeModel = new JstreeModel(`theme${theme.id}`, theme.name, theme.description, "theme", theme.sequence, theme.path, new JstreeState(false, false, false));
-    let tree = $("#theme-tree-full").jstree(true);
-    // Position theme just before the first citation of the parent theme
-    let position = 0;
-    let children = tree.get_node(`#theme${theme.parent}`).children;
-    let siblings:string[] = [];
-    if (children === true) {
-      tree.open_node(`#theme${theme.parent}`, () => {
-        siblings = tree.get_node(`#theme${theme.parent}`).children;
-      })
-    }
-    else if (Array.isArray(children)) {
-      siblings = children;
-    }
-
-    if (siblings) {
-      siblings.map((id) => {
-        if (id.startsWith("theme")) {
-          position++;
-        }
-      });
-    }
-
-    $('#theme-tree-full').jstree('create_node', `#theme${theme.parent}`, model, position, (theme:any) => {
-      console.log("theme created");
-      console.log(theme);
-    });
-  }
-
   public static updateCitationNode(citation: JstreeModel) {
     if (citation && citation.li_attr && citation.li_attr.citationId) {
       const citationLabel = citation.text;

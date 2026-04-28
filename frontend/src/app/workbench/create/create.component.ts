@@ -3,7 +3,7 @@ import { Component } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
 import { WorkbenchComponent } from '../workbench.component';
 import { BibleThemeTreeComponent } from '../../bible-theme-tree/bible-theme-tree.component';
-import { CiteScriptureComponent } from '../search/cite-scripture/cite-scripture.component';
+import { CreateCitationComponent } from './create-citation/create-citation.component';
 import { CreateThemeComponent } from './create-theme/create-theme.component';
 import { JstreeModel } from '../../model/jstree.model';
 import { ThemeModel } from '../../model/theme.model';
@@ -15,7 +15,7 @@ import $ from 'jquery';
     imports: [
         CommonModule,
         NgFor,
-        CiteScriptureComponent,
+        CreateCitationComponent,
         CreateThemeComponent
     ],
     templateUrl: './create.component.html',

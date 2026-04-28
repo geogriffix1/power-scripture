@@ -48,10 +48,8 @@ export class CreateThemeComponent {
                $("div.command-message").text(theme.description);
              }
              else {
-              BibleThemeTreeComponent.appendTheme(theme);
-              obj.nameField.nativeElement.value = "";
-              obj.descriptionField.nativeElement.value = "";
-               $("div.command-message").text(`Theme "${theme.name}" created successfully`); 
+              BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${theme.parent}`);
+              $("div.command-message").text(`Theme "${theme.name}" created successfully`); 
              }
           });
       }
