@@ -72,7 +72,7 @@ export class EditCitationComponent {
 
 
   refreshCitationEditor(citation: CitationExtendedModel) {
-    $("#citationDescription").val(citation.description).show(100);
+    $("#description").val(citation.description).show(100);
     $("div.citation.selected").removeClass("missing").text(citation?.citationLabel ?? "").show(100);
 
     this.activeCitation = {
@@ -179,27 +179,27 @@ export class EditCitationComponent {
           node.li_attr.title = this.activeCitation.description;
           BibleThemeTreeComponent.updateCitationNode(node);
           $("div.citation.selected").text(citationLabel);
+          this.ShowSuccess("Range added successfully");
         }
       }
     })();
   }
 
   EditCitationDescription() {
-    if (!this.editedCitation.description || this.editedCitation.description.trim() != ($("#citationDiscription").val() ?? "")) {
-      this.editedCitation.description = <string>$("#citationDescription").val() ?? "";
-      (async () => {
-        let edited = await this.service.editCitation(<CitationModel> {
-          id: this.editedCitation.id,
-          description: this.editedCitation.description
-        });
+    this.editedCitation.description = <string>$("#description").val() ?? "";
+    (async () => {
+      let edited = await this.service.editCitation(<CitationModel> {
+        id: this.editedCitation.id,
+        description: this.editedCitation.description ?? ""
+      });
 
-        this.activeCitation = edited;
-        let treeNode = <JstreeModel>this.activeCitationNode();
-        treeNode.li_attr.title = edited.description;
+      this.activeCitation = edited;
+      let treeNode = <JstreeModel>this.activeCitationNode();
+      treeNode.li_attr.title = edited.description;
 
-        BibleThemeTreeComponent.updateCitationNode(treeNode);
-      })();
-    }
+      BibleThemeTreeComponent.updateCitationNode(treeNode);
+      this.ShowSuccess("Citation description changed successfully");
+    })();
   }
 
   EditScriptureRange(index: number) {
@@ -224,6 +224,13 @@ export class EditCitationComponent {
     }
 
     this.activeVerse.set(verse);
+  }
+
+  ShowSuccess(message: string) {
+    $(".success-message").text(message).show(100);
+    setTimeout(() => {
+      $(".success-message").text("").hide(100);
+    }, 5000);
   }
 
   OnSaveMarkups() {

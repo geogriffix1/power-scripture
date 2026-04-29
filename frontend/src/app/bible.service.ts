@@ -182,6 +182,10 @@ export class BibleService {
   }
 
   async getScripturesByCitationString(cite:string) : Promise<ScriptureModel[]> {
+    if (cite == "[empty]") {
+      return <ScriptureModel[]>[];
+    }
+
     var url = `${this.ROOT_URL}scriptures/${encodeURIComponent(cite)}`;
     const data = await fetch(url);
     const scriptures = (await data.json() ?? []);
@@ -343,6 +347,8 @@ export class BibleService {
     body: JSON.stringify(citation)
   });
 
+  console.log("editCitation - body:");
+  console.log(JSON.stringify(citation));
   let result = await data.json();
   return result;
  }

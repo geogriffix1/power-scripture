@@ -19,8 +19,16 @@
             <i class="psmenu-icon"></i>
         </button>
     </div>
-    <div class="field1"><input id="description" #description type="text" placeholder="Citation Description" title="The description of the citation"></div>
-    <div class="no-icon"></div><div class="command-message"></div>
+    <div class="field1">
+        <input id="description"
+         #description type="text"
+         placeholder="Citation description (optional)"         
+         title="The description of the citation"
+         [value]="editedCitation.description">
+    </div>
+    <div class="no-icon"></div>
+    <div class="command-message"></div>
+    <div class="success-message" style="display: none;"></div>
     }
 }
 </div>

@@ -29,7 +29,7 @@ class BibleCitationModel {
     set values(value) {
         this.id.value = value.id ? value.id : null;
         this.citationLabel = { function: `get_citation_label(t1.bible_citation_id)` };
-        this.description.value = value.description ? value.description : null;
+        this.description.value = (value.description || value.description === "") ? value.description : null;
         this.bibleOrder = { function: `get_citation_bible_order(t1.bible_citation_id)` };
         this.createdAt.value = value.createdAt ? value.createdAt : null;
         this.updatedAt.value = value.updatedAt ? value.updatedAt : null;
