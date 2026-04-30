@@ -1,4 +1,4 @@
-import { OnInit } from '@angular/core';
+import { OnInit, Input, Signal } from '@angular/core';
 import { Component } from '@angular/core';
 import { BibleService } from '../../../bible.service';
 import { ThemeToCitationModel } from '../../../model/themeToCitation.model';
@@ -13,6 +13,8 @@ import { WorkbenchComponent } from '../../workbench.component';
     styleUrl: './delete-citation.component.css'
 })
 export class DeleteCitationComponent {
+  @Input({required: true})
+    activeCitationNode!: Signal<JstreeModel | null>;
   activeThemeToCitation!: ThemeToCitationModel;
   static isActive: boolean;
   static isSubscribed: boolean;

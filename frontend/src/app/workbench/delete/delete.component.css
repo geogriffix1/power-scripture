@@ -1,7 +1,167 @@
 .workbench-delete {
-    background-color: black;
-    color:white;
+  display: flex;
+  flex: 0 0 auto;
+  width: 100%;
+  padding-bottom: 4px;
+  color: white;
+  font-size: medium;
+  flex-wrap: nowrap;
+  justify-content: left;
+  align-items: left;
 }
+
+nav.workbench-delete {
+    border: 1px;
+    border-style: solid;
+    border-color: white;
+    padding: 4px;
+    background-color: black;
+}
+
+div.settings.settings-active {
+    border-left: gray solid 1px;
+}
+
+ /* icon shell */
+.workbench-delete .workbench-settings .icon-settings {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  margin: 0;
+  gap: 4px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.18);
+  background: linear-gradient(to bottom, #181818, #050505);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+
+  transform: translateY(0) scale(1);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease,
+    filter 120ms ease;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.45),
+    0 1px 2px rgba(0,0,0,0.65);
+}
+
+.workbench-delete .workbench-title button{
+    background-color: rgb(1, 1, 110);
+}
+
+.workbench-delete  .icon-settings  .psmenu-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    transition:
+      transform 120ms ease,
+      filter 120ms ease,
+      opacity 120ms ease;
+
+    background-image: url("/assets/images/Pinion.png");
+}
+
+.workbench-title {
+    color: white;
+    font-size: medium;
+    text-align: left;
+    width: 100%;
+    justify-content: left;
+}
+
+.workbench-title  .icon-circle-checked  .psmenu-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    transition:
+      transform 120ms ease,
+      filter 120ms ease,
+      opacity 120ms ease;
+
+    background-image: url("/assets/images/Circle checked.png");
+}
+
+.workbench-title  .icon-circle-unchecked  .psmenu-icon {
+    width: 24px;
+    height: 24px;
+    margin: 0;
+    padding: 0;
+    display: block;
+    background-repeat: no-repeat;
+    background-position: center;
+    background-size: contain;
+    pointer-events: none;
+    transition:
+      transform 120ms ease,
+      filter 120ms ease,
+      opacity 120ms ease;
+
+    background-image: url("/assets/images/Circle unchecked.png");
+}
+
+/* hover */
+.workbench-delete button.icon-settings:hover:not(.is-active) {
+  transform: translateY(-2px) scale(1.08);
+  border-color: rgba(255, 215, 0, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 0 8px rgba(255, 215, 0, 0.22),
+    0 3px 10px rgba(0,0,0,0.70);
+}
+
+.workbench-title {
+    color: white;
+    font-size: medium;
+    text-align: left;
+    width: 100%;
+    justify-content: left;
+}
+
+.workbench-title h3 {
+    font-size: medium;
+    text-align: left;
+    color: white;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 .workbench-delete .header {
     margin-left: 36px;
     font-weight: bold;

@@ -1,10 +1,12 @@
-import { Router, ActivatedRoute } from '@angular/router'
-import { Component, Input, Output, OnInit } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
+import { Component, signal, WritableSignal, Input, Output, OnInit } from '@angular/core';
+import { Subscription } from 'rxjs';
 import { CommonModule, NgFor, NgIf } from '@angular/common';
 import { BibleThemeTreeComponent } from '../../bible-theme-tree/bible-theme-tree.component';
 import { WorkbenchComponent } from '../workbench.component';
 import { DeleteThemeComponent } from './delete-theme/delete-theme.component';
 import { DeleteCitationComponent } from './delete-citation/delete-citation.component';
+import { JstreeModel } from '../../model/jstree.model';
 
 @Component({
     selector: 'app-delete',
@@ -32,23 +34,14 @@ export class DeleteComponent implements OnInit {
 
   static isSubscribed = false;
   static isActive = false;
+  activeThemeNode!: WritableSignal<JstreeModel | null>;
+  activeCitationNode!: WritableSignal<JstreeModel | null>;
+  private subscriptions = new Subscription;
 
-  @Input()
-    activeType = 0;
-  @Output()
-    activeTheme = WorkbenchComponent.activeTheme;
-  @Output()
-    activeCitation = WorkbenchComponent.activeCitation;
+  activeType = 0;
+
   deleteType = this.deleteTypes[this.activeType];
   settingsActive = false;
-  sectionWidth!:number;
-  sectionHeight!:number;
-  instance = this;
-
-  workbenchDomRect(rect:DOMRectReadOnly) {
-    this.sectionWidth = rect.width;
-    this.sectionHeight = rect.height;
-  }
   
   onClickSettings() {
     console.log("onClickSettings");
@@ -61,64 +54,66 @@ export class DeleteComponent implements OnInit {
 
     this.settingsActive = !this.settingsActive;
   }
+
   onRadioClickSettings(index:number) {
     console.log("onRadioClickSettings");
+    (async() => {
+      $("div.settings").hide(500).removeClass("settings-active");
+      await this.delay(500);
 
-    if (this.activeType != index) {
-      console.log(`navigating to ${this.paths[index]}`);
-      this.router.navigate([this.paths[index]]);
-    }
+      if (this.activeType != index) {
+        this.router.navigate([this.paths[index]]);
+      }
 
-    $("div.settings.settings-active").hide(500).removeClass("settings-active");
-    this.settingsActive = false;
+      this.settingsActive = false;
+      this.activeType = index;
+    })();
+  }
 
-    this.activeType = index;
-    console.log(`onRadioClickSettings this.activeType = ${index}`);
+  delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   ngOnInit() {
     DeleteComponent.isActive = true;
-    console.log("DeleteComponent ngOnInit");
-    console.log("route:");
-    console.log(this.actRoute);
 
     this.activeType = this.paths.indexOf(this.actRoute.snapshot.routeConfig?.path ?? "delete");
     this.deleteType = this.deleteTypes[this.activeType];
+    this.subscriptions = new Subscription;
 
+    this.activeThemeNode = signal(WorkbenchComponent.activeTheme);
+    this.activeCitationNode = signal(WorkbenchComponent.activeCitation);
+  }
+
+  ngAfterViewInit() {
     if (this.activeType == 0) {
       this.settingsActive = false;
       this.onClickSettings();
     }
 
-    console.log(`activeType: ${this.activeType}`);
-
-    let rect = WorkbenchComponent.getWorkbenchSize();
-    this.workbenchDomRect(rect);
-    this.sectionWidth = rect.width;
-    $("app-delete").width(rect.width);
-    $("#description").width(rect.width - 60);
-  }
-
-  ngAfterViewInit() {
     console.log("ngAfterViewInit");
+
     if (!DeleteComponent.isSubscribed) {
-      WorkbenchComponent.WorkbenchResizeBroadcaster
-        .subscribe((rect:DOMRectReadOnly) => {
-          this.workbenchDomRect(rect);
-          if (DeleteComponent.isActive) {
-            this.workbenchDomRect(rect);            
-            this.sectionWidth = rect.width - 4;
-            $("app-delete").width(rect.width);
-            $("#description").width(rect.width - 60);
-          }      
-        });
+      this.subscriptions.add(
+        BibleThemeTreeComponent.ActiveCitationSelector.subscribe((node: JstreeModel | null) => {
+            this.activeCitationNode.set(node);
+        })
+      );
+
+      this.subscriptions.add(
+        BibleThemeTreeComponent.ActiveThemeSelector.subscribe((themeNode:JstreeModel | null) => {
+          console.log("active theme changed");
+          this.activeThemeNode.set(themeNode);
+        })
+      );
 
       DeleteComponent.isSubscribed = true;
     }
   }
 
   ngOnDestroy() {
-    console.log("ngOnDestroy - delete component");
+    this.subscriptions.unsubscribe();
+    DeleteComponent.isSubscribed = false;
     DeleteComponent.isActive = false;
   }
 }

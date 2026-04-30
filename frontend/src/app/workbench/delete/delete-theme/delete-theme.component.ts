@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, Signal, effect } from '@angular/core';
 import { WorkbenchComponent } from '../../workbench.component';
 import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-tree.component';
 import { JstreeModel } from '../../../model/jstree.model';
@@ -13,10 +13,9 @@ import { ThemeCascadeModel } from '../../../model/themeCascade.model';
     styleUrl: './delete-theme.component.css'
 })
 export class DeleteThemeComponent {
+  @Input({required: true})
+    activeThemeNode!: Signal<JstreeModel|null>;
   activeTheme!: ThemeModel;
-  sectionWidth!:number;
-  sectionHeight!:number;
-  resequencingHeight!:number;
   themeListOpen = false;
   citationListOpen = false;
   themeToDeleteCascade?: ThemeCascadeModel;
@@ -31,7 +30,28 @@ export class DeleteThemeComponent {
 
   parentTheme!: ThemeModelReference;
 
-  constructor(private service: BibleService) {}
+  constructor(private service: BibleService)
+  {
+    console.log("DeleteThemeComponent ctor");
+     effect(() => {      
+      if (this.activeThemeNode()) {
+        $(".command-message").text("").hide(100);
+        let id = <number><unknown>this.activeThemeNode()?.id?.replace("theme", "");
+        $("#name").val(this.activeThemeNode()!.text).show(500);
+        $("#description").val(this.activeThemeNode()?.li_attr.title).show(500);
+        $("div.theme.selected").removeClass("missing").text(this.activeThemeNode()?.data.path).show(500);
+      }
+      else {
+        $("#name").val("");
+        $("#description").val("");
+        $("div.theme.selected")
+          .removeClass("missing")
+          .addClass("missing")
+          .html("Please select the <b>Theme</b> to delete from the <b>Bible Theme Tree</b>")
+          .show(500);
+      }
+    });
+  }
 
   DeleteTheme(e?: Event) {
     e?.preventDefault();
@@ -41,7 +61,12 @@ export class DeleteThemeComponent {
     $("command-message").text("");
 
     (async () => {
-      const cascade = await this.service.getThemeCascade(this.activeTheme.id);
+      if (!this.activeThemeNode()!.parent.startsWith("theme")) {
+        $(".command-message").text("Cannot delete a root theme").show(100);
+        return;
+      }
+
+      const cascade = await this.service.getThemeCascade(+this.activeThemeNode()!.id.replace("theme", ""));
 
       const themes = cascade?.themes ?? [];
       const links = cascade?.themeToCitations ?? [];
@@ -101,104 +126,75 @@ export class DeleteThemeComponent {
     $("command-message").text("");
   }
 
-  workbenchDomRect(rect:DOMRectReadOnly) {
-    this.sectionWidth = rect.width;
-    this.sectionHeight = rect.height;
-  }
+//   ngOnInit() {
+//     DeleteThemeComponent.isActive = true;
+//   }
 
-  ngOnInit() {
-    console.log("initializing delete theme component");
-    DeleteThemeComponent.isActive = true;
+//   ngAfterViewInit() {
+//     console.log("ngAfterViewInit");
+//     if (!DeleteThemeComponent.isSubscribed) {
+//       (async (obj:DeleteThemeComponent) => {
+//         console.log("subscribing to active theme selector");
+//         BibleThemeTreeComponent.ActiveThemeSelector
+//           .subscribe((node:any) => {
+//             if (WorkbenchComponent.activeTheme) {
+//               console.log("WorkbenchComponent.activeTheme");
+//               let parent = WorkbenchComponent.activeTheme.parent;
+//               if (parent.startsWith("theme")) {
+//                 parent = parent.replace("theme", "");
+//               }
+//               else {
+//                 parent = "0";
+//               }
 
-    let rect = WorkbenchComponent.getWorkbenchSize();
+//               this.activeTheme = {
+//                 id: <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", ""),
+//                 name: WorkbenchComponent.activeTheme.text,
+//                 description: WorkbenchComponent.activeTheme.li_attr.title,
+//                 parent: +parent,
+//                 sequence: WorkbenchComponent.activeTheme.li_attr.sequence,
+//                 childCount: 0,
+//                 path: WorkbenchComponent.activeTheme.data.path,
+//                 node: WorkbenchComponent.activeTheme
+//               };
 
-    this.workbenchDomRect(rect);
-    this.sectionWidth = rect.width;
-    $("app-delete-theme").width(rect.width);
-    $("#description").width(rect.width - 60);
-  }
+//               $("#name").val(obj.activeTheme.name);
+//               $("#description").val(obj.activeTheme.description);
+//               $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
+//               $(".command-warning").hide();
+//               $(".command-message").text("");
+//             }
+//             else {
+//               $(".workbench-theme div.selected.theme").addClass("missing");
+//             }
+//           });
+//       })(this);
 
-  ngAfterViewInit() {
-    console.log("ngAfterViewInit");
-    if (!DeleteThemeComponent.isSubscribed) {
-      WorkbenchComponent.WorkbenchResizeBroadcaster
-        .subscribe((rect:DOMRectReadOnly) => {
-          this.workbenchDomRect(rect);
-          if (DeleteThemeComponent.isActive) {
-            this.workbenchDomRect(rect);
-            this.sectionWidth - rect.width - 4;
-            $("app-delete-theme").width(rect.width);
-            $("#description").width(rect.width - 60);
-          }
-        });
+//       DeleteThemeComponent.isSubscribed = true;
+//     }
 
-      (async (obj:DeleteThemeComponent) => {
-        console.log("subscribing to active theme selector");
-        BibleThemeTreeComponent.ActiveThemeSelector
-          .subscribe((node:any) => {
-            if (WorkbenchComponent.activeTheme) {
-              console.log("WorkbenchComponent.activeTheme");
-              let parent = WorkbenchComponent.activeTheme.parent;
-              if (parent.startsWith("theme")) {
-                parent = parent.replace("theme", "");
-              }
-              else {
-                parent = "0";
-              }
+//     (async (obj:DeleteThemeComponent) => {
+//       if (WorkbenchComponent.activeTheme) {
+//         console.log("WorkbenchComponent has an active theme");
+//         obj.activeTheme = {
+//           id: <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", ""),
+//           name: WorkbenchComponent.activeTheme.text,
+//           description: WorkbenchComponent.activeTheme.li_attr.title,
+//           parent: <number><unknown>WorkbenchComponent.activeTheme.parent.replace("theme", ""),
+//           sequence: WorkbenchComponent.activeTheme.li_attr.sequence,
+//           childCount: 0,
+//           path: WorkbenchComponent.activeTheme.data.path,
+//           node: WorkbenchComponent.activeTheme
+//         };
 
-              this.activeTheme = {
-                id: <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", ""),
-                name: WorkbenchComponent.activeTheme.text,
-                description: WorkbenchComponent.activeTheme.li_attr.title,
-                parent: +parent,
-                sequence: WorkbenchComponent.activeTheme.li_attr.sequence,
-                childCount: 0,
-                path: WorkbenchComponent.activeTheme.data.path,
-                node: WorkbenchComponent.activeTheme
-              };
-
-              $("#name").val(obj.activeTheme.name);
-              $("#description").val(obj.activeTheme.description);
-              $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
-              $(".command-warning").hide();
-              $(".command-message").text("");
-            }
-            else {
-              $(".workbench-theme div.selected.theme").addClass("missing");
-            }
-          });
-      })(this);
-
-      DeleteThemeComponent.isSubscribed = true;
-    }
-
-    (async (obj:DeleteThemeComponent) => {
-      if (WorkbenchComponent.activeTheme) {
-        console.log("WorkbenchComponent has an active theme");
-        obj.activeTheme = {
-          id: <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", ""),
-          name: WorkbenchComponent.activeTheme.text,
-          description: WorkbenchComponent.activeTheme.li_attr.title,
-          parent: <number><unknown>WorkbenchComponent.activeTheme.parent.replace("theme", ""),
-          sequence: WorkbenchComponent.activeTheme.li_attr.sequence,
-          childCount: 0,
-          path: WorkbenchComponent.activeTheme.data.path,
-          node: WorkbenchComponent.activeTheme
-        };
-
-        $("#name").val(obj.activeTheme.name);
-        $("#description").val(obj.activeTheme.description);
-        $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
-      }
-      else {
-        console.log("No WorkbenchComponent.activeTheme");
-        $(".workbench-theme div.selected.theme").addClass("missing");
-      }
-    })(this);
-  }
-
-  ngOnDestroy() {
-    console.log("ngOnDestroy");
-    DeleteThemeComponent.isActive = false;
-  }
-}
+//         $("#name").val(obj.activeTheme.name);
+//         $("#description").val(obj.activeTheme.description);
+//         $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
+//       }
+//       else {
+//         console.log("No WorkbenchComponent.activeTheme");
+//         $(".workbench-theme div.selected.theme").addClass("missing");
+//       }
+//     })(this);
+//   }
+ }

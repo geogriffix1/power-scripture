@@ -1,22 +1,26 @@
-<header></header>
 <nav class="workbench-delete">
-    @if (activeType > 0) {
     <div class="workbench-settings">
-        <a class="settings" title="Settings" (click)=onClickSettings()>
-            <i class="settings active"></i>
-        </a>
+        <button
+            type="button"
+            class="icon-settings"
+            (click)="onClickSettings()"
+            title="Settings for deleting - Theme or Citation">
+            <i class="psmenu-icon" title="Settings for editing"></i>
+        </button>
     </div>
-    }
     <div class="workbench-title">
         {{deleteType}}
         <div class="settings">
-            <h3>Delete Element Type:</h3>
+            <h3>Choose Delete Type:</h3>
             <div class="settings-selector" *ngFor="let item of deleteTypes; index as i">
                 @if (i > 0) {
-                <a class="menu-radio-{{i === activeType ? 'checked' : 'unchecked'}}" (click)=onRadioClickSettings(i)>
-                    <i class="radio-icon"></i>
-                    <span>{{item}}</span>
-                </a>
+                <button
+                    type="button"
+                    class="icon-circle-{{i == activeType ? 'checked' : 'unchecked'}}"
+                    (click)="onRadioClickSettings(i)">
+                        <i class="psmenu-icon"></i>
+                </button>
+                <span>{{item}}</span>
                 }
             </div>
         </div>
@@ -27,9 +31,9 @@
     <div></div>
     }
     @else if(activeType == 1) {
-    <app-delete-theme></app-delete-theme>
+    <app-delete-theme [activeThemeNode]="activeThemeNode"></app-delete-theme>
     }
     @else if(activeType == 2) {
-    <app-delete-citation ></app-delete-citation>
+    <app-delete-citation [activeCitationNode]="activeCitationNode"></app-delete-citation>>
     }
 </section>

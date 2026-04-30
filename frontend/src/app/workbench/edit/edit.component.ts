@@ -44,9 +44,6 @@ export class EditComponent {
 
   editType = this.editTypes[this.activeType];
   settingsActive = false;
-  sectionWidth!:number;
-  sectionHeight!:number;
-  instance = this;
 
   onClickSettings() {
     if (this.settingsActive) {
@@ -58,10 +55,11 @@ export class EditComponent {
 
     this.settingsActive = !this.settingsActive;
   }
+
   onRadioClickSettings(index:number) {
     (async() => {
       $("div.settings").hide(500).removeClass("settings-active");
-      await this.delay(500)
+      await this.delay(500);
       if (this.activeType != index) {
         this.router.navigate([this.paths[index]]);
       }

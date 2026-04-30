@@ -347,8 +347,6 @@ export class BibleService {
     body: JSON.stringify(citation)
   });
 
-  console.log("editCitation - body:");
-  console.log(JSON.stringify(citation));
   let result = await data.json();
   return result;
  }

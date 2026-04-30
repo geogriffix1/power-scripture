@@ -167,8 +167,12 @@ div.search-results { width:100%; overflow-y: scroll; }
     border-right: 1px solid rgb(1, 1, 110);
 }
 
-nav.create {
-    padding: 1px;
+nav.workbench-create {
+    border: 1px;
+    border-style: solid;
+    border-color: white;
+    padding: 4px;
+    background-color: black;
 }
 
 .workbench-parent-theme {
