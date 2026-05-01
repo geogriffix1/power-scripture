@@ -40,19 +40,16 @@ export class BibleThemeTreeComponent implements OnInit {
     BibleThemeTreeComponent.ThemeSwitchTrigger = new Subject<void>();
     BibleThemeTreeComponent.ngZone = ngzone;
     BibleThemeTreeComponent.router = router;
-    console.log("BibleThemeTreeComponent constructor - router:");
-    console.log(BibleThemeTreeComponent.router);
   }
 
   broadcastActiveThemeChange(theme:JstreeModel|null) {
     BibleThemeTreeComponent.ActiveThemeSelector.next(theme);
-    console.log("broadcast active theme change");
-    console.log(theme);
   }
 
   broadcastActiveCitationChange(citation:JstreeModel|null) {
     BibleThemeTreeComponent.ActiveCitationSelector.next(citation);
     console.log("broadcast active citation change");
+    console.log(citation);
   }
 
   public static triggerEditThemeSwitch() {
@@ -112,21 +109,20 @@ export class BibleThemeTreeComponent implements OnInit {
         }
       }
     })
-    .on('loaded.jstree', (e:any, data:any) => {
-      console.log("jstree loaded event");
-      console.log(data);
-    }).on('redraw.jstree', (e:any, data:any) => {
-      console.log("jstree redraw event data:");  
-      console.log(data);
-      console.log("e:")
-      console.log(e);
-    })
-    ;
+    // .on('loaded.jstree', (e:any, data:any) => {
+    //   console.log("jstree loaded event");
+    //   console.log(data);
+    // }).on('redraw.jstree', (e:any, data:any) => {
+    //   console.log("jstree redraw event data:");  
+    //   console.log(data);
+    //   console.log("e:")
+    //   console.log(e);
+    // })
+    // ;
   }
 
   ThemeTreeContextMenu (node:JstreeModel): any {
     let service = BibleThemeTreeComponent.service;
-    console.log("In AppComponent.ThemeTreeContextMenu");
     let items:any = {};
     if (node.a_attr.class == "theme-tree-node-theme") {
       // theme menu
@@ -182,8 +178,9 @@ export class BibleThemeTreeComponent implements OnInit {
       }
 
       if (node.parent == "#") {
+        delete items.createThemeItem;
         delete items.editThemeItem;
-        delete items.deleteItem;
+        delete items.deleteThemeItem;
       }
     }
     else {
@@ -199,14 +196,14 @@ export class BibleThemeTreeComponent implements OnInit {
         copyCitationItem: {
           label: "Copy",
           action: () =>  {
-            console.log("copying citation item");
-            BibleThemeTreeComponent.ClipboardSelector.next(node);;
-            console.log("done copying citation item");
+            BibleThemeTreeComponent.ClipboardSelector.next(node);
           }
         },
         deleteCitationItem: {
           label: "Delete",
-          action: () =>  { }
+          action: () =>  { 
+            BibleThemeTreeComponent.ngZone.run(() => BibleThemeTreeComponent.router.navigate(["/delete/citation"]));
+          }
         }
       }
     }
