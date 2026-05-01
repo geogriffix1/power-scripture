@@ -152,6 +152,10 @@ export class BibleThemeTreeComponent implements OnInit {
               let copyThemeId = +BibleThemeTreeComponent.ClipboardNode.id.replace("theme", "");
               service.pasteTheme(copyThemeId, node);
             }
+            else if (BibleThemeTreeComponent.ClipboardNode) {
+              let copyCitationId = +BibleThemeTreeComponent.ClipboardNode.id.replace("citation", "");
+              service.pasteCitation(copyCitationId, node);
+            }
           }
         },
         createThemeItem: {
