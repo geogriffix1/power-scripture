@@ -1,22 +1,21 @@
 <div class="workbench-delete">
-    <div class="header">Delete Citation</div>
-    <div class="citation citation-icon"><img src="/assets/images/Script.png" title="Navigate by Theme Tree to the target citation"></div>
+    <div class="no-icon"></div><div class="header">Delete Citation</div>
+    <div class="citation icon icon-folder"><i class="psmenu-icon" title="Navigate by Theme Tree to the target citation"></i></div>
     <div class="citation selected missing">
         Please select an active <b>Citation</b> from the <b>Bible Theme Tree</b>
     </div>
-    <nav class="cite-scripture">
-        <div class="form-grid">
-            <button
-                type="button"
-                class="icon-button menu menu-icon-delete"
-                (click)="DeleteCitationLink()"
-                title="Click to Delete"
-            >
-                <i class="citation psmenu-icon"></i>
-            </button>
-            <input id="label" #label type="text" class="text-input" placeholder="Citation Link" title="The Citation Label" disabled>
-            <input id="citation-description" type="text" class="text-input" placeholder="Citation Description" title="The description of the citation" disabled>
-        </div>
-        <div class="command-message"></div>
-    </nav>
+    <div class="icon icon-delete">
+        <button
+            type="button"
+            class="icon-delete"
+            (click)="DeleteCitationLink()"
+            title="Click to Delete">
+            <i class="citation psmenu-icon"></i>
+        </button>
+    </div>
+    <div class="field2"><input id="label" #label type="text" title="The citation label" readonly></div>
+    <div class="field2"><input id="description" #description type="text" title="The description of the citation" readonly></div>
+
+    <div class="no-icon"></div>
+    <div class="field2"><div class="command-message"></div><div class="command-warning" style="display: none;"></div></div>
 </div>
