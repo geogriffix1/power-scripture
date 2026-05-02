@@ -1,13 +1,11 @@
 import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { SearchScriptureComponent } from './search-scripture/search-scripture.component';
-import { CiteScriptureComponent } from './cite-scripture/cite-scripture.component';
 import $ from 'jquery';
 
 @Component({
     selector: 'app-search',
     imports: [
-        CiteScriptureComponent,
         SearchScriptureComponent,
         CommonModule
     ],

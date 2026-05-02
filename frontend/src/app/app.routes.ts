@@ -17,21 +17,21 @@ export const routes: Routes = [
         path: '',
         component: WorkbenchComponent,
         children: [
-          { path: '', redirectTo: 'search', pathMatch: 'full' },
-          { path: 'search', component: SearchComponent },
-          { path: 'create', component: CreateComponent },
-          { path: 'create/citation', component: CreateComponent },
-          { path: 'create/theme', component: CreateComponent },
-          { path: 'edit', component: EditComponent },
-          { path: 'edit/theme', component: EditComponent },
-          { path: 'edit/citation', component: EditComponent },
-          { path: 'edit/citation/range', component: EditComponent },
-          { path: 'edit/citation/verse', component: EditComponent },
-          { path: 'edit/citation/verse/markup', component: EditComponent },
-          { path: 'delete', component: DeleteComponent },
-          { path: 'delete/citation', component: DeleteComponent },
-          { path: 'delete/theme', component: DeleteComponent },
-          { path: 'import', component: ImportComponent }
+          { path: '', redirectTo: 'search', pathMatch: 'full', data: { activeTool: 'search' } },
+          { path: 'search', component: SearchComponent, data: { activeTool: 'search' } },
+          { path: 'create', component: CreateComponent, data: { activeTool: 'create' } },
+          { path: 'create/citation', component: CreateComponent, data: { activeTool: 'create' } },
+          { path: 'create/theme', component: CreateComponent, data: { activeTool: 'create' } },
+          { path: 'edit', component: EditComponent, data: { activeTool: 'edit' } },
+          { path: 'edit/theme', component: EditComponent, data: { activeTool: 'edit' } },
+          { path: 'edit/citation', component: EditComponent, data: { activeTool: 'edit' } },
+          { path: 'edit/citation/range', component: EditComponent, data: { activeTool: 'edit' } },
+          { path: 'edit/citation/verse', component: EditComponent, data: { activeTool: 'edit' } },
+          { path: 'edit/citation/verse/markup', component: EditComponent, data: { activeTool: 'edit' } },
+          { path: 'delete', component: DeleteComponent, data: { activeTool: 'delete' } },
+          { path: 'delete/citation', component: DeleteComponent, data: { activeTool: 'delete' } },
+          { path: 'delete/theme', component: DeleteComponent, data: { activeTool: 'delete' } },
+          { path: 'import', component: ImportComponent, data: { activeTool: '' } }
         ]
       }
     ]

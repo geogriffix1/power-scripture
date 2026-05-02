@@ -1,6 +1,6 @@
-import { Component } from '@angular/core';
-import { Router, RouterOutlet, RouterLink, RouterLinkActive } from '@angular/router';
-import { Subject } from 'rxjs';
+import { Component, inject, signal } from '@angular/core';
+import { Router, RouterOutlet, ActivatedRoute, NavigationEnd } from '@angular/router';
+import { filter } from 'rxjs';
 import { MainShellComponent } from '../mainshell/mainshell.component';
 import { BibleThemeTreeComponent } from '../bible-theme-tree/bible-theme-tree.component';
 import { CiteScriptureRangeModel } from '../model/citeScriptureRangeModel';
@@ -24,23 +24,45 @@ export class WorkbenchComponent {
   static scriptureRanges: CiteScriptureRangeModel[];
   static activeScriptureRange: string;
   static activeCitationVerse: CitationVerseExtendedModel;
-  static WorkbenchResizeBroadcaster:Subject<DOMRectReadOnly>;
+  //static WorkbenchResizeBroadcaster:Subject<DOMRectReadOnly>;
 
-  activeTool: string | null = null;
+  private router = inject(Router);
+  private route = inject(ActivatedRoute);
+
+  activeTool = signal<string | null>(null);
   helpWindow: any = null;
 
-  static getWorkbenchSize() {
-    let section = $("section.bible-workbench");
-    let position = section.position();
-
-    let rect = new DOMRect(position?.left ?? 0, position?.top ?? 0, section.innerWidth(), section.innerHeight());
-    return rect;
+  constructor() {
+    this.router.events.pipe(
+      filter(event => event instanceof NavigationEnd)
+    )
+    .subscribe(() => {
+      const activeRoute = this.getDeepestChild(this.route);
+      const tool = activeRoute.snapshot.data['activeTool'] ?? null;
+      this.activeTool.set(tool);
+     });
   }
 
-  setActiveTool(tool: string): void {
-    this.activeTool = tool;
+  private getDeepestChild(route: ActivatedRoute): ActivatedRoute {
+    while (route.firstChild) {
+      route = route.firstChild;
+    }
+
+    return route;
   }
-  
+
+ // static getWorkbenchSize() {
+  //   let section = $("section.bible-workbench");
+  //   let position = section.position();
+
+  //   let rect = new DOMRect(position?.left ?? 0, position?.top ?? 0, section.innerWidth(), section.innerHeight());
+  //   return rect;
+  // }
+
+  public setActiveTool(tool: string): void {
+    this.activeTool.set(tool);
+  }
+
   static setScriptureRanges(citation: CitationExtendedModel) {
     const unicodeSuperscriptNumbers = [
       "\u2070",
@@ -185,14 +207,14 @@ export class WorkbenchComponent {
     this.helpWindow?.focus();
   }
 
-  resizeObserver = new ResizeObserver(elements => {
-    let element = elements[0];
-      WorkbenchComponent.WorkbenchResizeBroadcaster.next(element.contentRect);
-  });
+  // resizeObserver = new ResizeObserver(elements => {
+  //   let element = elements[0];
+  //     WorkbenchComponent.WorkbenchResizeBroadcaster.next(element.contentRect);
+  // });
 
   ngAfterViewInit() {
-    WorkbenchComponent.WorkbenchResizeBroadcaster = new Subject<DOMRectReadOnly>;
-    this.resizeObserver.observe($("section.bible-workbench")[0]);
+    // WorkbenchComponent.WorkbenchResizeBroadcaster = new Subject<DOMRectReadOnly>;
+    // this.resizeObserver.observe($("section.bible-workbench")[0]);
 
     BibleThemeTreeComponent.ActiveCitationSelector.subscribe((citation:JstreeModel|null) => {
       WorkbenchComponent.activeCitation = citation;
@@ -214,6 +236,4 @@ export class WorkbenchComponent {
     BibleThemeTreeComponent.ActiveThemeSelector.unsubscribe();
     BibleThemeTreeComponent.ClipboardSelector.unsubscribe();
   }
-
-  constructor(private router:Router) {}
 }
