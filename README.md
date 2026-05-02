@@ -24,8 +24,6 @@ Power Scripture allows users to:
 
 ## Key Features
 
-## Key Features
-
 ### Scripture Search
 
 - Fast, keystroke-responsive search
@@ -128,6 +126,14 @@ A citation is a **collection of one or more scripture verses**.
 - Always belongs to a **parent theme**
 - Can be copied or moved to other themes
 - Designed to represent a single idea or concept
+- Internally stores individual verses as children of the citation
+
+In the user interface, verses are displayed as **grouped ranges** for readability.
+
+Power Scripture does not alter the original scripture text.  
+Instead, users may apply **markups** to individual verses within a citation to clarify meaning (for example, replacing a pronoun with a bracketed reference such as `[Jesus]`).
+
+These markups are applied at the verse level within the citation and do not modify the underlying scripture data.
 
 ---
 
