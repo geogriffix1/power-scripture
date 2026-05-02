@@ -190,7 +190,11 @@ export class SearchScriptureComponent implements OnInit{
   }
 
   public toggleSelected(item:any) {
-    item.selected = !item.selected;
+    this.searchResults.update(items =>
+      items.map(i =>
+        i === item ? { ...i, selected: !i.selected } : i
+      )
+    );
   }
 
   public showModalContextMenu(event:MouseEvent) {
