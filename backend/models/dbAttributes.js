@@ -217,9 +217,6 @@ class TableAttribute {
     }
 
     static getJoinSelectString(tableName, tableInstance, joinTables) {
-        console.log("In getJoinSelectString");
-        console.log("primary table = " + tableInstance.table.tableName);
-
         this.allJoinTables = [];
         this.joinClauses = [];
 
@@ -240,7 +237,6 @@ class TableAttribute {
         var tableIncrement = 1;
         for (var joinIndex in this.allJoinTables) {
             var joinInstance = this.allJoinTables[joinIndex];
-            console.log("table is " + joinInstance.table.tableName);
             var tableNumber = tableIncrement++;
             var propertyNames = Object.keys(joinInstance);
             index = 0;
@@ -263,10 +259,7 @@ class TableAttribute {
         }
 
         var selectClause = query;
-        console.log(selectClause);
-
         var fromClause = ` FROM ${tableName} t1`;
-        console.log(fromClause);
 
         this.createJoinClauses(tableInstance, joinTables);
 
@@ -275,7 +268,6 @@ class TableAttribute {
             joinClause += ` ${this.joinClauses[index]}`;
         }
 
-        console.log(joinClause);
         var query = "";
         comma = "";
 
@@ -304,7 +296,6 @@ class TableAttribute {
             }
         }
         var whereClause = query;
-        console.log(whereClause);
         return selectClause + fromClause + joinClause + whereClause;
     }
 
@@ -374,7 +365,6 @@ class TableAttribute {
         }
 
         var updateString = `UPDATE ${table.tableName} ${setClause} WHERE ${keyColumn.columnName}=${keyColumn.value}`;
-        console.log(updateString);
         return updateString;
     }
 

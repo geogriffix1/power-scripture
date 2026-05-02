@@ -40,7 +40,6 @@ refreshThemePathsAsync = () => {
                 }
 
                 themeList = response;
-                console.log(themeList);
                 themeList.map(theme => {
                     if (!theme.parent) {
                         roots.push(theme)
@@ -61,7 +60,6 @@ refreshThemePathsAsync = () => {
                 }
 
                 global.themePaths = paths;
-                console.log(JSON.stringify(global.themePaths));
                 resolve();
             }
             else {

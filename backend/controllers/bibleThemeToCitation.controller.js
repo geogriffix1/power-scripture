@@ -46,7 +46,6 @@ exports.listOne = (req, res) => {
     var isFull = req.route.path.endsWith("full");
     if (isFull) {
         const selectString = themeToCitation.getJoinSelectString();
-        console.log(selectString);
         dbAccess.query(selectString, (err, results) => {
             if (err) {
                 res.status(500).send(errorMessage(
@@ -60,7 +59,6 @@ exports.listOne = (req, res) => {
             else {
                 var themeToCitation = null;
 
-                console.log(results[0]);
                 var result = results[0];
                 if (result) {
                     themeToCitation = tools.getObjectFromResult(result, 1);
@@ -70,10 +68,6 @@ exports.listOne = (req, res) => {
                     if (themeToCitation.citation.description === null) {
                         themeToCitation.citation.description = "";
                     }
-                }
-
-                if (themeToCitation === null) {
-                    console.log("NULL THEME TO CITATION");
                 }
 
                 res.send({ themeToCitation: themeToCitation });

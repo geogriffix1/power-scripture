@@ -39,7 +39,6 @@ exports.listOne = (req, res) => {
             else {
                 var verse = null;
 
-                console.log(results);
                 for (var i = 0; i < results.length; i++) {
                     var result = results[i];
                     if (verse === null) {
@@ -94,7 +93,6 @@ exports.listAll = (req, res) => {
         else {
             var verses = [];
 
-            console.log(results);
             var citationVerse = null;
             for (var i = 0; i < results.length; i++) {
                 var result = results[i];
@@ -157,7 +155,6 @@ exports.citationId = (req, res) => {
         else {
             var verses = [];
 
-            console.log(results);
             var citationVerse = null;
             for (var i = 0; i < results.length; i++) {
                 var result = results[i];
@@ -229,8 +226,8 @@ exports.listByCitationAndScriptures = async (req, res) => {
     if (scriptureIds.length > 0) {
         let selectString = `${bibleVerse.getJoinSelectString()} AND t1.bible_scripture_niv_id IN (`;
         scriptureIds.forEach(value => selectString += value + ",");
+
         selectString = selectString.substring(0, selectString.length - 1) + ")";
-        console.log(selectString);
         dbAccess.query(selectString, (err, results) => {
             if (err) {
                 res.status(500).send(errorMessage(
@@ -243,8 +240,6 @@ exports.listByCitationAndScriptures = async (req, res) => {
             }
             else {
                 var verses = [];
-
-                console.log(results);
                 var citationVerse = null;
                 for (var i = 0; i < results.length; i++) {
                     var result = results[i];
@@ -524,7 +519,6 @@ exports.setHideProperty = (req, res) => {
             dbAccess.update(updateString, (err, result) => {
                 if (err) {
                     error = err;
-                    console.log("Error updating");
                     reject(error);
                 }
                 else {

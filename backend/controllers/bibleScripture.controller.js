@@ -327,7 +327,6 @@ exports.scriptureContains = (req, res) => {
             .replace(`WHERE t1.text = '${query.replace("'", "''")}'`, `WHERE t1.text REGEXP '.*${query.replace("'", "''")}.*'`)
             + ` ORDER BY bible_order LIMIT 401 OFFSET ${offset}`;
         dbAccess.query(selectString, (err, result) => {
-            console.log(selectString);
             if (err) {
                 res.send(errorMessage(
                     500,

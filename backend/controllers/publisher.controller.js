@@ -341,8 +341,6 @@ exports.listTheme = (req, res) => {
                     var childTheme = subthemes[i];
 
                     themeQueue.push(childTheme);
-                    console.log("childTheme:");
-                    console.log(childTheme);
                 }
             }
         }

@@ -242,7 +242,6 @@ exports.listAll = (req, res) => {
 
 exports.create = (req, res) => {
     var obj = req.body;
-    console.log(obj);
     var message = null;
     if (!obj) {
         message = "Error: theme object is missing from the message body";
@@ -316,7 +315,6 @@ exports.create = (req, res) => {
 
     Promise.all(tasks)
         .then(data => {
-            //console.log("after get_next_theme_sequence_from_parent_theme");
             var context = data[0].context;
             var count = data[1][0].count;
 
@@ -334,7 +332,6 @@ exports.create = (req, res) => {
 
             var nextSequence = data[2][0].nextSequence;
 
-            console.log(`nextSequence: ${nextSequence}`);
             if (!context.insert.sequence) {
                 context.insert.sequence = nextSequence;
             }
@@ -391,7 +388,6 @@ exports.delete = (req, res) => {
 
 exports.edit = (req, res) => {
     var obj = req.body;
-    console.log(obj);
     var message = null;
     if (!obj) {
         message = "Error: theme object is missing from the message body";
@@ -564,14 +560,12 @@ exports.edit = (req, res) => {
             theme.values = { id: context.edited.id };
 
             var query = theme.getChildrenSelectString();
-            console.log(query);
             tasks.push(getQuery(query));
 
             if (context.changeParent) {
                 theme.values = { parent: context.original.parent };
                 query = theme.getChildrenSelectString();
                 tasks.push(getQuery(query));
-                console.log(query);
             }
 
             Promise.all(tasks)
@@ -812,7 +806,6 @@ exports.normalizeThemes = (req, res) => {
 
 exports.resequenceCitations = (req, res) => {
     var obj = req.body;
-    console.log(obj);
     var message = null;
     if (!obj) {
         message = "Error: citation resequence object is missing from the message body";

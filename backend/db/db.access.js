@@ -16,17 +16,17 @@ const pool = mysql.createPool({
 
 pool.query("SELECT DATABASE() AS db, CURRENT_USER() AS user", (err, rows) => {
   if (err) return console.error(err);
-  console.log("DB/user:", rows[0]);
+  console.log("DB/user:", `${rows[0].db}/${rows[0].user}`);
 });
 
 pool.query(
   "SHOW VARIABLES WHERE Variable_name IN ('hostname','port')",
   (err, rows) => {
     if (err) return console.error(err);
-    // rows will look like [{Variable_name:'hostname',Value:'...'}, {Variable_name:'port',Value:'3306'}]
-    console.log("Host/port vars:", rows);
+    rows.forEach(row => console.log(`${row.Variable_name}: ${row.Value}`));
   }
 );
+
 //-------------------------
 // Core query executor
 //-------------------------

@@ -40,7 +40,6 @@ exports.listOne = (req, res) => {
             else {
                 var citation = null;
 
-                console.log(results);
                 for (var i = 0; i < results.length; i++) {
                     var result = results[i];
                     if (citation === null) {
@@ -121,7 +120,6 @@ exports.listAll = (req, res) => {
     const citation = new bibleCitation;
     var selectString = citation.getSelectString();
     selectString += ` ORDER BY bibleOrder LIMIT ${offset}, ${limit}`;
-    console.log(selectString);
 
     dbAccess.query(selectString, (err, results) => {
         if (err) {
@@ -210,7 +208,8 @@ exports.create = (req, res) => {
     var scriptures = [];
     var foundVerse = null;
     var sequence = 0;
-    console.log("== Create Citation ==")
+
+    //== Create Citation ==//
     if (req.body) {
         try {
             obj = req.body;
@@ -255,23 +254,14 @@ exports.create = (req, res) => {
 
                     if (!methodType) {
                         methodType = "scriptures";
-                        console.log(`methodType: "scriptures"`);
                         for (var scripture of obj.scriptures) {
-                            console.log("scripture:");
-                            console.log(scripture);
                             foundVerse = null;
                             for (var idx in global.verseValidation) {
-                                console.log(`idx: ${idx}`);
-                                console.log("global.verseValidation[idx]:");
-                                console.log(global.verseValidation[idx]);
                                 var validBook = global.verseValidation[idx];
                                 if (validBook.book.toLowerCase() == scripture.book.toLowerCase()) {
-                                    console.log(`book found: ${scripture.book}`);
-                                    console.log(JSON.stringify(validBook.chapters));
                                     for (var ix in validBook.chapters) {
                                         var validChapter = validBook.chapters[ix];
                                         if (scripture.chapter && validChapter.chapter == scripture.chapter) {
-                                            console.log(`chapter found: ${validChapter}`);
                                             if (scripture.verse > 0 && scripture.verse <= validChapter.lastVerse) {
                                                 foundVerse = { book: validBook.book, chapter: scripture.chapter, verse: scripture.verse };
                                                 break;
@@ -341,17 +331,13 @@ exports.create = (req, res) => {
     }
 
     createCitation = citation => {
-        console.log("in biblecitation.controller createCitation");
         return new Promise((resolve, reject) => {
             var error;
             var coreCitation = citation;
             var insertString = citation.getInsertString();
-            console.log(insertString);
             dbAccess.insert(insertString, (err, result) => {
                 if (err) {
-                    console.log("biblecitation.controller createCitation insert error");
                     error = err;
-                    console.log("rejecting");
                     return reject(error);
                 }
                 else {
@@ -366,7 +352,6 @@ exports.create = (req, res) => {
         return new Promise((resolve, reject) => {
             var coreThemeToCitation = themeToCitation;
             var insertString = themeToCitation.getInsertString();
-            console.log(insertString);
             dbAccess.insert(insertString, (err, result) => {
                 if (err) {
                     reject(err);
@@ -382,7 +367,6 @@ exports.create = (req, res) => {
     createCitationVerse = (citationVerse) => {
         var coreCitationVerse = citationVerse;
         var insertString = citationVerse.getInsertString();
-        console.log(insertString);
         return new Promise((resolve, reject) => {
             dbAccess.insert(insertString, (err, result) => {
                 if (err) {
@@ -453,7 +437,6 @@ exports.create = (req, res) => {
             var scr = new bibleScripture;
             scr.values = scriptures[index];
             var selectString = scr.getSelectString();
-            console.log(selectString);
 
             tasks.push(getQuery(selectString));
         }
@@ -463,7 +446,6 @@ exports.create = (req, res) => {
             scr = new bibleScripture;
             scr.values = { id: scriptureIds[index] };
             var selectString = scr.getSelectString();
-            console.log(selectString);
 
             tasks.push(getQuery(selectString));
         }
@@ -471,8 +453,6 @@ exports.create = (req, res) => {
 
     Promise.all(tasks)
         .then(data => {
-            console.log("data:");
-            console.log(data);
             var context = data[0].context;
             var scriptureIds = context.scriptureIds;
             var scriptures = [];
@@ -489,15 +469,8 @@ exports.create = (req, res) => {
                 context.nextSequence = context.sequence;
             }
 
-            console.log(`nextSequence: ${context.nextSequence}`);
-
             tasks.push(addContext(context));
             tasks.push(createCitation(context.citation));
-            
-            console.log("context:");
-            console.log(context);
-            console.log("after reading scriptures");
-            console.log(data);
 
             Promise.all(tasks)
                 .then(data => {
@@ -510,7 +483,6 @@ exports.create = (req, res) => {
                     var tasks = [];
                     tasks.push(addContext(context));
 
-                    console.log(`Citation ${citation.id} created. Attaching scriptures`);
                     var themeToCitation = new bibleThemeToCitation;
                     themeToCitation.values = {
                         themeId: context.themeId,
@@ -536,11 +508,8 @@ exports.create = (req, res) => {
                         tasks.push(getScriptureVerse(scriptureIds[i]));
                     }
 
-                    console.log("waiting for themeToCitation and multiple verse completions");
                     Promise.all(tasks)
                         .then(data => {
-                            console.log("Data:");
-                            console.log(data);
                             var context = data[0].context;
                             var themeToCitation = data[1];
                             var scriptures = [];
@@ -585,9 +554,6 @@ exports.create = (req, res) => {
                                     citation.themeToCitation = context.themeToCitation;
                                     citation.verses = context.citationVerses;
 
-                                    console.log("Just before send:");
-                                    console.log(citation);
-
                                     res.send(citation);
                                 });
                         });
@@ -603,8 +569,6 @@ exports.create = (req, res) => {
                 "Error while attempting to insert new citation in database"
             ));
         });
-
-    console.log("After createCitation completion");
 }
 
 exports.update = (req, res) => {
@@ -659,37 +623,30 @@ exports.update = (req, res) => {
 
     verifyCitation = (obj) => {
         return new Promise((resolve, reject) => {
-            console.log("in the verifyCitation Promise");
             var error;
             var citation = new bibleCitation;
             citation.id.value = obj.id;
+
             var selectString = citation.getSelectString();
-            console.log(selectString);
             dbAccess.query(selectString, (err, result) => {
                 if (err) {
-                    console.log("biblecitation.controller updateCitation citation does not exist");
                     error = err;
-                    console.log("rejecting");
                     reject(error);
                 }
                 else {
-                    console.log("query successful");
                     citation = new bibleCitation;
                     citation.values = result[0];
-                    resolve(citation);
                 }
             });
         });
     };
 
     updateCitation = (updateString) => {
-        console.log("in biblecitation.controller updateCitation");
         return new Promise((resolve, reject) => {
             var error;
             dbAccess.update(updateString, (err, result) => {
                 if (err) {
                     error = err;
-                    console.log("Error updating");
                     reject(error);
                 }
                 else {
@@ -711,8 +668,6 @@ exports.update = (req, res) => {
             var context = data[0].context;
             var cit = data[1];
 
-            console.log("Citation verified");
-            console.log(cit.values);
             context.originalCitation = cit;
 
             var tasks = [];
@@ -732,8 +687,6 @@ exports.update = (req, res) => {
                     getQuery(citation.getSelectString())
                         .then(results => {
                             var result = results[0];
-                            console.log("returning results");
-                            console.log(result);
                             res.send(result);
                         });
                 });
@@ -755,8 +708,6 @@ exports.removeVerses = async (req, res) => {
     var verseIds = [];
     var message = null;
 
-    console.log("put: citations/id/remove-verses initiated");
-
     if (!req.params.id || Number(req.params.id) === NaN) {
         message = "Error, citation id is missing or invalid";
     }
@@ -774,7 +725,6 @@ exports.removeVerses = async (req, res) => {
     }
 
     if (message) {
-        console.log(`message: ${message}`);
         res.status(500).send(errorMessage(
             500,
             "Server Error",
@@ -791,8 +741,6 @@ exports.removeVerses = async (req, res) => {
     const citation = new bibleCitation;
     citation.values = { id: citationId };
 
-    console.log("Query:");
-    console.log(citation.getChildrenSelectString());
     let results = await dbAccess.query(citation.getChildrenSelectString(), (err, results) => {
         if (err) {
             res.status(500).send(errorMessage(
@@ -804,9 +752,6 @@ exports.removeVerses = async (req, res) => {
             ));
         }
         else {
-            console.log("remove verses - citation results:");
-            console.log(results);
-
             const verseIdList = `(${verseIds.join(",")})`;
 
             const delete1 = `DELETE FROM bible_citation_markups WHERE bible_citation_verse_id in ${verseIdList}`;
