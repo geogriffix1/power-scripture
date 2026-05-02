@@ -24,6 +24,8 @@ Power Scripture allows users to:
 
 ## Key Features
 
+## Key Features
+
 ### Scripture Search
 
 - Fast, keystroke-responsive search
@@ -38,10 +40,16 @@ Power Scripture allows users to:
 
 ### Citation Creation
 
-Citations can be created in multiple ways:
+Citations can be created and refined in multiple ways:
 
 - From the search interface by selecting verses
 - From the import console using keyboard input
+- Through a guided editor that allows selection of:
+  - book
+  - chapter
+  - starting verse
+  - ending verse (range)
+  - and the ability to add multiple ranges to a single citation
 
 This supports both:
 
@@ -56,6 +64,7 @@ This supports both:
 - Citations are always created under a parent theme
 - Citations can be copied or moved to other themes
 - A citation may belong to multiple themes
+- Citations internally consist of individual verses, which are grouped and displayed as ranges for readability
 
 ---
 
@@ -68,11 +77,33 @@ This supports both:
 
 ---
 
+### Markups
+
+Markups allow users to clarify or adjust the presentation of scripture within a citation without altering the original text.
+
+- Applied to individual verses within a citation
+- Can be used to:
+  - replace words for clarity (e.g., `he` → `[Jesus]`)
+  - suppress words or phrases, which are rendered as an ellipsis (`...`)
+  - highlight important portions of text
+  - annotate with additional context
+  - insert line breaks for readability
+- Do not modify or overwrite the underlying scripture
+
+---
+
 ### Import Console
 
 - Keyboard-driven interface for entering scripture references
 - Designed for fast entry of large or structured inputs
-- Supports integration with export/import workflows
+- Supports:
+  - creation of citations
+  - creation of themes
+  - navigation within the theme structure
+- Provides the ability to review, undo, and save staged changes
+
+The import console is focused on efficient data entry and organization.  
+Detailed editing and refinement of citations is performed in the editor.
 
 ---
 
