@@ -120,13 +120,16 @@ Themes represent categories of thought.
 
 ### Citations
 
-A citation is a **collection of one or more scripture verses**.
+A citation represents a **collection of scripture verses organized around a single idea or concept**.
 
-- Created from selected verses or import input
+- Created from selected verses, guided entry, import input, or as an empty draft in the workbench
 - Always belongs to a **parent theme**
 - Can be copied or moved to other themes
-- Designed to represent a single idea or concept
+- Designed to be refined over time
 - Internally stores individual verses as children of the citation
+
+Citations typically contain one or more verses.  
+When created as a draft in the workbench, a citation may initially have no verses and can be populated later using the citation editor.
 
 In the user interface, verses are displayed as **grouped ranges** for readability.
 
