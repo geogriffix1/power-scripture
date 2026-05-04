@@ -27,8 +27,8 @@ export class CreateCitationComponent {
       return;
     }
 
-    if (this.descriptionField.nativeElement.value.length > 100) {
-      this.descriptionField.nativeElement.value = this.descriptionField.nativeElement.value.substring(0, 100);
+    if (this.descriptionField.nativeElement.value.length > 200) {
+      this.descriptionField.nativeElement.value = this.descriptionField.nativeElement.value.substring(0, 200);
     }
 
     (async () => {

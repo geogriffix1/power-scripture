@@ -4,7 +4,7 @@ class BibleCitationModel {
         this.table = new attr.tableAttribute("bible_citations", this);
         this.id = new attr.columnAttribute("bible_citation_id", "INT", true);
         this.citationLabel = { function: `get_citation_label(t1.bible_citation_id)` };
-        this.description = new attr.columnAttribute("description", "VARCHAR(80)");
+        this.description = new attr.columnAttribute("description", "VARCHAR(200)");
         this.bibleOrder = { function: `get_citation_bible_order(t1.bible_citation_id)` };
         this.createdAt = new attr.columnAttribute("created_at", "DATETIME");
         this.updatedAt = new attr.columnAttribute("updated_at", "DATETIME");

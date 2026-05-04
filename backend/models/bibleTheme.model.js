@@ -4,7 +4,7 @@ class BibleThemeModel {
         this.table = new attr.tableAttribute("bible_themes", this);
         this.id = new attr.columnAttribute("bible_theme_id", "INT", true);
         this.name = new attr.columnAttribute("name", "VARCHAR(45)");
-        this.description = new attr.columnAttribute("description", "VARCHAR(100)");
+        this.description = new attr.columnAttribute("description", "VARCHAR(200)");
         this.sequence = new attr.columnAttribute("sequence", "INT");
         this.path = null;
         this.parent = new attr.columnAttribute("bible_theme_parent_id", "INT", false, "bible_themes");
