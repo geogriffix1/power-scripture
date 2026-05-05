@@ -1,59 +1,33 @@
-<div class="ps-help-actions">
-  <button class="menu menu-icon-definitions" type="button" [class.active]="activePage === 'definitions'" (click)="setPage('definitions')">
-    <i class="psmenu-icon"></i>Definitions
-  </button>
+<div class="help-window">
+  <header class="help-header">
+    <div class="help-title">
+      <i class="ps-icon ps-icon-help"></i>
+      <span class="logo">Power Scripture</span>- &nbsp;Help
+    </div>
 
-  <button class="menu menu-icon-search" type="button" [class.active]="activePage === 'search'" (click)="setPage('search')">
-    <i class="psmenu-icon"></i>Search
-  </button>
+    <button type="button" class="help-close-button" (click)="closeHelp()">
+      ✕
+    </button>
+  </header>
+  <div class="help-shell">
+    <aside class="help-nav">
+      <h2>Contents</h2>
 
-  <button class="menu menu-icon-create" type="button" [class.active]="activePage === 'create'" (click)="setPage('create')">
-    <i class="psmenu-icon"></i>Create
-  </button>
+      @for (topic of topics; track topic.id) {
+        <button
+          type="button"
+          class="help-nav-button"
+          [class.active]="topic.id === activeTopic.id"
+          (click)="selectTopic(topic)"
+        >
+          <i [class]="topic.iconClass"></i>
+          <span>{{ topic.title }}</span>
+        </button>
+      }
+    </aside>
 
-  <button class="menu menu-icon-edit" type="button" [class.active]="activePage === 'edit'" (click)="setPage('edit')">
-    <i class="psmenu-icon"></i>Edit
-  </button>
-
-  <button class="menu menu-icon-delete" type="button" [class.active]="activePage === 'delete'" (click)="setPage('delete')">
-    <i class="psmenu-icon"></i>Delete
-  </button>
-
-  <button class="menu menu-icon-import" type="button" [class.active]="activePage === 'import'" (click)="setPage('import')">
-    <i class="psmenu-icon"></i>Import
-  </button>
-
-  <button class="menu menu-icon-publish" type="button" [class.active]="activePage === 'publish'" (click)="setPage('publish')">
-    <i class="psmenu-icon"></i>Publish
-  </button>
-
-  <button class="menu menu-icon-help" type="button" [class.active]="activePage === 'help'" (click)="setPage('help')">
-    <i class="psmenu-icon"></i>Help
-  </button>
+    <main class="help-content">
+      <div [innerHTML]="activeTopic.content"></div>
+    </main>
+  </div>
 </div>
-<aside class="ps-help-sidebar">
-  <h2>Contents</h2>
-
-  @if (activePage === 'definitions') {
-    <nav>
-      <a href="#themes">Themes</a>
-      <a href="#citations">Citations</a>
-    </nav>
-  }
-
-  @if (activePage === 'search') {
-    <nav>
-      <a href="#search-overview">Overview</a>
-      <a href="#search-theme">Search Themes</a>
-      <a href="#search-citation">Search Citations</a>
-    </nav>
-  }
-
-  @if (activePage === 'create') {
-    <nav>
-      <a href="#create-overview">Overview</a>
-      <a href="#create-theme">Create Theme</a>
-      <a href="#create-citation">Create Citation</a>
-    </nav>
-  }
-</aside>

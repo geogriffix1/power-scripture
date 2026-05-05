@@ -191,7 +191,7 @@ export class WorkbenchComponent {
   }
 
   onHelpClick(): void {
-    const url = `${window.location.origin}/help`;
+    //const url = `${window.location.origin}/help`;
 
     if (this.helpWindow && !this.helpWindow.closed) {
       this.helpWindow.focus();
@@ -199,18 +199,13 @@ export class WorkbenchComponent {
     }
 
     this.helpWindow = window.open(
-      url,
+      "/help",
       'powerScriptureHelp',
-      'width=1100,height=850,resizable=yes,scrollbars=yes'
+      'width=1100,height=800,left=100,top=100'
     );
 
     this.helpWindow?.focus();
   }
-
-  // resizeObserver = new ResizeObserver(elements => {
-  //   let element = elements[0];
-  //     WorkbenchComponent.WorkbenchResizeBroadcaster.next(element.contentRect);
-  // });
 
   ngAfterViewInit() {
     // WorkbenchComponent.WorkbenchResizeBroadcaster = new Subject<DOMRectReadOnly>;

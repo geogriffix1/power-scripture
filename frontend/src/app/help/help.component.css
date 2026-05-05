@@ -1,163 +1,178 @@
-.ps-help-page {
-  padding: 16px 20px 24px;
-  color: #222;
-}
-
-.ps-help-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 20px;
-  padding-bottom: 14px;
-  border-bottom: 1px solid #d6d6d6;
-}
-
-.ps-help-header h1 {
-  margin: 0 0 6px 0;
-  font-size: 28px;
-  line-height: 1.2;
-}
-
-.ps-help-subtitle {
-  margin: 0;
-  color: #666;
-}
-
-.ps-help-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-end;
-}
-
-.ps-help-layout {
-  display: grid;
-  grid-template-columns: 240px 1fr;
-  gap: 20px;
-}
-
-.ps-help-sidebar {
-  border: 1px solid #d7d7d7;
-  border-radius: 8px;
-  padding: 14px;
-  background: #fafafa;
-  height: fit-content;
-  position: sticky;
-  top: 12px;
-}
-
-
-.ps-help-actions {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  justify-content: flex-start;
-}
-.ps-help-actions > .menu.menu-icon-definitions  > .psmenu-icon {
-background-image: url('/assets/images/Help book.png');
-}
-
-.ps-help-actions > .menu.menu-icon-search  > .psmenu-icon {
-background-image: url('/assets/images/Search.png');
-}
-
-.ps-help-actions > .menu.menu-icon-create  > .psmenu-icon {
-background-image: url('/assets/images/Create.png');
-}
-
-.ps-help-actions > .menu.menu-icon-edit    > .psmenu-icon {
-background-image: url('/assets/images/Edit page.png');
-}
-
-.ps-help-actions > .menu.menu-icon-delete  > .psmenu-icon {
-background-image: url('/assets/images/Delete.png');
-}
-
-.ps-help-actions > .menu.menu-icon-import  > .psmenu-icon {
-background-image: url('/assets/images/Import.png');
-}
-
-.ps-help-actions > .menu.menu-icon-publish > .psmenu-icon {
-background-image: url('/assets/images/Scenario.png');
-}
-
-.ps-help-actions > .menu.menu-icon-help    > .psmenu-icon {
-background-image: url('/assets/images/Help.png');
-}
-
-.ps-help-sidebar h2 {
-  margin: 0 0 12px 0;
-  font-size: 18px;
-}
-
-.ps-help-sidebar nav {
+.help-window {
+  height: 100vh;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  background: url('/assets/BlackLeather.png');
+  background-size: cover;
+  background-position: center;
+  font-family: "Segoe UI", Arial, sans-serif;
 }
 
-.ps-help-sidebar a {
-  text-decoration: none;
-  color: #1b4f9c;
-}
-
-.ps-help-sidebar a:hover {
-  text-decoration: underline;
-}
-
-.ps-help-content {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-}
-
-.ps-help-card {
-  border: 1px solid #d7d7d7;
-  border-radius: 10px;
-  background: white;
-  overflow: hidden;
-}
-
-.ps-help-card-header {
+.help-header {
+  height: 52px;
+  flex: 0 0 52px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 14px 16px;
-  border-bottom: 1px solid #e5e5e5;
-  background: #f7f9fc;
+  justify-content: space-between;
+  padding: 0 16px;
+  color: #f3d28b;
+  background: rgba(0, 0, 0, 0.86);
+  border-bottom: 1px solid rgba(230, 200, 140, 0.45);
+  box-shadow: 0 3px 10px rgba(0, 0, 0, 0.55);
 }
 
-.ps-help-card-header h2 {
-  margin: 0;
-  font-size: 22px;
-  line-height: 1.2;
+.help-title {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  color: #f3d28b;
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: 0.3px;
 }
 
-.ps-help-card-body {
-  padding: 16px;
-  line-height: 1.55;
+.logo {
+  font-family: Georgia, "Times New Roman", Times, serif;
 }
 
-.ps-help-card-body p:first-child {
-  margin-top: 0;
+.help-title span {
+  color: #f3d28b;
 }
 
-.ps-help-card-body p:last-child,
-.ps-help-card-body ol:last-child {
-  margin-bottom: 0;
+.help-title i {
+  width: 28px;
+  height: 28px;
+  flex: 0 0 28px;
 }
 
-@media (max-width: 900px) {
-  .ps-help-layout {
-    grid-template-columns: 1fr;
-  }
+.help-close-button {
+  width: 34px;
+  height: 30px;
+  color: #f3d28b;
+  background: #000;
+  border: 1px solid rgba(230, 200, 140, 0.65);
+  border-radius: 6px;
+  cursor: pointer;
+}
 
-  .ps-help-sidebar {
-    position: static;
-  }
+.help-close-button:hover {
+  color: #fff4c8;
+  border-color: #f3d28b;
+  box-shadow: 0 0 6px rgba(243, 210, 139, 0.5);
+}
 
-  .ps-help-header {
-    flex-direction: column;
-  }
+.help-shell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  color: #f4efe2;
+}
+
+.help-nav {
+  width: 280px;
+  padding: 14px;
+  border-right: 1px solid rgba(230, 200, 140, 0.35);
+  background: rgba(0, 0, 0, 0.65);
+  overflow-y: auto;
+}
+
+.help-nav h2 {
+  margin: 0 0 14px 0;
+  padding: 8px 10px;
+  font-size: 1.15rem;
+  color: #f3d28b;
+  border-bottom: 1px solid rgba(243, 210, 139, 0.35);
+}
+
+.help-nav-button {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  margin-bottom: 8px;
+  color: #efe3c3;
+  background: #000;
+  border: 1px solid rgba(210, 175, 105, 0.45);
+  border-radius: 8px;
+  text-align: left;
+  cursor: pointer;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.35);
+}
+
+.help-nav-button:hover {
+  border-color: rgba(243, 210, 139, 0.85);
+  box-shadow: 0 0 6px rgba(243, 210, 139, 0.4);
+  transform: translateY(-1px);
+}
+
+.help-nav-button.active {
+  color: #1f160c;
+  background: linear-gradient(#f1d694, #c99a45);
+  border-color: #f7e2a4;
+  font-weight: 600;
+}
+
+.help-nav-button i {
+  width: 24px;
+  height: 24px;
+  flex: 0 0 24px;
+  padding: 8px 10px;
+  font-size: 15px;
+}
+
+.help-content {
+  flex: 1;
+  min-width: 0;
+  max-width: 850px;
+  margin: 18px;
+  padding: 28px 36px;
+  color: #20160c;
+  background: linear-gradient(
+    rgba(255, 248, 225, 0.96),
+    rgba(238, 221, 178, 0.96)
+  );
+  border: 1px solid rgba(120, 80, 30, 0.45);
+  border-radius: 14px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  overflow-y: auto;
+  font-size: 18px;
+  line-height: 1.7;
+  letter-spacing: 0.2px;
+
+}
+
+.help-content h1,
+.help-content h2,
+.help-content h3 {
+  color: #4a2f12;
+}
+
+.help-content h2 {
+  border-bottom: 1px solid rgba(90, 55, 18, 0.25);
+  padding-bottom: 6px;
+}
+
+.help-content code {
+  background: rgba(90, 55, 18, 0.12);
+  padding: 1px 4px;
+  border-radius: 4px;
+}
+
+.help-content h1 {
+  font-size: 28px;
+}
+
+.help-content h2 {
+  font-size: 24px;
+}
+
+.help-content h3 {
+  font-size: 20px;
+}
+
+.help-content i {
+  display: inline-block;
+  vertical-align: middle;
+  margin: 0 4px;
 }
