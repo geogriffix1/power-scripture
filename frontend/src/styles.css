@@ -320,3 +320,71 @@ body {
   margin: 0;
   overflow: hidden; /* prevent browser from scrolling page */
 }
+
+
+.ps-icon {  
+  display: inline-block;
+  width: 24px;
+  height: 24px;
+  background-size: contain;
+}
+
+.ps-icon-folder {
+  background-image: url("/assets/images/Folder.png");
+}
+
+.ps-icon-script, .ps-icon-citation {
+  background-image: url("/assets/images/Script.png");
+}
+
+.ps-icon-help-book, .ps-icon-overview {
+  background-image: url("/assets/images/Help book.png");
+}
+
+.ps-icon-flow-block, .ps-icon-tree {
+  background-image: url("/assets/images/Flow block.png");
+}
+
+.ps-icon-settings, .ps-icon-workbench {
+  background-image: url("/assets/images/Settings.png");
+}
+
+.ps-icon-add {
+  background-image: url("/assets/images/Add.png");
+}
+
+.ps-icon-save {
+  background-image: url("/assets/images/Save.png");
+}
+
+.ps-icon-search {
+  background-image: url("/assets/images/Search.png");
+}
+
+.ps-icon-create {
+  background-image: url("/assets/images/Create.png");
+}
+
+.ps-icon-edit {
+  background-image: url("/assets/images/Edit page.png");
+}
+
+.ps-icon-delete {
+  background-image: url("/assets/images/Delete.png");
+}
+
+.ps-icon-import {
+  background-image: url("/assets/images/Import.png");
+}
+
+.ps-icon-import {
+  background-image: url("/assets/images/Import.png");
+}
+
+.ps-icon-scenario {
+  background-image: url("/assets/images/Scenario.png");
+}
+
+.ps-icon-help {
+  background-image: url("/assets/images/Help.png");
+}
