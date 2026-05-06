@@ -35,6 +35,7 @@ export const HELP_TOPICS: HelpTopic[] = [
     id: 'overview',
     title: 'Overview',
     iconClass: 'ps-icon ps-icon-help-book',
+    group: 'concepts',
     content: `
       <h2>Welcome to Power Scripture</h2>
       <p>Power Scripture is a <b>free</b> and powerful tool for searching scripture by
@@ -59,6 +60,7 @@ export const HELP_TOPICS: HelpTopic[] = [
     id: 'theme-tree',
     title: 'Bible Theme Tree',
     iconClass: 'ps-icon ps-icon-tree',
+    group: 'concepts',
     content: `
       <h2>Bible Theme Tree</h2>
       <p>Power Scripture is presented in a split-view layout. The left pane contains the Bible Theme Tree.
@@ -101,6 +103,7 @@ export const HELP_TOPICS: HelpTopic[] = [
     id: 'workbench',
     title: 'Workbench',
     iconClass: 'ps-icon ps-icon-workbench',
+    group: 'concepts',
     content: `
       <h2>Workbench</h2>
       <p>The workbench is the right pane of the Power Scripture application. It is used to
@@ -148,5 +151,143 @@ export const HELP_TOPICS: HelpTopic[] = [
       <h3>Help</h3>
       <p>The Help button <i class="ps-icon ps-icon-help"></i> Opens the help page you are currently viewing.</p>
     `
-  }
+  },
+  {
+    id: 'search',
+    title: 'Search',
+    iconClass: 'ps-icon ps-icon-search',
+    group: 'tools',
+    content: `
+      <h2>Search</h2>
+
+      <p>
+      The search tool is used to locate scripture verses by matching text content.
+      Searches are performed in Bible order, which is the same order scripture appears in the Bible.
+      </p>
+
+      <p>
+      Open the search tool by clicking the magnifying glass button
+      <i class="ps-icon ps-icon-search"></i> on the Workbench toolbar.
+      </p>
+
+      <h3>Standard Searches</h3>
+
+      <p>
+      Standard searches are optimized for speed and are appropriate for most searches.
+      Searches match scripture verses containing the entered text.
+      Partial word and phrase matching are supported.
+      </p>
+
+      <p>
+      Wildcard searches are supported in standard search mode.
+      </p>
+
+      <ul>
+        <li><b>%</b> — Matches zero or more characters</li>
+        <li><b>_</b> — Matches a single character</li>
+      </ul>
+
+      <p>
+      Examples:
+      </p>
+
+      <ul>
+        <li><code>Jer%</code> matches words beginning with "Jer"</li>
+        <li><code>m_n</code> matches three-letter words such as "man" or "men"</li>
+      </ul>
+
+      <h3>Advanced Searches</h3>
+
+      <p>
+      Advanced search mode enables regular expression pattern matching for more complex searches.
+      When advanced mode is enabled, special pattern characters are interpreted according to regular expression rules.
+      </p>
+
+      <p>
+      Advanced mode also supports normal text searches, but searches performed in advanced mode are typically slower than standard searches.
+      </p>
+
+      <p>
+      Advanced search mode is intended for specialized searches and is usually not required for normal use.
+      </p>
+
+      <h3>Search Results</h3>
+
+      <p>
+      Each search result is presented as an individual scripture verse.
+      Results are displayed in Bible order.
+      </p>
+
+      <p>
+      Each verse is displayed with a citation label identifying the scripture reference.
+      Citation labels contain the book, chapter, and verse reference associated with the scripture text.
+      </p>
+
+      <p>
+      Search results can be selected or deselected individually.
+      Selected verses can later be grouped into citations.
+      </p>
+
+      <h3>Match Highlighting</h3>
+
+      <p>
+      Matching portions of scripture text are highlighted within search results.
+      Highlighting identifies the exact text that caused the verse to match the search criteria.
+      </p>
+
+      <p>
+      Highlighting is especially useful when using wildcard or advanced search patterns,
+      where the matching text may not be immediately obvious.
+      </p>
+
+      <h3>Search Result Context Menu</h3>
+
+      <p>
+      Right-clicking the search results displays a context menu with additional operations.
+      </p>
+
+      <ul>
+        <li>
+          <b>Select All</b> — Selects all displayed search results.
+        </li>
+
+        <li>
+          <b>Deselect All</b> — Clears all selected search results.
+        </li>
+
+        <li>
+          <b>Remove Selected</b> — Removes selected verses from the current search results display.
+          This operation does not delete scripture or citations from the database.
+        </li>
+
+        <li>
+          <b>Create Citation</b> — Creates a citation from selected verses under the active theme.
+        </li>
+
+        <li>
+          <b>Export Selected</b> — Exports selected verses to a Microsoft Word document.
+        </li>
+      </ul>
+
+      <h3>Citation Creation</h3>
+
+      <p>
+      Creating a citation requires an active theme.
+      The active theme is determined by the currently selected theme in the Bible Theme Tree.
+      </p>
+
+      <p>
+      After creation, the citation immediately appears in the Theme Tree under the active theme.
+      </p>
+
+      <h3>Search Limits</h3>
+
+      <p>
+      Search results are limited to maintain responsiveness and to prevent excessively broad searches from returning large portions of scripture.
+      </p>
+
+      <p>
+      If a search returns too many results, refine the search by entering a more specific word or phrase.
+      </p>
+` }
 ];

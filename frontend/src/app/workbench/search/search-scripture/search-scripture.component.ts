@@ -35,7 +35,7 @@ export class SearchScriptureComponent implements OnInit{
   searchResultsHeight!:number;
   searchResults = signal<ScriptureSearchResultModel[]>([]);
   isSubscribedKeystrokes = false;
-  rect!: DOMRect;
+  searchOverflow = 401; // Number of search results indicating overflow condition
 
   callbacks = {
     bibleService: new BibleService(),
@@ -45,12 +45,12 @@ export class SearchScriptureComponent implements OnInit{
     },
     canDeselectAll():boolean { return true; },
     deselectAll():void {
-      $(".command-message").text('').hide(100);
+      $(".command-message").removeClass('warning').text('').hide(100);
       $(".search-result-selector").attr('aria-selected', 'false');
     },
     canRemoveSelected():boolean { return true; },
     removeSelected(searchResults:WritableSignal<ScriptureSearchResultModel[]>):void {
-      $(".command-message").text('').hide(500);
+      $(".command-message").removeClass('warning').text('').hide(100);
       let toRemove = Array.from($("div.search-result-selector[aria-selected=true]"))
         .map(result => +result.id.replace("result-", ""));
       searchResults.set(
@@ -62,7 +62,7 @@ export class SearchScriptureComponent implements OnInit{
     canCreateCitation():boolean { return true; },
     createCitation(searchResults:WritableSignal<ScriptureSearchResultModel[]>, context:any):void {
       console.log("create citation context menu action");
-      $(".command-message").text('').hide(500);
+      $(".command-message").removeClass('warning').text('').hide(100);
       let activeTheme = WorkbenchComponent.activeTheme;
       if (!activeTheme) {
         $("div.command-message").text("Please select the Parent Theme from the Bible Theme Tree").show(500);
@@ -82,11 +82,6 @@ export class SearchScriptureComponent implements OnInit{
       }
 
       forCitations = searchResults().filter(result => toAdd.some(id => id == result.id));
-
-      console.log("searchResults:");
-      console.log(searchResults());
-      console.log("forCitations:");
-      console.log(forCitations);
 
       let scriptures: number[] = forCitations.map((result) => result.id);
       
@@ -108,13 +103,12 @@ export class SearchScriptureComponent implements OnInit{
                 BibleThemeTreeComponent.openDomThemeNode(theme);
                 let citationNode = BibleThemeTreeComponent.getDomNode(`citation${result.themeToCitation.id}`) as JstreeModel;
                 BibleThemeTreeComponent.ActiveCitationSelector.next(citationNode);
-                let router = inject(Router);
-                router.navigate(['/edit/citation']);
             });
         });
     },
     canExportSelected():boolean { return true; },
     exportSelected(searchResults:WritableSignal<any>, context:any):void {
+      $(".command-message").removeClass('warning').text('').hide(100);
       let selected = $("tbody > tr[aria-checked=true]");
       let forExport = [];
       if (selected.length > 0) {
@@ -156,7 +150,7 @@ export class SearchScriptureComponent implements OnInit{
       $("#command-wordlist").hide(100);
     }
     else {
-      $("div.command-message").text("").hide(100);
+      $(".command-message").removeClass('warning').text('').hide(100);
       const pattern = /.*?([a-z0-9]+)$/i;
       let change = newValue.replace(pattern, "$1");
       this.suggestions = wordList.wordList.filter(word => word.startsWith(change.toLowerCase()));
@@ -177,6 +171,7 @@ export class SearchScriptureComponent implements OnInit{
     $(event.target).removeClass("hover");
   }
   public onClickSuggestion(text:string):void {
+    $(".command-message").removeClass('warning').text('').hide(100);
     const pattern = /^(.*?)[a-z0-9]*$/i;
     let searchString = $("input[type=text].search-string");
     let command = <string>searchString.val();
@@ -190,6 +185,7 @@ export class SearchScriptureComponent implements OnInit{
   }
 
   public toggleSelected(item:any) {
+    $(".command-message").removeClass('warning').text('').hide(100);
     this.searchResults.update(items =>
       items.map(i =>
         i === item ? { ...i, selected: !i.selected } : i
@@ -199,6 +195,7 @@ export class SearchScriptureComponent implements OnInit{
 
   public showModalContextMenu(event:MouseEvent) {
     event.preventDefault();
+    $(".command-message").removeClass('warning').text('').hide(100);
     SearchContextMenuComponent.showContextMenu(this.searchResults, this.context);
     let contextMenu = $("app-search-context-menu");
     contextMenu.removeClass("hidden");
@@ -225,6 +222,7 @@ export class SearchScriptureComponent implements OnInit{
   }
 
   public runSearch(event:any) {
+    $(".command-message").removeClass('warning').text('').hide(100);
     this.searchCommand = (<string>$("input[type=text].search-string").val()).trim();
     if (!this.searchCommand) {
       $("div.command-message").text("Please enter a search string").show(500);
@@ -247,12 +245,17 @@ export class SearchScriptureComponent implements OnInit{
 
         if (pattern) {
           this.service.processSearchContains(this.searchCommand.replace("\\", "\\\\"), (data:ScriptureSearchResultModel[]) => {
+            if (data.length == this.searchOverflow) {
+              data.pop();
+              $("div.command-message").addClass("warning").text(`Your search returned more than ${this.searchOverflow - 1} results. Please refine your search to see more specific results.`).show(500);
+            }
+
             this.searchResults.set(data);
             this.processScriptureSearchResults(<RegExp>pattern);
           });
         }
         else {
-          $("div.command-message").text("The search string value is an invalid regex expression.").show(100);
+          $("div.command-message").removeClass("warning").text("The search string value is an invalid regex expression.").show(100);
           $("div.await").hide();
         }
       }
@@ -279,12 +282,17 @@ export class SearchScriptureComponent implements OnInit{
       
         if (pattern) {
           this.service.processSearchLike(this.searchCommand, (data:ScriptureSearchResultModel[]) => {
+            if (data.length == this.searchOverflow) {
+              data.pop();
+              $("div.command-message").addClass("warning").text(`Your search returned more than ${this.searchOverflow - 1} results. Please refine your search to see more specific results.`).show(500);
+            }
+
             this.searchResults.set(data);
             this.processScriptureSearchResults(<RegExp>pattern);
           });
         }
         else {
-          $("div.command-message").text("The search string value contains an invalid character").show(100);
+          $("div.command-message").removeClass("warning").text("The search string value contains an invalid character").show(100);
           $("div.await").hide();
         }
       }

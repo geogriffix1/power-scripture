@@ -13,16 +13,34 @@
     <aside class="help-nav">
       <h2>Contents</h2>
 
+      <h3 class="help-nav-group">Concepts</h3>
       @for (topic of topics; track topic.id) {
-        <button
-          type="button"
-          class="help-nav-button"
-          [class.active]="topic.id === activeTopic.id"
-          (click)="selectTopic(topic)"
-        >
-          <i [class]="topic.iconClass"></i>
-          <span>{{ topic.title }}</span>
-        </button>
+        @if (topic.group === 'concepts') {
+          <button
+            type="button"
+            class="help-nav-button"
+            [class.active]="topic.id === activeTopic.id"
+            (click)="selectTopic(topic)"
+          >
+            <i [class]="topic.iconClass"></i>
+            <span>{{ topic.title }}</span>
+          </button>
+        }
+      }
+
+      <h3 class="help-nav-group">Tools</h3>
+      @for (topic of topics; track topic.id) {
+        @if (topic.group === 'tools') {
+          <button
+            type="button"
+            class="help-nav-button"
+            [class.active]="topic.id === activeTopic.id"
+            (click)="selectTopic(topic)"
+          >
+            <i [class]="topic.iconClass"></i>
+            <span>{{ topic.title }}</span>
+          </button>
+        }
       }
     </aside>
 
