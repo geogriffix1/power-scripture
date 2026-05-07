@@ -271,7 +271,7 @@ export class CitationMarkupService {
     if (!verse) return;
 
     const { startIndex, endIndex } = this.pristineSelection;
-    if (startIndex === endIndex) return;
+    if (kind !== CitationVerseMarkupKind.Replace && startIndex === endIndex) return;
 
     const textLength = verse.scripture.text.length;
     const clampedStart = Math.max(0, Math.min(startIndex, textLength));
@@ -508,7 +508,9 @@ export class CitationMarkupService {
           break;
         }
         case CitationVerseMarkupKind.Replace: {
+          if (m.startIndex > 0 && text[m.startIndex - 1] !== ' ') html += " ";
           html += `[${this.escapeHtml(m.replacementText ?? '')}]`;
+          if (m.endIndex < text.length && ![' ','.',',','!','?'].some(c => text[m.endIndex] === c)) html += " ";
           idx = m.endIndex;
           break;
         }

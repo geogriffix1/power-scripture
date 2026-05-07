@@ -353,6 +353,10 @@ body {
   background-image: url("/assets/images/Add.png");
 }
 
+.ps-icon-close {
+  background-image: url("/assets/images/Close.png");
+}
+
 .ps-icon-save {
   background-image: url("/assets/images/Save.png");
 }
@@ -381,10 +385,14 @@ body {
   background-image: url("/assets/images/Import.png");
 }
 
-.ps-icon-scenario {
+.ps-icon-scenario, .ps-icon-publish {
   background-image: url("/assets/images/Scenario.png");
 }
 
 .ps-icon-help {
   background-image: url("/assets/images/Help.png");
+}
+
+.ps-icon-writing-pencil, .ps-icon-markup {
+  background-image: url("/assets/images/Writing pencil.png");
 }

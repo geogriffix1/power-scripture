@@ -42,6 +42,21 @@
           </button>
         }
       }
+
+      <h3 class="help-nav-group">Editing</h3>
+      @for (topic of topics; track topic.id) {
+        @if (topic.group === 'editing') {
+          <button
+            type="button"
+            class="help-nav-button"
+            [class.active]="topic.id === activeTopic.id"
+            (click)="selectTopic(topic)"
+          >
+            <i [class]="topic.iconClass"></i>
+            <span>{{ topic.title }}</span>
+          </button>
+        }
+      }
     </aside>
 
     <main class="help-content">
