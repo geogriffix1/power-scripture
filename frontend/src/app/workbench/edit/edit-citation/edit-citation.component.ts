@@ -237,7 +237,7 @@ export class EditCitationComponent {
     // Markups that have been saved have positive id values. Markups that have not been saved
     // have negative id values. The editor does not edit existing markups, but it will delete all
     // existing markups for a given verse if it is directed to do so.
-    const original = this.markupService.getOriginalMarkupsForVerse(this.activeVerse().id);
+    const original = this.markupService.getOriginalMarkups();
     const verse = this.activeVerse();
     if (original.length > 0 && !verse.markups.some(markup => markup.id > 0)) {
       this.service.deleteCitationVerseMarkups(this.activeVerse().id);
@@ -248,13 +248,11 @@ export class EditCitationComponent {
       this.service.createCitationVerseMarkup(markup);
     });
 
-    // TODO: update the scripture range
-
     this.activeVerse.set(new NullCitationVerse);
   }
 
   OnCancelMarkups() {
-    const original = this.markupService.getOriginalMarkupsForVerse(this.activeVerse().id);
+    const original = this.markupService.getOriginalMarkups();
     const verse = this.activeVerse();
     verse.markups = original.map(markup => ({...markup}));
     const index = this.activeVerses().findIndex(v => v.id == verse.id );
@@ -320,45 +318,12 @@ export class EditCitationComponent {
     this.activeVerses().filter(verse => verse.id == $event.id)[0].hide = hide;
   }
 
-  ngOnInit() {
-    EditCitationComponent.isActive = true;
-    // let rect = WorkbenchComponent.getWorkbenchSize();
-
-    // this.workbenchDomRect(rect);
-    // this.sectionWidth = rect.width;
-    // this.activeScriptureRange.set(new NullCiteScriptureRange);
-    // $("app-edit-theme").width(rect.width);
-    // $("#citationDescription").width(rect.width - 60);
-
-    // this.updateScrollingHeight();
-
-    console.log(this.actRoute.snapshot);
-
-    this.activeRoute = this.actRoute.snapshot.routeConfig?.path ?? "";
-  }
-
   ngAfterViewInit() {
     this.activeRoute = this.actRoute.snapshot.routeConfig?.path ?? "";
-    if (!EditCitationComponent.isSubscribed) {
-      // WorkbenchComponent.WorkbenchResizeBroadcaster
-      //   .subscribe((rect:DOMRectReadOnly) => {
-      //     if(EditCitationComponent.isActive) {
-      //       this.workbenchDomRect(rect);
-      //       this.sectionWidth - rect.width - 4;
-      //       $("app-edit-theme").width(rect.width);
-      //       $("#citationDescription").width(rect.width - 60);
-
-      //       this.updateScrollingHeight();
-      //     }
-      //   });
-      }
-
-    EditCitationComponent.isSubscribed = true;
 
     runInInjectionContext(this.injector, () => {
       effect(() => {
         const node = this.activeCitationNode(); // 👈 direct signal read
-        console.log('Child effect triggered, node:', node);
 
         if (node) {
           const id = Number(node?.li_attr?.citationId);
@@ -421,9 +386,5 @@ export class EditCitationComponent {
         scrollingEl.style.height = `${newHeight}px`;
       }
     }
-  }
-
-  ngOnDestroy() {
-    EditCitationComponent.isActive = false;
   }
 }

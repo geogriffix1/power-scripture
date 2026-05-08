@@ -13,15 +13,20 @@ export class CitationMarkupService {
 
   private sessionVerses: CitationVerseExtendedModel[] = [];
 
-  private originalMarkupsByVerse = new Map<number, CitationVerseMarkup[]>();
-  private workingMarkupsByVerse = new Map<number, CitationVerseMarkup[]>();
+  // private originalMarkupsByVerse = new Map<number, CitationVerseMarkup[]>();
+  // private workingMarkupsByVerse = new Map<number, CitationVerseMarkup[]>();
+  private originalMarkups = <CitationVerseMarkup[]>[];
+  private workingMarkups = <CitationVerseMarkup[]>[];
 
   // Persisted selection (so highlight can survive focus leaving the editor)
   private pristineSelection: PristineSelection | null = null;
 
-  private undoStacks = new Map<number, CitationVerseMarkup[][]>();
-  private redoStacks = new Map<number, CitationVerseMarkup[][]>();
-  private activeVerseId: number | null = null;
+  // private undoStacks = new Map<number, CitationVerseMarkup[][]>();
+  // private redoStacks = new Map<number, CitationVerseMarkup[][]>();
+  private undoStack = <CitationVerseMarkup[][]>[];
+  private redoStack = <CitationVerseMarkup[][]>[];
+
+  private activeVerse!: CitationVerseExtendedModel;
 
   private nextTempId = -1;
 
@@ -30,55 +35,79 @@ export class CitationMarkupService {
 
   // --- Session lifecycle -------------------------------------------------
 
-  beginSessionSnapshot(verses: CitationVerseExtendedModel[]): void {
-    this.sessionVerses = verses.slice();
+  // beginSessionSnapshot(verses: CitationVerseExtendedModel[]): void {
+  //   this.sessionVerses = verses.slice();
 
-    this.originalMarkupsByVerse.clear();
-    this.workingMarkupsByVerse.clear();
-    this.undoStacks.clear();
-    this.redoStacks.clear();
+  //   this.originalMarkupsByVerse.clear();
+  //   this.workingMarkupsByVerse.clear();
+  //   this.undoStacks.clear();
+  //   this.redoStacks.clear();
+  //   this.pristineSelection = null;
+  //   this.activeVerseId = verses.length > 0 ? this.sessionVerses[0].id : null;
+
+  //   for (const v of verses) {
+  //     const cloned = (v.markups ?? []).map(m => ({ ...m }));
+  //     this.originalMarkupsByVerse.set(v.id, cloned.map(m => ({ ...m })));
+  //     this.workingMarkupsByVerse.set(v.id, cloned);
+  //   }
+
+  //   this.bump();
+  // }
+
+  beginSessionSnapshot(verse: CitationVerseExtendedModel): void {
+    this.originalMarkups = verse.markups ? verse.markups.map(m => ({ ...m })) : [];
+    this.workingMarkups = verse.markups ? verse.markups.map(m => ({ ...m })) : [];
+    this.undoStack = [];
+    this.redoStack = [];
     this.pristineSelection = null;
-    this.activeVerseId = verses.length > 0 ? this.sessionVerses[0].id : null;
-
-    for (const v of verses) {
-      const cloned = (v.markups ?? []).map(m => ({ ...m }));
-      this.originalMarkupsByVerse.set(v.id, cloned.map(m => ({ ...m })));
-      this.workingMarkupsByVerse.set(v.id, cloned);
-    }
-
+    this.activeVerse = verse;
     this.bump();
   }
 
-  rollbackSession(): void {
-    this.workingMarkupsByVerse.clear();
 
-    for (const [verseId, original] of this.originalMarkupsByVerse.entries()) {
-      this.workingMarkupsByVerse.set(verseId, original.map(m => ({ ...m })));
-      const verse = this.findSessionVerse(verseId);
-      if (verse) verse.markups = this.getMarkupsForVerse(verseId);
-    }
+  // rollbackSession(): void {
+  //   this.workingMarkupsByVerse.clear();
 
-    this.undoStacks.clear();
-    this.redoStacks.clear();
-    this.pristineSelection = null;
-    this.bump();
+  //   for (const [verseId, original] of this.originalMarkupsByVerse.entries()) {
+  //     this.workingMarkupsByVerse.set(verseId, original.map(m => ({ ...m })));
+  //     const verse = this.findSessionVerse(verseId);
+  //     if (verse) verse.markups = this.getMarkupsForVerse(verseId);
+  //   }
+
+  //   this.undoStacks.clear();
+  //   this.redoStacks.clear();
+  //   this.pristineSelection = null;
+  //   this.bump();
+  // }
+
+    rollbackSession(): void {
+      this.workingMarkups = [];
+      this.workingMarkups.push(...this.originalMarkups.map(m => ({ ...m })));
+      this.undoStack = [];
+      this.redoStack = [];
+      this.pristineSelection = null;
+      this.bump();
   }
+
 
   getSessionMarkups(): CitationVerseMarkup[] {
-    const result: CitationVerseMarkup[] = [];
-    for (const arr of this.workingMarkupsByVerse.values()) {
-      for (const m of arr) result.push({ ...m });
-    }
-    return result;
+    // const result: CitationVerseMarkup[] = [];
+    // for (const arr of this.workingMarkupsByVerse.values()) {
+    //   for (const m of arr) result.push({ ...m });
+    // }
+    // return result;
+    return this.workingMarkups.map(m => ({ ...m }));
   }
 
   hasSessionChanges(): boolean {
-    for (const v of this.sessionVerses) {
-      const original = this.originalMarkupsByVerse.get(v.id) ?? [];
-      const current = this.workingMarkupsByVerse.get(v.id) ?? [];
-      if (!this.areMarkupArraysEqual(original, current)) return true;
-    }
-    return false;
+    // for (const v of this.sessionVerses) {
+    //   const original = this.originalMarkupsByVerse.get(v.id) ?? [];
+    //   const current = this.workingMarkupsByVerse.get(v.id) ?? [];
+    //   if (!this.areMarkupArraysEqual(original, current)) return true;
+    // }
+    // return false;
+
+    return this.areMarkupArraysEqual(this.originalMarkups, this.workingMarkups);
   }
 
   private areMarkupArraysEqual(a: CitationVerseMarkup[], b: CitationVerseMarkup[]): boolean {
@@ -131,105 +160,159 @@ export class CitationMarkupService {
 
   // --- Working markups access -------------------------------------------
 
-  getMarkupsForVerse(verseId: number): CitationVerseMarkup[] {
-    const arr = this.workingMarkupsByVerse.get(verseId) ?? [];
-    return arr.map(m => ({ ...m }));
+  // getMarkupsForVerse(verseId: number): CitationVerseMarkup[] {
+  //   // const arr = this.workingMarkupsByVerse.get(verseId) ?? [];
+  //   // return arr.map(m => ({ ...m }));
+
+  //   return this.workingMarkups.map(m => ({ ...m }));
+  // }
+
+  getMarkups(): CitationVerseMarkup[] {
+    return this.workingMarkups.map(m => ({ ...m }));
   }
 
-  getOriginalMarkupsForVerse(verseId: number): CitationVerseMarkup[] {
-    const arr = this.originalMarkupsByVerse.get(verseId) ?? [];
-    return arr.map(m => ({ ...m}));
+  // getOriginalMarkupsForVerse(verseId: number): CitationVerseMarkup[] {
+  //   // const arr = this.originalMarkupsByVerse.get(verseId) ?? [];
+  //   // return arr.map(m => ({ ...m}));
+
+  //   return this.originalMarkups.map(m => ({ ...m }));
+  // }
+
+  getOriginalMarkups(): CitationVerseMarkup[] {
+    return this.originalMarkups.map(m => ({ ...m }));
   }
 
-  deleteAllMarkupsForVerse(verseId: number): void {
-    const current = this.workingMarkupsByVerse.get(verseId) ?? [];
-    if (!current.length) return;
+  deleteAllMarkups(): void {
+    // const current = this.workingMarkupsByVerse.get(verseId) ?? [];
+    // if (!current.length) return;
 
-    this.pushUndoSnapshot(verseId);
-    this.workingMarkupsByVerse.set(verseId, []);
+    // this.pushUndoSnapshot(verseId);
+    // this.workingMarkupsByVerse.set(verseId, []);
 
-    const verse = this.findSessionVerse(verseId);
-    if (verse) verse.markups = [];
+    // const verse = this.findSessionVerse(verseId);
+    // if (verse) verse.markups = [];
 
+    // this.bump();
+
+    if (!this.workingMarkups.length) return;
+
+    this.pushUndoSnapshot();
+    this.workingMarkups = [];
     this.bump();
   }
 
   // --- Undo/Redo (per verse) --------------------------------------------
 
   canUndo(): boolean {
-    const verseId = this.activeVerseId;
-    if (!verseId) return false;
-    const stack = this.undoStacks.get(verseId);
-    return !!stack && stack.length > 0;
+    // const verseId = this.activeVerseId;
+    // if (!verseId) return false;
+    // const stack = this.undoStacks.get(verseId);
+    // console.log(`canUndo check for verseId ${verseId}: stack length = ${stack?.length ?? 0}`);
+    // return !!stack && stack.length > 0;
+    return this.undoStack.length > 0;
   }
 
   canRedo(): boolean {
-    const verseId = this.activeVerseId;
-    if (!verseId) return false;
-    const stack = this.redoStacks.get(verseId);
-    return !!stack && stack.length > 0;
+    // const verseId = this.activeVerseId;
+    // if (!verseId) return false;
+    // const stack = this.redoStacks.get(verseId);
+    // return !!stack && stack.length > 0;
+    return this.redoStack.length > 0;
   }
 
-  resetUndoRedoForVerse(verseId: number): void {
-    this.undoStacks.delete(verseId);
-    this.redoStacks.delete(verseId);
+  // resetUndoRedoForVerse(verseId: number): void {
+  //   this.undoStacks.delete(verseId);
+  //   this.redoStacks.delete(verseId);
+  //   this.bump();
+  // }
+
+  resetUndoRedo(): void {
+    this.undoStack = [];
+    this.redoStack = [];
     this.bump();
   }
 
-  private pushUndoSnapshot(verseId: number): void {
-    const current = this.workingMarkupsByVerse.get(verseId) ?? [];
-    const snapshot = current.map(m => ({ ...m }));
-    const stack = this.undoStacks.get(verseId) ?? [];
-    stack.push(snapshot);
-    this.undoStacks.set(verseId, stack);
-    this.redoStacks.delete(verseId);
+  // private pushUndoSnapshot(verseId: number): void {
+  //   const current = this.workingMarkupsByVerse.get(verseId) ?? [];
+  //   const snapshot = current.map(m => ({ ...m }));
+  //   const stack = this.undoStacks.get(verseId) ?? [];
+  //   stack.push(snapshot);
+  //   this.undoStacks.set(verseId, stack);
+  //   this.redoStacks.delete(verseId);
+  // }
+
+  private pushUndoSnapshot(): void {
+    const snapshot = this.getMarkups();
+    this.undoStack.push(snapshot);
   }
 
   undo(): void {
-    const verseId = this.activeVerseId;
-    if (!verseId) return;
+    // const verseId = this.activeVerseId;
+    // if (!verseId) return;
 
-    const undoStack = this.undoStacks.get(verseId);
-    if (!undoStack || undoStack.length === 0) return;
+    // const undoStack = this.undoStacks.get(verseId);
+    // if (!undoStack || undoStack.length === 0) return;
 
-    const current = undoStack.pop()!;
-    const redoStack = this.redoStacks.get(verseId) ?? [];
-    redoStack.push(current.map(m => ({ ...m })));
-    this.redoStacks.set(verseId, redoStack);
+    // const current = undoStack.pop()!;
+    // const redoStack = this.redoStacks.get(verseId) ?? [];
+    // redoStack.push(current.map(m => ({ ...m })));
+    // this.redoStacks.set(verseId, redoStack);
 
-    if (undoStack.length > 0) {
-      const prev = undoStack.at(-1);
-      this.workingMarkupsByVerse.set(verseId, prev!.map(m => ({ ...m })));
+    // if (undoStack.length > 0) {
+    //   const prev = undoStack.at(-1);
+    //   this.workingMarkupsByVerse.set(verseId, prev!.map(m => ({ ...m })));
+    // }
+    // else {
+    //   const prev = this.originalMarkupsByVerse.get(verseId);
+    //   this.workingMarkupsByVerse.set(verseId, prev!.map(m => ({ ...m })));
+    // }
+
+    // const verse = this.findSessionVerse(verseId);
+    // if (verse) verse.markups = this.getMarkupsForVerse(verseId);
+    if (!this.undoStack) return;
+
+    const current = this.undoStack.pop()!;
+    this.redoStack.push(current.map(m => ({ ...m })));
+
+    if (this.undoStack.length > 0) {
+      const prev = this.undoStack.at(-1)!;
+      this.workingMarkups = prev.map(m => ({ ...m }));
     }
     else {
-      const prev = this.originalMarkupsByVerse.get(verseId);
-      this.workingMarkupsByVerse.set(verseId, prev!.map(m => ({ ...m })));
+      this.workingMarkups = this.getOriginalMarkups();
     }
 
-    const verse = this.findSessionVerse(verseId);
-    if (verse) verse.markups = this.getMarkupsForVerse(verseId);
-
+    this.activeVerse.markups = this.getMarkups();
     this.bump();
   }
 
   redo(): void {
-    const verseId = this.activeVerseId;
-    if (!verseId) return;
+    // const verseId = this.activeVerseId;
+    // if (!verseId) return;
 
-    const redoStack = this.redoStacks.get(verseId);
-    if (!redoStack || redoStack.length === 0) return;
+    // const redoStack = this.redoStacks.get(verseId);
+    // if (!redoStack || redoStack.length === 0) return;
 
-    const undoStack = this.undoStacks.get(verseId) ?? [];
-    const next = redoStack.pop()!;
-    undoStack.push(next.map(m => ({ ...m })));
-    this.undoStacks.set(verseId, undoStack);
+    // const undoStack = this.undoStacks.get(verseId) ?? [];
+    // const next = redoStack.pop()!;
+    // undoStack.push(next.map(m => ({ ...m })));
+    // this.undoStacks.set(verseId, undoStack);
 
-    this.workingMarkupsByVerse.set(verseId, next.map(m => ({ ...m })));
+    // this.workingMarkupsByVerse.set(verseId, next.map(m => ({ ...m })));
 
-    const verse = this.findSessionVerse(verseId);
-    if (verse) verse.markups = this.getMarkupsForVerse(verseId);
+    // const verse = this.findSessionVerse(verseId);
+    // if (verse) verse.markups = this.getMarkupsForVerse(verseId);
 
-    this.bump();
+    // this.bump();
+
+    if (this.redoStack.length) {
+      const next = this.redoStack.pop()!;
+      this.undoStack.push(next.map(m => ({ ...m })));
+
+      this.workingMarkups = next.map(m => ({ ...m }));
+      this.activeVerse.markups = this.getMarkups();
+      this.bump();
+    }
   }
 
   // --- Toolbox APIs ------------------------------------------------------
@@ -256,9 +339,9 @@ export class CitationMarkupService {
 
   // --- Internal helpers --------------------------------------------------
 
-  private findSessionVerse(verseId: number): CitationVerseExtendedModel | undefined {
-    return this.sessionVerses.find(v => v.id === verseId);
-  }
+  // private findSessionVerse(verseId: number): CitationVerseExtendedModel | undefined {
+  //   return this.sessionVerses.find(v => v.id === verseId);
+  // }
 
   private applySpanMarkupToVerse(
     verseId: number,
@@ -267,7 +350,7 @@ export class CitationMarkupService {
   ): void {
     if (!this.pristineSelection || this.pristineSelection.verseId !== verseId) return;
 
-    const verse = this.findSessionVerse(verseId);
+    const verse = this.activeVerse;
     if (!verse) return;
 
     const { startIndex, endIndex } = this.pristineSelection;
@@ -277,7 +360,7 @@ export class CitationMarkupService {
     const clampedStart = Math.max(0, Math.min(startIndex, textLength));
     const clampedEnd = Math.max(clampedStart, Math.min(endIndex, textLength));
 
-    let arr = this.workingMarkupsByVerse.get(verseId) ?? [];
+    let arr = this.workingMarkups;
 
     // non-overlap rule for span markups (paragraph allowed at same index)
     for (const m of arr) {
@@ -297,22 +380,20 @@ export class CitationMarkupService {
     };
 
     arr = this.sortMarkups(arr.concat(newMarkup));
-    this.workingMarkupsByVerse.set(verseId, arr);
-    verse.markups = this.getMarkupsForVerse(verseId);
-
-    this.pushUndoSnapshot(verseId);
+    this.workingMarkups = arr;
+    this.pushUndoSnapshot();
 
     this.bump();
   }
 
   private applyParagraphMarkup(verseId: number, index: number): void {
-    const verse = this.findSessionVerse(verseId);
+    const verse = this.activeVerse;
     if (!verse) return;
 
     const textLength = verse.scripture.text.length;
     const pos = Math.max(0, Math.min(index, textLength));
 
-    let arr = this.workingMarkupsByVerse.get(verseId) ?? [];
+    let arr = this.workingMarkups;
 
     // avoid duplicate paragraph at same index
     const exists = arr.some(m =>
@@ -322,7 +403,7 @@ export class CitationMarkupService {
     );
     if (exists) return;
 
-    this.pushUndoSnapshot(verseId);
+    this.pushUndoSnapshot();
 
     const newMarkup: CitationVerseMarkup = {
       id: this.nextTempId--,
@@ -334,8 +415,8 @@ export class CitationMarkupService {
     };
 
     arr = this.sortMarkups(arr.concat(newMarkup));
-    this.workingMarkupsByVerse.set(verseId, arr);
-    verse.markups = this.getMarkupsForVerse(verseId);
+    this.workingMarkups = arr;
+    verse.markups = this.workingMarkups;
 
     this.bump();
   }
@@ -351,6 +432,7 @@ export class CitationMarkupService {
   }
 
   private bump(): void {
+    this.activeVerse.markups = this.getMarkups();
     this.markupsVersion.update(x => x + 1);
   }
 
@@ -377,7 +459,7 @@ export class CitationMarkupService {
    */
   renderVerse(verse: CitationVerseExtendedModel): string {
     const text = verse.scripture.text;
-    const markups = this.getMarkupsForVerse(verse.id);
+    const markups = verse.markups;
     return this.renderTextWithMarkups(text, markups);
   }
 
@@ -438,7 +520,7 @@ export class CitationMarkupService {
     this.markupsVersion();
 
     const text = verse.scripture.text ?? '';
-    const markups = this.getMarkupsForVerse(verse.id);
+    const markups = this.getMarkups();
     const sel = (this.pristineSelection?.verseId === verse.id) ? this.pristineSelection : null;
 
     // Build boundaries from markups + selection

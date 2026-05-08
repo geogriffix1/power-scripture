@@ -117,9 +117,7 @@
                 </div>
             </div>
         </div>
-        <div id="range_{{i}}_content" class="scripture-text" style="display: none;">
-            {{range.verses}}
-        </div>
+        <div id="range_{{i}}_content" class="scripture-text" style="display: none;" [innerHTML]="range.verses"></div>
             }
         }
     }

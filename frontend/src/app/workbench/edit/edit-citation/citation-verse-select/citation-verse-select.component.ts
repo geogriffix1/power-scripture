@@ -25,15 +25,12 @@ export class CitationVerseSelectComponent {
   }
 
   onMarkupClicked(v: CitationVerseExtendedModel) {
+    this.markupService.beginSessionSnapshot(v);
     this.markupClicked.emit(v);
   }
 
   renderVerse(verse:CitationVerseExtendedModel) {
     const text = this.markupService.renderVerse(verse);
     return text;
-  }
-
-  ngOnInit() {
-    this.markupService.beginSessionSnapshot(this.verses());
   }
 }

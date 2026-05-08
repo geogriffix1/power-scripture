@@ -37,7 +37,7 @@ export class MarkupActiveVerseComponent {
   renderedVerseHtml = computed(() => {
     this.markup.markupsVersion();
     const v = this.activeVerse();
-    const hasMarkups = (this.markup.getMarkupsForVerse(v.id)?.length ?? 0) > 0;
+    const hasMarkups = (this.markup.getMarkups()?.length ?? 0) > 0;
     return hasMarkups ? this.markup.renderVerse(v) : '';
   });
 

@@ -45,8 +45,7 @@ export class CitationVerseMarkupToolboxComponent {
   }
 
   deleteAllMarkups() {
-    const verseId = this.activeVerse().id;
-    this.markupService.deleteAllMarkupsForVerse(verseId);
+    this.markupService.deleteAllMarkups();
     this.markupService.clearPristineSelection();
   }
 

@@ -8,6 +8,7 @@ import { CitationExtendedModel } from '../model/citation.model';
 import { CitationVerseExtendedModel } from '../model/citationVerse.model';
 import { ScriptureModel } from '../model/scripture.model';
 import { JstreeModel } from '../model/jstree.model';
+import { CitationMarkupService } from '../citation-markup.service';
 
 @Component({
     selector: 'app-workbench',
@@ -51,54 +52,46 @@ export class WorkbenchComponent {
     return route;
   }
 
- // static getWorkbenchSize() {
-  //   let section = $("section.bible-workbench");
-  //   let position = section.position();
-
-  //   let rect = new DOMRect(position?.left ?? 0, position?.top ?? 0, section.innerWidth(), section.innerHeight());
-  //   return rect;
-  // }
-
   public setActiveTool(tool: string): void {
     this.activeTool.set(tool);
   }
 
   static setScriptureRanges(citation: CitationExtendedModel) {
-    const unicodeSuperscriptNumbers = [
-      "\u2070",
-      "\u00B9",
-      "\u00B2",
-      "\u00B3",
-      "\u2074",
-      "\u2075",
-      "\u2076",
-      "\u2077",
-      "\u2078",
-      "\u2079",
-    ];
+  //   const unicodeSuperscriptNumbers = [
+  //     "\u2070",
+  //     "\u00B9",
+  //     "\u00B2",
+  //     "\u00B3",
+  //     "\u2074",
+  //     "\u2075",
+  //     "\u2076",
+  //     "\u2077",
+  //     "\u2078",
+  //     "\u2079",
+  //   ];
 
-    function superscript(n:number): string {
-      let s = n.toString();
-      let ss = "";
-      for (let i=0; i<s.length; i++) {
-        let c = s.charCodeAt(i) - "0".charCodeAt(0);
-        ss += unicodeSuperscriptNumbers[c];
-      }
+    // function superscript(n:number): string {
+    //   let s = n.toString();
+    //   let ss = "";
+    //   for (let i=0; i<s.length; i++) {
+    //     let c = s.charCodeAt(i) - "0".charCodeAt(0);
+    //     ss += unicodeSuperscriptNumbers[c];
+    //   }
 
-      return ss;
-    }
+    //   return ss;
+    // }
     
+    const markupService = new CitationMarkupService;
     WorkbenchComponent.scriptureRanges = [];
     const forCitations = <CitationVerseExtendedModel[]>citation?.verses ?? [];
     forCitations.sort((a,b) => a.scripture.bibleOrder - b.scripture.bibleOrder);
 
     let book = "";
     let chapter = 0;
-    let verse = 0;
     let startVerse = 0;
     let endVerse = 0;
-    let verses = "";
     let scriptures: ScriptureModel[] = [];
+    let range = <CitationVerseExtendedModel[]>[];
 
     for (let i=0; i<forCitations.length; i++) {
       let citationId = forCitations[i].citationId;
@@ -107,8 +100,8 @@ export class WorkbenchComponent {
         result.book == book &&
         result.chapter == chapter &&
         result.verse == endVerse + 1) {
-          verses = `${verses} ${superscript(result.verse)}${result.text}`;
           scriptures.push(result);
+          range.push(forCitations[i]);
           endVerse++;
       }
       else {
@@ -126,22 +119,23 @@ export class WorkbenchComponent {
           
           let scriptureRange:CiteScriptureRangeModel = {
             citation: citation,
-            verses: verses,
+            verses: markupService.renderRange(range),
             isOpen: false,
             scriptures: scriptures,
             citationId: citationId
           };
+
+          range = [];
 
           WorkbenchComponent.scriptureRanges.push(scriptureRange)
         }
 
         book = result.book;
         chapter = result.chapter;
-        verse = result.verse;
         startVerse = result.verse;
         endVerse = result.verse;
-        verses = result.text;
         scriptures = [result];
+        range = [forCitations[i]];
       }
     }
 
@@ -159,7 +153,7 @@ export class WorkbenchComponent {
       
       let scriptureRange:CiteScriptureRangeModel = {
         citation: citation,
-        verses: verses,
+        verses: markupService.renderRange(range),
         scriptures: scriptures
       };
 
@@ -191,7 +185,6 @@ export class WorkbenchComponent {
   }
 
   onHelpClick(): void {
-    //const url = `${window.location.origin}/help`;
 
     if (this.helpWindow && !this.helpWindow.closed) {
       this.helpWindow.focus();
@@ -208,9 +201,6 @@ export class WorkbenchComponent {
   }
 
   ngAfterViewInit() {
-    // WorkbenchComponent.WorkbenchResizeBroadcaster = new Subject<DOMRectReadOnly>;
-    // this.resizeObserver.observe($("section.bible-workbench")[0]);
-
     BibleThemeTreeComponent.ActiveCitationSelector.subscribe((citation:JstreeModel|null) => {
       WorkbenchComponent.activeCitation = citation;
     });
@@ -221,9 +211,7 @@ export class WorkbenchComponent {
 
     BibleThemeTreeComponent.ClipboardSelector.subscribe((node:JstreeModel) => {
       WorkbenchComponent.clipboardNode = node;
-      console.log("workbench clipboard change:");
-      console.log(node);
-    })
+    });
   }
 
   ngOnDestroy() {

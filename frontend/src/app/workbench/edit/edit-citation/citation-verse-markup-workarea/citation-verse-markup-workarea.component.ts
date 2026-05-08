@@ -24,11 +24,14 @@ export class CitationVerseMarkupWorkareaComponent {
 
   constructor() {
     effect(() => {
+      const verse = this.activeVerse();
       const verses = this.activeVerses();
+      console.log('Active verses changed:', verses);
       if (!verses || verses.length === 0) return;
 
       // 🔑 ALWAYS initialize session before any selection can occur
-      this.markup.beginSessionSnapshot(verses);
+      console.log('Initializing markup session with verses:', verses);
+      this.markup.beginSessionSnapshot(verse);
     });
   }
 
@@ -44,7 +47,7 @@ export class CitationVerseMarkupWorkareaComponent {
   }
 
   beginSession() {
-    this.markup.beginSessionSnapshot(this.activeVerses());
+    this.markup.beginSessionSnapshot(this.activeVerse());
 
     // 🔑 Seed an initial pristine selection for the active verse
     const v = this.activeVerse();
