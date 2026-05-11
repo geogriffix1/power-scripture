@@ -15,14 +15,11 @@ export class CiteScriptureReportComponent {
     Context!: any;
 
   ngOnInit() {
-    console.log(`ngOnInit show CiteScriptureReport: ${this.Context?.showCiteScriptureReport ?? "null"}`);
     const creator = new CitationDocumentCreator;
     const doc = creator.create(this.Context.citations);
 
     Packer.toBlob(doc).then(blob => {
-      console.log(blob);
       saveAs(blob, `Power Scripture citation report.docx`);
-      console.log("Document created successfully");
 
       this.Context.showCiteScriptureReport = false;
     });

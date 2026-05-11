@@ -95,7 +95,7 @@
 }
 
 /* icon shell */
-.scripture-range .icon {
+/* .scripture-range .icon {
   appearance: none;
   -webkit-appearance: none;
   width: 34px;
@@ -122,7 +122,104 @@
     inset 0 1px 0 rgba(255,255,255,0.08),
     inset 0 -1px 0 rgba(0,0,0,0.45),
     0 1px 2px rgba(0,0,0,0.65);
+} */
+
+
+/* button shell */
+/* .right-icons {
+  appearance: none;
+  -webkit-appearance: none;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+  margin: 0;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 215, 0, 0.18);
+  background: linear-gradient(to bottom, #181818, #050505);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  text-decoration: none;
+
+  transform: translateY(0) scale(1);
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease,
+    background 120ms ease,
+    filter 120ms ease;
+
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.08),
+    inset 0 -1px 0 rgba(0,0,0,0.45),
+    0 1px 2px rgba(0,0,0,0.65);
+} */
+
+.right-icons {
+  appearance: none;
+  -webkit-appearance: none;
+  width: auto;
+  height: 34px;
+  padding: 0;
+  margin: 0;
+  align-items: center;
+  float: right;
+  cursor: pointer;
+  text-decoration: none;
+  background-color: field;
 }
+
+
+/* icon box */
+.right-icons button {
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+  border: 0;
+  cursor: pointer;
+  transition:
+    transform 120ms ease,
+    box-shadow 120ms ease,
+    border-color 120ms ease,
+    filter 120ms ease,
+    opacity 120ms ease;
+}
+
+.right-icons button > i {
+  pointer-events: none;
+}
+
+.right-icons button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+
+/* hover */
+.right-icons button.can-pop:hover {
+  transform: translateY(-2px) scale(1.08);
+  border-color: rgba(255, 215, 0, 0.35);
+  box-shadow:
+    inset 0 1px 0 rgba(255,255,255,0.12),
+    0 0 8px rgba(255, 215, 0, 0.22),
+    0 3px 10px rgba(0,0,0,0.70);
+}
+
+/* pressed */
+.right-icons button.can-pop:active {
+  transform: translateY(1px) scale(0.96);
+  box-shadow:
+    inset 0 2px 5px rgba(0,0,0,0.75),
+    inset 0 0 6px rgba(255,255,255,0.04);
+}
+
 
 .theme-member , .scripture-range, .citation-verse {
     border: 2px solid darkslategray;
@@ -132,7 +229,6 @@
     padding-top: 4px;
     padding-left: 4px;
 }
-
 
 div.scripture-range, div.citation-verse {
     display: flex;
@@ -207,7 +303,9 @@ div.scripture-range span, div.citation-verse span {
       transform 120ms ease,
       filter 120ms ease,
       opacity 120ms ease;
+}
 
+.icon .icon-delete {
     cursor: pointer;
     background-image: url("/assets/images/Delete.png");
 }

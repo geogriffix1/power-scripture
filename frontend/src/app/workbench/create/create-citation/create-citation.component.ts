@@ -57,7 +57,6 @@ export class CreateCitationComponent {
   }
 
   showOptions() {
-    console.log("show options!");
     $(".ps-action-btn").show(500);
   }
 }

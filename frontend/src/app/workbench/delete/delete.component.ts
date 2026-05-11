@@ -44,7 +44,6 @@ export class DeleteComponent implements OnInit {
   settingsActive = false;
   
   onClickSettings() {
-    console.log("onClickSettings");
     if (this.settingsActive) {
       $("div.settings").hide(500).removeClass("settings-active");
     }
@@ -56,7 +55,6 @@ export class DeleteComponent implements OnInit {
   }
 
   onRadioClickSettings(index:number) {
-    console.log("onRadioClickSettings");
     (async() => {
       $("div.settings").hide(500).removeClass("settings-active");
       await this.delay(500);
@@ -91,8 +89,6 @@ export class DeleteComponent implements OnInit {
       this.onClickSettings();
     }
 
-    console.log("ngAfterViewInit");
-
     if (!DeleteComponent.isSubscribed) {
       this.subscriptions.add(
         BibleThemeTreeComponent.ActiveCitationSelector.subscribe((node: JstreeModel | null) => {
@@ -102,7 +98,6 @@ export class DeleteComponent implements OnInit {
 
       this.subscriptions.add(
         BibleThemeTreeComponent.ActiveThemeSelector.subscribe((themeNode:JstreeModel | null) => {
-          console.log("active theme changed");
           this.activeThemeNode.set(themeNode);
         })
       );

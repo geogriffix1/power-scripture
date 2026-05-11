@@ -56,20 +56,6 @@
             (closeSelectedRange)="OnCloseSelectedRange()"
         ></app-citation-verse-select>
         }
-        <!-- @else if (activeScriptureRange().citationId && 
-            activeScriptureRange().citationId == editedCitation.id &&
-            activeVerse().id > 0) {
-        <div class="header" title="Highlight sections of text to markup">Citation Scripture Verse Markup</div>
-        <div class="markup-editor">
-            <div class="top-row">
-                <app-citation-verse-markup-workarea
-                    [activeVerses]="activeVerses"
-                    [activeVerse]="activeVerse"
-                    (verseSessionChanged)="onVerseSessionChanged($event)">
-                </app-citation-verse-markup-workarea>
-            </div>
-        </div>
-        } -->
         @else {
     <!-- Scripture Range List Selector (selects ranges for markup or deletion from citation) -->
             @for (range of scriptureRanges(); track range.citation; let i = $index) {

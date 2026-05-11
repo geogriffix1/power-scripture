@@ -25,21 +25,14 @@ export class CiteContextMenuComponent {
 
   ngOnInit()
   {
-    console.log("cite context menu component constructor");
-    console.log(`is router null? ${!this.router}`);
     CiteContextMenuComponent.showContextMenu(this.scriptureRanges, this.context, this.router);
   }
 
   constructor() {
-    console.log("cite context menu component constructor");
     CiteContextMenuComponent.instance = this;
   }
 
   public static showContextMenu(scriptureRanges:any[], context:any, router:Router) {
-    console.log("showContextMenu");
-    console.log(`context:`);
-    console.log(context);
-    console.log(`router is null? ${!router}`)
     CiteContextMenuComponent.instance.menuItems = [];
     CiteContextMenuComponent.instance.menuItems.push({
       text: "Select All",
@@ -89,7 +82,6 @@ export class CiteContextMenuComponent {
   }
     
   public static hide() {
-    console.log("hiding");
     $("app-cite-context-menu").addClass("hidden");
   }
 }

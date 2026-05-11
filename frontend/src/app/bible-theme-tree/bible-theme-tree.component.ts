@@ -48,8 +48,6 @@ export class BibleThemeTreeComponent implements OnInit {
 
   broadcastActiveCitationChange(citation:JstreeModel|null) {
     BibleThemeTreeComponent.ActiveCitationSelector.next(citation);
-    console.log("broadcast active citation change");
-    console.log(citation);
   }
 
   public static triggerEditThemeSwitch() {
@@ -83,11 +81,8 @@ export class BibleThemeTreeComponent implements OnInit {
       }
     })
     .on('changed.jstree', (e:any, data:any) => {
-      console.log(data);
-      console.log(e);
       if (data.action == "select_node") {
         // A new different node on the tree was selected (clicked)
-        console.log("jstree select event");
         let node = JstreeModel.getJstreeModel(data.node);
         if (node.id.startsWith("theme")) {
           // theme was selected - change the active theme but allow the active citation to remain active
@@ -136,9 +131,7 @@ export class BibleThemeTreeComponent implements OnInit {
         copyThemeItem: {
           label: "Copy",
           action: () =>  {
-            console.log("copying theme item");
             BibleThemeTreeComponent.ClipboardSelector.next(node);;
-            console.log("done copying theme item");
            }
         },
         pasteItem: {
@@ -157,21 +150,18 @@ export class BibleThemeTreeComponent implements OnInit {
         createThemeItem: {
           label: "Create Subtheme",
           action: () => {
-            console.log("createSubtheme action in AppComponent");
             BibleThemeTreeComponent.ngZone.run(() => BibleThemeTreeComponent.router.navigate(["/create/theme"]));
           }
         },
         createCitationItem: {
           label: "Create Citation",
           action: () => {
-            console.log("createSubtheme action in AppComponent");
             BibleThemeTreeComponent.ngZone.run(() => BibleThemeTreeComponent.router.navigate(["/create/citation"]));                    
           }
         },
         deleteThemeItem: {
           label: "Delete",
           action: () =>  {
-            console.log(`Delete theme ${node.id}`);
             BibleThemeTreeComponent.ngZone.run(() => BibleThemeTreeComponent.router.navigate(["/delete/theme"]));
            }
         }
@@ -214,8 +204,6 @@ export class BibleThemeTreeComponent implements OnInit {
   public static getDomNode(id: string): any {
     const themeTree = $('#theme-tree-full').jstree(true);
     let domNode = themeTree.get_node(id);
-    console.log(`getDomNode id=${id}`);
-    console.log(domNode);
 
     return domNode;
   }
@@ -248,19 +236,13 @@ static refreshDomNodeFromDb(nodeId: string, callback?: (node: any) => void): voi
   tree.refresh_node(nodeId);
 }
   public static refreshDomNode(node: JstreeModel) {
-    console.log("refreshDomNode");
     const themeTree = $('#theme-tree-full').jstree(true);
     (themeTree as any).redraw_node(node);
   }
 
   public static setActiveCitation(node: JstreeModel) {
-    console.log("SET ACTIVE CITATION function - node:");
-    console.log("citation:");
-    console.log(node);
-
     const themeTree = $('#theme-tree-full').jstree(true);
    $('#theme-tree-full [id^=citation].jstree-clicked').removeClass('jstree-clicked').attr('aria-selected', 'false');
-    console.log('opening parent:');
     themeTree.open_node(`theme${node.parent}`);
     themeTree.select_node(node.id);
   }
@@ -302,7 +284,6 @@ static refreshDomNodeFromDb(nodeId: string, callback?: (node: any) => void): voi
           node.a_attr.title = citation.li_attr?.title ?? '';
 
           tree.redraw_node(node);
-          console.log('verified model a_attr.title:', tree.get_node(nodeId).a_attr.title);
         });
       })();
     }
@@ -312,27 +293,18 @@ static refreshDomNodeFromDb(nodeId: string, callback?: (node: any) => void): voi
 @Directive()
 export class ServiceDirective {
   constructor (provider:BibleService) {
-    console.log("serviceDirective initializer");
     this.provider = provider;
   }
 
   provider:BibleService;
 
-  public async process(node:any, callback:any) {
-    console.log("processing");
-    
+  public async process(node:any, callback:any) {    
     let themeId = <number><unknown>node.id.replace(/theme(\d+)/, '$1');
-    console.log(`service directive value=${node.id}, themeId=${themeId}`);
-
-    console.log(node);
     let children = await this.provider.getChildren(themeId);
-    console.log(`children of  ${node?.text ?? "theme0"}`);
-    console.log(children);
     callback(children);
   }
 
   public async getThemeChain(id: number, callback:any) {
-    console.log(`getThemeChain for ${id}`);
     await this.provider.getThemeChain(id, (chain:ThemeChainModel) => {
       callback(chain.chain.map(t => t.name).join("/"));
     });
@@ -345,8 +317,6 @@ export class ServiceDirective {
   public async pasteTheme(copyId: number, pasteNode: JstreeModel) {
     let pasteId = +pasteNode.id.replace("theme", "");
     return await this.provider.pasteTheme(copyId, pasteId, (result: any) => {
-      console.log("pasteTheme callback function");
-      console.log(result);
       BibleThemeTreeComponent.refreshDomNodeFromDb(pasteNode.id);
     });
   }
@@ -354,8 +324,6 @@ export class ServiceDirective {
   public async pasteCitation(copyId: number, pasteNode: JstreeModel) {
     let pasteId = +pasteNode.id.replace("theme", "");
     return await this.provider.pasteCitation(copyId, pasteId, (result: any) => {
-      console.log("pasteCitation callback function");
-      console.log(result);
       BibleThemeTreeComponent.refreshDomNodeFromDb(pasteNode.id);
     });
   }

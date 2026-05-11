@@ -132,12 +132,10 @@ export class CitationMarkupService {
   // --- Undo/Redo (per verse) --------------------------------------------
 
   canUndo(): boolean {
-    console.log("canUndo - undoStack:", this.undoStack);
     return this.undoStack.length > 0;
   }
 
   canRedo(): boolean {
-    console.log("canRedo - redoStack:", this.redoStack);
     return this.redoStack.length > 0;
   }
 
@@ -296,8 +294,6 @@ export class CitationMarkupService {
     verse.markups = this.getMarkups();
     this.activeVerse.set({...verse});
     this.activeVerseIsDirty.set(!this.areMarkupArraysEqual(this.originalMarkups, this.getMarkups()));
-
-    console.log("update: ", this.activeVerse());
     this.bump();
   }
 

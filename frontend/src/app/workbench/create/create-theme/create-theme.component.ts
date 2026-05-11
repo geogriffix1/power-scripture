@@ -41,10 +41,7 @@ export class CreateThemeComponent {
         let id = <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", "");
         service.createTheme(id, this.nameField.nativeElement.value.trim(), this.descriptionField.nativeElement.value.trim(), 0)
           .then(theme => {
-            console.log("after create theme attempt");
-            console.log(theme);
              if (theme.id == -1) {
-              console.log("theme.id==-1");
                $("div.command-message").text(theme.description);
              }
              else {

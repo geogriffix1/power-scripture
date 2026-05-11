@@ -21,16 +21,11 @@ export class SearchScriptureReportComponent {
     Context!: any;
 
   ngOnInit() {
-    console.log(`ngOnInit SearchCommand: ${this.SearchCommand}, showSearchScriptureReport: ${this.Context?.showSearchScriptureReport ?? "null"}`);
     const creator = new DocumentCreator();
-    //const doc = creator.create(this.SearchCommand, this.ScriptureList);
     const doc = creator.create(this.SearchCommand, this.Context.searchResults);
 
     Packer.toBlob(doc).then(blob => {
-      console.log(blob);
       saveAs(blob, "Power Scripture search report.docx");
-      console.log("Document created successfully");
-
       this.Context.showSearchScriptureReport = false;
     });
   }

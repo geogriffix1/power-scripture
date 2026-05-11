@@ -26,20 +26,15 @@ export class EditScriptureRangeContextMenuComponent {
 
   ngOnInit()
   {
-    console.log("scripture range context menu component constructor");
     EditScriptureRangeContextMenuComponent.showContextMenu(this.scriptureRange);
   }
 
   constructor() {
-    console.log("scripture range context menu component constructor");
     EditScriptureRangeContextMenuComponent.instance = this;
   }
 
   public static showContextMenu(entry: CiteScriptureRangeModel) {
-    console.log("showContextMenu");
-    console.log(`context:`);
     EditScriptureRangeContextMenuComponent.instance.menuItems = [];
-    console.log("check 1");
     EditScriptureRangeContextMenuComponent.instance.menuItems.push({
       text: "Edit Scripture Range",
       title: "Adjust the range of scriptures",
@@ -49,48 +44,9 @@ export class EditScriptureRangeContextMenuComponent {
         this.hide();
       }
     });
-    console.log("check 2");
-    // EditScriptureRangeContextMenuComponent.instance.menuItems.push({
-    //   text: "Scripture Markup",
-    //   title: "Apply markups to selected scriptures",
-    //   isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canDeselectAll(); },
-    //   onClick: (entry:any) => {
-    //     EditScriptureRangeContextMenuComponent.instance.callbacks.deselectAll();
-    //     this.hide();
-    //   }
-    // });
-    // EditScriptureRangeContextMenuComponent.instance.menuItems.push({
-    //   text: "Remove Scripture Range",
-    //   title: "Delete the range of scriptures from the citation",
-    //   isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canRemoveSelected(); },
-    //   onClick: (entry:any) => {
-    //     EditScriptureRangeContextMenuComponent.instance.callbacks.removeSelected(scriptureRanges);
-    //     this.hide();
-    //   }
-    // });
-    // EditScriptureRangeContextMenuComponent.instance.menuItems.push({
-    //   text: "Save Citation",
-    //   title: "Save the full citation as edited",
-    //   isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canSaveCitation(); },
-    //   onClick: (entry:any) => {
-    //     EditScriptureRangeContextMenuComponent.instance.callbacks.saveCitation(scriptureRanges);
-    //     this.hide();
-    //   }
-    // });
-    // EditScriptureRangeContextMenuComponent.instance.menuItems.push({
-    //   text: "Export Selected",
-    //   title: "Export the selected scriptures to a file",
-    //   isActive: () => { return EditScriptureRangeContextMenuComponent.instance.callbacks.canExportSelected(); },
-    //   onClick: (entry:any) => {
-    //     EditScriptureRangeContextMenuComponent.instance.callbacks.exportSelected(scriptureRanges, context);
-    //     this.hide();
-    //   }
-    // });
-
   }
     
   public static hide() {
-    console.log("hiding");
     $("app-scripture-range-editor").addClass("hidden");
   }
 }

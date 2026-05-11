@@ -46,9 +46,7 @@ export class DocxService {
     });
 
     Packer.toBlob(doc).then(blob => {
-      console.log(blob);
       saveAs("example.docx");
-      console.log("document created successfully");
     });
   }
 
@@ -131,10 +129,8 @@ export class DocxService {
 
   public reportScriptures(scriptureRanges:ScriptureRangeModel[]):Paragraph[] {
     for (let i=0; i < scriptureRanges.length; i++) {
-      console.log(`citation: ${scriptureRanges[i].citation}`);
       for (let j=0; j < scriptureRanges[i]!.verses.length; j++) {
         let verse = scriptureRanges[i]!.verses[j];
-        console.log(`verse ${verse.verse} ${verse.text}`);
       }
     }
 

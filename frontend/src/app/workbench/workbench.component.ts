@@ -150,7 +150,6 @@ export class WorkbenchComponent {
   }
 
   onEditClick() {
-    console.log("edit clicked!");
     MainShellComponent.editObject = undefined;
     this.router.navigate(['/edit']);
   }

@@ -23,21 +23,15 @@ export class BibleService {
     let url = `${this.ROOT_URL}themes`;
     const data = await fetch(url);
     const themes = await data.json() ?? [];
-  
-    console.log("GET ALL THEMES");
-    console.log(JSON.stringify(themes));
 
     return themes;
   }
 
   async getChildren(parent:number): Promise<JstreeModel[]> {
-    console.log(`parent=${parent}`);
     if (parent == 0) {
       // In this case the parent is the top node of the tree.
       // Theme 0 is not a not a real node in the database, but it has child themes.
       // The list of child nodes is returned.
-
-      console.log("fetching root themes");
 
       let rootUrl = `${this.ROOT_URL}themes?parent=0`;
       const data = await fetch(rootUrl);
@@ -196,8 +190,6 @@ export class BibleService {
     var url = `${this.ROOT_URL}themeToCitations/${id}/full`;
     const data = await fetch(url);
     const themeToCitation = (await data.json() ?? null);
-    console.log("GET THEME TO CITATION");
-    console.log(JSON.stringify(themeToCitation));
     return <ThemeToCitationModel>themeToCitation;
   }
 
@@ -230,7 +222,6 @@ export class BibleService {
 
   async setThemeToCitationSequence(id:number, sequence:number): Promise<boolean> {
     var url = `${this.ROOT_URL}themeToCitations/${id}/sequence/${sequence}`;
-    console.log(`url: ${url}`);
     const data = await fetch(url, {
       method: "PUT",
       cache: "no-cache",
@@ -296,9 +287,6 @@ export class BibleService {
     });
 
     let theme = await data.json();
-    console.log("CREATE THEME");
-
-    console.log(JSON.stringify(theme));
 
     if (theme.error) {
       let error:ThemeExtendedModel = {
@@ -383,7 +371,6 @@ const data = await fetch(url, {
   });
 
   let response = await data.json();
-  console.log("RESEQUENCE THEMES");
   if (callback) {
     callback(response);
   }
@@ -410,7 +397,6 @@ const data = await fetch(url, {
     var url = `${this.ROOT_URL}themes/${themeId}`;
     var data:any;
     try {
-      console.log("fetching result");
       data = await fetch(url, {
         method: "DELETE",
         cache: "no-cache",
@@ -456,7 +442,6 @@ const data = await fetch(url, {
     var url = `${this.ROOT_URL}themeToCitations/${themeToCitationId}`;
     var data:any;
     try {
-      console.log("fetching result");
       data = await fetch(url, {
         method: "DELETE",
         cache: "no-cache",
@@ -481,7 +466,6 @@ const data = await fetch(url, {
 
   async citeScriptures(cite:string) : Promise<ScriptureModel[]> {
     var url = `${this.ROOT_URL}scriptures/${cite}`;
-    console.log(`citeScriptures ${url}`);
     const data = await fetch(url, {
       method: "GET",
       cache: "no-cache",
@@ -491,15 +475,11 @@ const data = await fetch(url, {
     });
 
     const searchResults = (await data.json() ?? []);
-    console.log("SEARCH SCRIPTURES CONTAINS");
-    console.log(JSON.stringify(searchResults));
     return <ScriptureModel[]>searchResults;
   }
 
   async searchScripturesLike(search:string) : Promise<ScriptureModel[]> {
-    console.log(`search like: ${search}`);
     var url = `${this.ROOT_URL}scriptures/like`;
-    console.log(`url: ${url}, body: ${JSON.stringify({query: search})}`);
     const data = await fetch(url, {
       method: "POST",
       cache: "no-cache",
@@ -510,16 +490,10 @@ const data = await fetch(url, {
     });
 
     const searchResults = (await data.json() ?? []);
-    console.log("SEARCH SCRIPTURES LIKE");
-
-    if (searchResults )
-    console.log(JSON.stringify(searchResults));
     return <ScriptureModel[]>searchResults;
   }
   async searchScripturesContains(search:string) : Promise<ScriptureModel[]> {
-    console.log(`search contains: ${search}`);
     var url = `${this.ROOT_URL}scriptures/contains`;
-    console.log(`url: ${url}, body: ${JSON.stringify({query: search})}`);
     const data = await fetch(url, {
       method: "POST",
       cache: "no-cache",
@@ -530,15 +504,10 @@ const data = await fetch(url, {
     });
 
     const searchResults = (await data.json() ?? []);
-    console.log("SEARCH SCRIPTURES LIKE");
-
-    if (searchResults )
-    console.log(JSON.stringify(searchResults));
     return <ScriptureModel[]>searchResults;
   }
 
   async getScripturesChapterMaxVerse(book:string, chapter:number): Promise<number> {
-    console.log(`getting max verse of ${book}:${chapter}`);
     var url = `${this.ROOT_URL}scriptures/maxverse/book/${book}/chapter/${chapter}`;
     const data = await fetch(url);
     const result = (await data.json() ?? null);
@@ -546,7 +515,6 @@ const data = await fetch(url, {
   }
 
   async createCitation(description:string, parentTheme:number, sequence:number, scriptures:number[]): Promise<ThemeToCitationLinkModel> {
-    console.log("createCitation");
     var url = `${this.ROOT_URL}citations`;
     let payload = {
       "themeId": parentTheme,
@@ -554,9 +522,6 @@ const data = await fetch(url, {
       "scriptureIds": scriptures,
       "sequence": sequence
     };
-
-    console.log("payload sent to create a citation");
-    console.log(payload);
 
     const data = await fetch (url, {
       method: "POST",
@@ -569,15 +534,11 @@ const data = await fetch(url, {
 
     const creationResults = (await data.json() ?? []);
 
-    if (creationResults)
-      console.log(creationResults);
-
     return <ThemeToCitationLinkModel>creationResults;
   }
 
 
   async createCitationFromScriptureLabel(description:string, parentTheme:number, sequence: number, label:string): Promise<CitationModel | null> {
-    console.log("createCitation");
     var url = `${this.ROOT_URL}citations`;
 
     const scriptures = [];
@@ -603,9 +564,6 @@ const data = await fetch(url, {
       "sequence" : sequence
     };
 
-    console.log("payload sent to create a citation");
-    console.log(JSON.stringify(payload));
-
     const data = await fetch (url, {
       method: "POST",
       cache: "no-cache",
@@ -617,14 +575,10 @@ const data = await fetch(url, {
 
     const creationResults = (await data.json() ?? []);
 
-    if (creationResults)
-      console.log(creationResults);
-
     return <CitationModel>creationResults;
   }
 
   async createCitationVerse(citationId:number, scriptureId:number): Promise<CitationVerseExtendedModel> {
-    console.log("createCitation");
     var url = `${this.ROOT_URL}verses`;
 
     const data = await fetch (url, {
@@ -637,9 +591,6 @@ const data = await fetch(url, {
     });
 
     const creationResults = (await data.json() ?? null);
-
-    if (creationResults)
-      console.log(JSON.stringify(creationResults));
 
     return <CitationVerseExtendedModel>creationResults;
   }
@@ -696,10 +647,7 @@ const data = await fetch(url, {
       body: JSON.stringify({ verseIds: verseIds })
     });
 
-    console.log(`deleteCitationVerses citationId: ${citationId}`);
-    console.log(verseIds);
     const result = (await data.json() ?? null);
-    console.log(result);
     return result.citation;
   }
 
@@ -708,7 +656,6 @@ const data = await fetch(url, {
 
     const data = await fetch(url);
     const result = (await data.json() ?? null);
-    console.log(result.citationLabel);
     return <string>result.citationLabel;
   }
 
@@ -757,16 +704,11 @@ const data = await fetch(url, {
 
     const creationResults = (await data.json() ?? null);
 
-    if (creationResults)
-      console.log(JSON.stringify(creationResults));
-
     return <CitationVerseMarkup>creationResults;
   }
 
   async editCitationVerseHide(verseId: number, hide:string): Promise<CitationVerseExtendedModel> {
     var url = `${this.ROOT_URL}verses/${verseId}/hide/${hide}`;
-    console.log(`editCitationVerseHide(${verseId}, ${hide})`);
-    console.log(url);
     const data = await fetch (url, {
       method: "PUT",
       cache: "no-cache",
@@ -776,7 +718,6 @@ const data = await fetch(url, {
     });
 
     const results = (await data.json() ?? null);
-    console.log(results);
     return results;
   }
 }

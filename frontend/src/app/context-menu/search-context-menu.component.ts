@@ -26,7 +26,6 @@ export class SearchContextMenuComponent implements ContextMenu, OnInit {
 
   public static showContextMenu(searchResults:WritableSignal<ScriptureSearchResultModel[]>, context:any) {
     SearchContextMenuComponent.instance.menuItems = [];
-    //console.log(`entry: ${entry}`);
 
     SearchContextMenuComponent.instance.menuItems.push({
       text: "Select All",
@@ -78,7 +77,6 @@ export class SearchContextMenuComponent implements ContextMenu, OnInit {
   }
 
   public static hide() {
-    console.log("hiding");
     $("app-search-context-menu").addClass("hidden");
   }
 

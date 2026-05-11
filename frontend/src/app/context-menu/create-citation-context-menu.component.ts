@@ -25,7 +25,6 @@ export class CreateCitationContextMenuComponent implements ContextMenu, OnInit {
 
   public static showContextMenu(inputObject:any, context:any) {
     CreateCitationContextMenuComponent.instance.menuItems = [];
-    //console.log(`entry: ${entry}`);
 
     CreateCitationContextMenuComponent.instance.menuItems.push({
       text: "Create Bible Citation",
@@ -50,7 +49,6 @@ export class CreateCitationContextMenuComponent implements ContextMenu, OnInit {
   }
 
   public static hide() {
-    console.log("hiding");
     $("app-search-context-menu").addClass("hidden");
   }
 

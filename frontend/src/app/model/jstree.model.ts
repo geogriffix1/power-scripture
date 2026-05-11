@@ -96,8 +96,6 @@ export class JstreeModel {
             new JstreeState(false, false, false),
             node.citationId);
         jstreeModel.children = false;
-        console.log("in getJstreeModelFromThemeToCitation node: (JstreeModel)");
-        console.log(node);
         return jstreeModel;
     }
 }

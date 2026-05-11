@@ -267,13 +267,15 @@ export class EditCitationComponent {
   }
 
   OnCloseSelectedRange() {
+    $(".await").show(100);
+    const id = this.activeScriptureRange().citationId!
     this.activeScriptureRange.set(new NullCiteScriptureRange);
+    this.service.getCitation(id)
+      .then(citation => {
+        this.refreshCitationEditor(citation);
+        $(".await").hide(100);
+      });
   }
-
-  // onVerseSessionChanged(changeEvent: any) {
-  //   console.log("onVerseSessionChanged");
-  //   console.log(changeEvent);
-  // }
 
   onVerseSelected(selectedVerse: CitationVerseExtendedModel) {
     this.activeVerse.set(selectedVerse);

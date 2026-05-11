@@ -2,7 +2,7 @@
   <div id="activeScriptureRange" class="scripture-range container">
     <div class="text">Select Verse for Markup - {{scriptureRangeLabel()}}</div>
     <div class="right-icons">
-      <button class="icon ps-icon-close"
+      <button class="icon ps-icon-close can-pop"
        (click)="onCloseSelectedRange()"
        title="Close Scripture Range">
         <i class="ps-icon"></i>
@@ -55,12 +55,23 @@
         <div id="activeVerse" class="citation-verse container">
         <div class="text">Markup Editor - {{markupService.activeVerse().verseCitationLabel}} <span class="right">[{{ markupService.activeVerseIsDirty() ? "unsaved changes" : "saved"}}]</span></div>
         <div class="right-icons">
-            <i class="save-icon" (click)="OnSaveMarkups()" title="Save Citation Verse Markups"></i>
-            <i class="close-icon" (click)="OnCancelMarkups()" title="Cancel Citation Verse Markup Editor"></i>
+          <button
+            class="icon ps-icon-save"
+            [class.can-pop]="markupService.activeVerseIsDirty()"
+            [disabled]="!markupService.activeVerseIsDirty()"
+            (click)="OnSaveMarkups()"
+            title="Save citation verse markups">
+            <i class="psmenu-icon"></i>
+          </button>
+          <button
+            class="icon ps-icon-close can-pop"
+            title="Close citation markup editor without saving"
+            (click)="OnCancelMarkups()">
+            <i class="psmenu-icon"></i>
+          </button>
         </div>
     </div>
     <!-- Active Scripture Range selected for Markup Editing -->
-    <div class="header" title="Highlight sections of text to markup">Citation Scripture Verse Markup</div>
     <div class="markup-editor">
         <div class="top-row">
             <app-citation-verse-markup-workarea
