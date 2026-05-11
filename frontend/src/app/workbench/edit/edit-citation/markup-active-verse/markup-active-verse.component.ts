@@ -31,12 +31,12 @@ export class MarkupActiveVerseComponent {
   overlayHtml = computed(() => {
     // force refresh on version changes
     this.markup.markupsVersion();
-    return this.markup.renderActiveVerseOverlay(this.activeVerse());
+    return this.markup.renderActiveVerseOverlay(this.markup.activeVerse());
   });
 
   renderedVerseHtml = computed(() => {
     this.markup.markupsVersion();
-    const v = this.activeVerse();
+    const v = this.markup.activeVerse();
     const hasMarkups = (this.markup.getMarkups()?.length ?? 0) > 0;
     return hasMarkups ? this.markup.renderVerse(v) : '';
   });
@@ -44,7 +44,7 @@ export class MarkupActiveVerseComponent {
   constructor() {
     // Ensure service has a verseId ready so toolbox works immediately on first entry.
     effect(() => {
-      const v = this.activeVerse();
+      const v = this.markup.activeVerse();
       if (!v?.id) return;
 
       // set editor text

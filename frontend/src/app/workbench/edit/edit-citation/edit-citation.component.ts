@@ -28,7 +28,6 @@ import { CitationMarkupService } from '../../../citation-markup.service';
     selector: 'app-edit-citation',
     imports: [
       ScriptureRangeEditorComponent,
-      CitationVerseMarkupWorkareaComponent,
       CitationVerseSelectComponent
     ],
     templateUrl: './edit-citation.component.html',
@@ -67,7 +66,7 @@ export class EditCitationComponent {
   constructor (
     private actRoute: ActivatedRoute,
     private service: BibleService,
-    private markupService: CitationMarkupService
+    public markupService: CitationMarkupService
   ) { }
 
 
@@ -210,6 +209,7 @@ export class EditCitationComponent {
 
       this.activeVerses.set(await this.service.getVersesByCitationAndScriptures(this.activeCitation.id, scriptureIds));
       this.activeScriptureRange.set(activeRange);
+      this.markupService.activeVerse.set(new NullCitationVerse);
       $("div.await").hide(100);
     })();
   }
@@ -231,41 +231,6 @@ export class EditCitationComponent {
     setTimeout(() => {
       $(".success-message").text("").hide(100);
     }, 5000);
-  }
-
-  OnSaveMarkups() {
-    // Markups that have been saved have positive id values. Markups that have not been saved
-    // have negative id values. The editor does not edit existing markups, but it will delete all
-    // existing markups for a given verse if it is directed to do so.
-    const original = this.markupService.getOriginalMarkups();
-    const verse = this.activeVerse();
-    if (original.length > 0 && !verse.markups.some(markup => markup.id > 0)) {
-      this.service.deleteCitationVerseMarkups(this.activeVerse().id);
-    }
-
-    const markupsToSave  = this.activeVerse().markups.filter(markup => markup.id < 0);
-    markupsToSave.forEach(markup => {
-      this.service.createCitationVerseMarkup(markup);
-    });
-
-    this.activeVerse.set(new NullCitationVerse);
-  }
-
-  OnCancelMarkups() {
-    const original = this.markupService.getOriginalMarkups();
-    const verse = this.activeVerse();
-    verse.markups = original.map(markup => ({...markup}));
-    const index = this.activeVerses().findIndex(v => v.id == verse.id );
-    this.activeVerses()[index] = {
-      id: verse.id,
-      citationId: verse.citationId,
-      scriptureId: verse.scripture.id,
-      scripture: verse.scripture,
-      hide: verse.hide,
-      markups: verse.markups
-    };
-
-    this.activeVerse.set(new NullCitationVerse);
   }
 
   DeleteScriptureRange(id: number) {
@@ -305,8 +270,10 @@ export class EditCitationComponent {
     this.activeScriptureRange.set(new NullCiteScriptureRange);
   }
 
-  onVerseSessionEnded(event:any) {
-  }
+  // onVerseSessionChanged(changeEvent: any) {
+  //   console.log("onVerseSessionChanged");
+  //   console.log(changeEvent);
+  // }
 
   onVerseSelected(selectedVerse: CitationVerseExtendedModel) {
     this.activeVerse.set(selectedVerse);
@@ -320,6 +287,7 @@ export class EditCitationComponent {
 
   ngAfterViewInit() {
     this.activeRoute = this.actRoute.snapshot.routeConfig?.path ?? "";
+    this.markupService.activeVerse.set(new NullCitationVerse);
 
     runInInjectionContext(this.injector, () => {
       effect(() => {

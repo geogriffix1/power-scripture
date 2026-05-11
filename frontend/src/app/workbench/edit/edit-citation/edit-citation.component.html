@@ -42,52 +42,34 @@
             <app-scripture-range-editor [citation]="editedCitation" (rangeAdded)="onRangeAdded($event)"></app-scripture-range-editor>
         </div>
 }
-@else if (activeCitationNode() && activeScriptureRange().citationId == editedCitation.id && activeVerse().id == 0) {
-        <!-- Markup Selector header -->
-        <div id="activeScriptureRange" class="scripture-range container">
-            <div class="text">Select Verse for Markup - {{activeScriptureRange().citation}}</div>
-            <div class="right-icons">
-                <i class="close-icon" (click)="OnCloseSelectedRange()" title="Close Scripture Range"></i>
-            </div>
-        </div>
-}
-@else if (activeCitationNode()) {
-        <!-- Markup Editor mode -->
-        <div id="activeVerse" class="citation-verse container">
-            <div class="text">Markup Editor - {{activeVerse().verseCitationLabel}}</div>
-            <div class="right-icons">
-                <i class="save-icon" (click)="OnSaveMarkups()" title="Save Citation Verse Markups"></i>
-                <i class="close-icon" (click)="OnCancelMarkups()" title="Cancel Citation Verse Markup Editor"></i>
-            </div>
-        </div>
-}
         <div class="await"></div>
 @if (activeCitationNode()) {
     <!-- A citation is active for editing -->
     @if (scriptureRanges() && scriptureRanges().length > 0) {
         <!-- A range of consecutive scriptures in the active citation has been selected -->
-        @if (activeScriptureRange().citationId && activeScriptureRange().citationId == editedCitation.id && activeVerse().id == 0) {
+        @if (activeScriptureRange().citationId && activeScriptureRange().citationId == editedCitation.id) {
         <app-citation-verse-select
+            [scriptureRangeLabel]="activeScriptureRange().citation"
             [verses]="activeVerses()"
             (markupClicked)="onVerseSelected($event)"
             (hideChanged)="onHideVerseChanged($event)"
+            (closeSelectedRange)="OnCloseSelectedRange()"
         ></app-citation-verse-select>
         }
-        @else if (activeScriptureRange().citationId && 
+        <!-- @else if (activeScriptureRange().citationId && 
             activeScriptureRange().citationId == editedCitation.id &&
             activeVerse().id > 0) {
-        <!-- Active Scripture Range selected for Markup Editing -->
         <div class="header" title="Highlight sections of text to markup">Citation Scripture Verse Markup</div>
         <div class="markup-editor">
             <div class="top-row">
                 <app-citation-verse-markup-workarea
                     [activeVerses]="activeVerses"
                     [activeVerse]="activeVerse"
-                    (verseSessionEnded)="onVerseSessionEnded($event)">
+                    (verseSessionChanged)="onVerseSessionChanged($event)">
                 </app-citation-verse-markup-workarea>
             </div>
         </div>
-        }
+        } -->
         @else {
     <!-- Scripture Range List Selector (selects ranges for markup or deletion from citation) -->
             @for (range of scriptureRanges(); track range.citation; let i = $index) {

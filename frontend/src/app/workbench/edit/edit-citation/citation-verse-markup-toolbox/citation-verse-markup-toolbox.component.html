@@ -4,21 +4,22 @@
   <button class="tool-btn" (click)="paragraph()" title="Add a line break at the cursor position in the pristine verse">Paragraph</button>
 
   <div class="tool-group">
-    <div class="tool-label">Replacement Text</div>
+    <div class="tool-label">Clarification Text</div>
     <input
       class="replacement-input"
       [value]="replacementDraft"
       (input)="replacementDraft = $any($event.target).value"
+      placeholder="Type here"
       type="text"
-      title="Replacement string for a substring of the pristine verse"
+      title="Replacement or Inserted string to clarify the verse"
     />
     <button
       class="tool-btn replace-btn"
       (click)="replace()"
       [disabled]="!replacementDraft.length"
-      title="Replace a substring of the pristine verse with the replacement text"
+      title="Replace a substring of the pristine verse with clarification text"
     >
-      Replace
+      Replace/Insert
     </button>
   </div>
 

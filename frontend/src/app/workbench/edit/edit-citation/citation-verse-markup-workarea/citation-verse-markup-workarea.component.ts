@@ -1,10 +1,16 @@
-import { Component, Input, Signal, computed, inject, effect } from '@angular/core';
+import { Component, Input, output, Signal, computed, inject, effect } from '@angular/core';
+import { AddEventListenerOptions } from 'rxjs/internal/observable/fromEvent';
 
 import { CitationVerseExtendedModel } from '../../../../model/citationVerse.model';
 import { CitationMarkupService } from '../../../../citation-markup.service';
 
 import { CitationVerseMarkupToolboxComponent } from '../citation-verse-markup-toolbox/citation-verse-markup-toolbox.component';
 import { MarkupActiveVerseComponent } from '../markup-active-verse/markup-active-verse.component';
+
+export interface VerseSessionChangedEvent {
+  verseId: number | null;
+  isDirty: boolean;
+}
 
 @Component({
   selector: 'app-citation-verse-markup-workarea',
@@ -18,28 +24,42 @@ import { MarkupActiveVerseComponent } from '../markup-active-verse/markup-active
 })
 export class CitationVerseMarkupWorkareaComponent {
   private markup = inject(CitationMarkupService);
+  private originalVerse: CitationVerseExtendedModel | null = null;
+  private isDirty = false;
 
   @Input({ required: true }) activeVerse!: Signal<CitationVerseExtendedModel>;
   @Input({ required: true }) activeVerses!: Signal<CitationVerseExtendedModel[]>;
 
   constructor() {
+    console.log("in CitationVerseMarkupWorkarea Constructor");
     effect(() => {
       const verse = this.activeVerse();
-      const verses = this.activeVerses();
-      console.log('Active verses changed:', verses);
-      if (!verses || verses.length === 0) return;
+      if (this.originalVerse === null) {
+        this.originalVerse = verse;
+        // 🔑 ALWAYS initialize session before any selection can occur
+        this.markup.beginSessionSnapshot(verse);
+        return;
+      }
 
-      // 🔑 ALWAYS initialize session before any selection can occur
-      console.log('Initializing markup session with verses:', verses);
-      this.markup.beginSessionSnapshot(verse);
+      this.isDirty = this.markup.activeVerseIsDirty();
+      console.log("activeverse isDirty: ", this.isDirty);
+      this.verseSessionChanged.emit({ verseId: this.activeVerse().id, isDirty: this.isDirty });
     });
   }
 
   previewOpen = true;
+  verseSessionChanged = output<VerseSessionChangedEvent>();
 
   renderedRangeHtml = computed(() => {
     this.markup.markupsVersion();
-    return this.markup.renderRange(this.activeVerses());
+    const range = this.activeVerses();
+    if (this.markup.activeVerse()) {
+      const verse = this.markup.activeVerse();
+      let index = this.activeVerses().findIndex(v => v.id == verse.id);
+      range[index] = verse;
+    }
+
+    return this.markup.renderRange(range);
   });
 
   togglePreview() {
@@ -57,5 +77,9 @@ export class CitationVerseMarkupWorkareaComponent {
       endIndex: 0,
       caretIndex: 0
     });
+  }
+
+  isSameAsOriginal(verse: CitationVerseExtendedModel): boolean {
+    return JSON.stringify(verse) == JSON.stringify(this.originalVerse);
   }
 }

@@ -23,6 +23,7 @@
     "angular-expressions": "^1.2.1",
     "angular-split": "^17.2.0",
     "bootstrap": "^5.3.2",
+    "buffer": "^6.0.3",
     "clipboardy": "^4.0.0",
     "docx": "^8.5.0",
     "docxtemplater": "^3.47.1",

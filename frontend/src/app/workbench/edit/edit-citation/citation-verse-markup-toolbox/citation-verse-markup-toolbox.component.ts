@@ -19,25 +19,25 @@ export class CitationVerseMarkupToolboxComponent {
   replacementDraft = '';
 
   highlight() {
-    const verseId = this.activeVerse().id;
+    const verseId = this.markupService.activeVerse().id;
     this.markupService.applyMarkupHighlightToActiveVerse(verseId);
     this.markupService.clearPristineSelection(); // rule: clear when toolbox button clicked
   }
 
   suppress() {
-    const verseId = this.activeVerse().id;
+    const verseId = this.markupService.activeVerse().id;
     this.markupService.applyMarkupSuppressToActiveVerse(verseId);
     this.markupService.clearPristineSelection();
   }
 
   paragraph() {
-    const verseId = this.activeVerse().id;
+    const verseId = this.markupService.activeVerse().id;
     this.markupService.applyParagraphMarkupToActiveVerse(verseId);
     this.markupService.clearPristineSelection();
   }
 
   replace() {
-    const verseId = this.activeVerse().id;
+    const verseId = this.markupService.activeVerse().id;
     if (!this.replacementDraft?.length) return;
     this.markupService.applyMarkupReplaceToActiveVerse(verseId, this.replacementDraft);
     this.replacementDraft = "";
