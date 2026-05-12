@@ -7,7 +7,6 @@ import {
   ViewChild,
   signal
 } from "@angular/core";
-import { WorkbenchComponent } from "../../workbench.component";
 import { ThemeExtendedModel } from "../../../model/theme.model";
 import { CitationExtendedModel } from "../../../model/citation.model";
 import { CitationVerseExtendedModel, CitationVerseRange } from "../../../model/citationVerse.model";
@@ -20,7 +19,7 @@ import { BibleService } from "../../../bible.service";
 import { BibleThemeTreeComponent } from "../../../bible-theme-tree/bible-theme-tree.component";
 // import { ScriptExecutionService } from "../../../script-execution.service";
 import { HttpClient } from '@angular/common/http';
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, Subscription } from 'rxjs';
 //import { BookCodeToName } from "../bookCodeToName";
 
 type LineLevel = "info" | "error";
@@ -67,6 +66,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
   private autoScroll = true;
   // private scrollMark = 0;
   private clipboard: JstreeModel|null = null;
+  private clipboardSubscription?: Subscription;
 
   private baseTheme: ThemeExtendedModel|null = null;
   private openTheme: ThemeExtendedModel|null = null;
@@ -86,39 +86,16 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
   ) {}
 
   ngOnInit() {
-    ImportConsoleComponent.isActive = true;
-    if (WorkbenchComponent.clipboardNode) {
-      this.clipboard = WorkbenchComponent.clipboardNode;
-    }
-
-    if (!ImportConsoleComponent.isSubscribed) {
-      BibleThemeTreeComponent.ClipboardSelector.subscribe((node: JstreeModel | null) => {
-        if (node)  {
-          this.clipboard = node;
-
-          let theme = -1;
-          if (node.id.startsWith("citation")) {
-            theme = node.parent ? +node.parent.replace("theme", "") : -1;
-          }
-          else {
-            theme = +node.id.replace("theme", "");
-          }
-
-          (async () => {
-            await this.service.getThemeChain(theme, (chain: ThemeChainModel) => {
-              let path = "/" + chain.chain.map(theme => theme.name).join("/");
-
-              this.copyTextToClipboard(path);
-            });
-          })();
-        }
-      });
-
-      ImportConsoleComponent.isSubscribed = true;
-    } 
+    this.clipboardSubscription = BibleThemeTreeComponent.ClipboardSelector.subscribe((node: JstreeModel) => {
+      this.onWorkbenchClipboardChanged(node);
+    });
   }
 
   ngAfterViewInit(): void {
+    if (BibleThemeTreeComponent.ClipboardNode) {
+      this.onWorkbenchClipboardChanged(BibleThemeTreeComponent.ClipboardNode);
+    }
+
     const root = this.consoleRoot?.nativeElement;
 
     this.roRoot = this.observeHeight("consoleRoot", root);
@@ -132,12 +109,37 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
   }
 
   ngOnDestroy(): void {
+    this.clipboardSubscription?.unsubscribe();
     this.roRoot?.disconnect();
     this.roHost?.disconnect();
     this.roSection?.disconnect();
-    BibleThemeTreeComponent.ClipboardSelector.unsubscribe();
     ImportConsoleComponent.isSubscribed = false;
     ImportConsoleComponent.isActive = false;
+  }
+
+  private onWorkbenchClipboardChanged(node: JstreeModel): void {
+    console.log("Workbench clipboard changed:", node);
+    this.clipboard = node;
+
+    const themeId = this.getClipboardThemeId(node);
+    if (themeId < 0) {
+      return;
+    }
+
+    (async () => {
+      await this.service.getThemeChain(themeId, (chain: ThemeChainModel) => {
+        const path = "/" + chain.chain.map(theme => theme.name).join("/");
+        this.copyTextToClipboard(path);
+      });
+    })();
+  }
+
+  private getClipboardThemeId(node: JstreeModel): number {
+    if (node.id.startsWith("citation")) {
+      return node.parent ? +node.parent.replace("theme", "") : -1;
+    }
+
+    return +node.id.replace("theme", "");
   }
 
   private observeHeight(label: string, el: Element | null | undefined): ResizeObserver | undefined {

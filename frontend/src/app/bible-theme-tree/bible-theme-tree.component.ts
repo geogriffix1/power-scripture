@@ -54,11 +54,13 @@ export class BibleThemeTreeComponent implements OnInit {
     BibleThemeTreeComponent.ThemeSwitchTrigger.next();
   }
 
+  public static setClipboardNode(node: JstreeModel) {
+    BibleThemeTreeComponent.ClipboardNode = node;
+    BibleThemeTreeComponent.ClipboardSelector.next(node);
+  }
+
   ngOnInit(): void {
     var service = BibleThemeTreeComponent.service;
-    BibleThemeTreeComponent.ClipboardSelector.subscribe((node:JstreeModel) => {
-      BibleThemeTreeComponent.ClipboardNode = node;
-    });
 
     $('#theme-tree-full').jstree({
       core: {
@@ -131,7 +133,7 @@ export class BibleThemeTreeComponent implements OnInit {
         copyThemeItem: {
           label: "Copy",
           action: () =>  {
-            BibleThemeTreeComponent.ClipboardSelector.next(node);;
+            BibleThemeTreeComponent.setClipboardNode(node);
            }
         },
         pasteItem: {
@@ -186,7 +188,7 @@ export class BibleThemeTreeComponent implements OnInit {
         copyCitationItem: {
           label: "Copy",
           action: () =>  {
-            BibleThemeTreeComponent.ClipboardSelector.next(node);
+            BibleThemeTreeComponent.setClipboardNode(node);
           }
         },
         deleteCitationItem: {

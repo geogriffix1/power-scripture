@@ -42,10 +42,6 @@ export class ImportComponent {
   }
 
   onRadioClickSettings(index:number) {
-    // this.activeType = i;
-    // this.importType = this.importTypes[this.activeType];
-    // this.settingsActive = false;
-
     (async() => {
       $("div.settings").hide(500).removeClass("settings-active");
       await this.delay(500);
@@ -53,7 +49,6 @@ export class ImportComponent {
       this.activeType = index;
       this.importType = this.importTypes[this.activeType];
     })();
-
   }
   
   delay(ms: number) {

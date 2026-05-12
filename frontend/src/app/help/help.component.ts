@@ -431,18 +431,156 @@ export const HELP_TOPICS: HelpTopic[] = [
     title: 'Import',
     iconClass: 'ps-icon ps-icon-import',
     group: 'tools',
-    content: `
-      <h2>Import</h2>
+content: `
+  <h2>Import Console</h2>
 
-      <p>The import tool provides an input console for creating themes and citations by keyboard entry.</p>
+  <p>
+  The Import Console is a command-driven environment for rapidly creating themes and citations
+  through keyboard entry. The console resembles a command shell or terminal window using white
+  text on a black background.
+  </p>
 
-      <p>The console supports navigation along the theme tree, opening themes for the purpose of creating themes
-      and citations as children of the opened theme.</p>
+  <p>
+  The active input line is always positioned at the bottom of the console window. Commands are
+  entered one line at a time and executed by pressing Enter.
+  </p>
 
-      <p>The import console supports undo and redo. Changes can be saved in bulk or rolled back.</p>
+  <p>
+  Entered commands are echoed back into the console output along with the system response.
+  As the console fills, older lines scroll upward. Previous output may be reviewed by scrolling
+  unless the console is cleared with the <b>clear</b> command.
+  </p>
 
-      <p>Future expansion will allow the import of archived themes and structured content files.</p>
-    `
+  <h3>Import Console Purpose</h3>
+
+  <p>
+  The Import Console is intended for rapid data entry, navigation, and viewing. It provides a
+  keyboard-driven alternative to the graphical interface for creating themes and citations.
+  </p>
+
+  <p>
+  The Import Console does not support editing or deleting existing themes or citations.
+  </p>
+
+  <h3>Theme Navigation</h3>
+
+  <p>
+  The Import Console treats themes similarly to directories in a file system.
+  </p>
+
+  <p>
+  A Base Theme must first be established using the <b>base</b> command. The Base Theme acts as
+  the primary reference point for the session.
+  </p>
+
+  <p>
+  Theme paths can be copied directly from the Bible Theme Tree and pasted into the Import Console.
+  This is often the easiest way to establish a Base Theme accurately.
+  </p>
+
+  <p>
+  After the Base Theme is established, subsequent paths are interpreted relative to the currently
+  open theme.
+  </p>
+
+  <h3>Temporary Working State</h3>
+
+  <p>
+  Themes and citations created during an Import Console session remain temporary until saved.
+  </p>
+
+  <p>
+  The <b>save</b> command commits all staged themes and citations to the database.
+  </p>
+
+  <p>
+  The <b>reset</b> command discards all unsaved themes and citations created during the session.
+  </p>
+
+  <p>
+  Newly created themes may immediately be opened and navigated before they are saved.
+  This allows an entire hierarchy of themes and citations to be built during a single session.
+  </p>
+
+  <h3>Creating Themes</h3>
+
+  <p>
+  Themes are created as immediate children of the open theme.
+  </p>
+
+  <p>
+  Themes require a name and may include an optional description. Descriptions are entered using
+  double quotation marks.
+  </p>
+
+  <h3>Creating Citations</h3>
+
+  <p>
+  Citations are created as immediate children of the open theme.
+  Citations may be populated with scripture ranges during creation.
+  </p>
+
+  <p>
+  Citation scripture input accepts one or more verse ranges separated by commas.
+  The order of scripture ranges does not matter.
+  </p>
+
+  <p>
+  Book names may be:
+  </p>
+
+  <ul>
+    <li>fully spelled out</li>
+    <li>or abbreviated using recognized three-character codes</li>
+  </ul>
+
+  <p>
+  Capitalization and spacing are flexible and are not strictly required.
+  </p>
+
+  <h3>Markup Support</h3>
+
+  <p>
+  The Import Console does not support creating or editing markups.
+  </p>
+
+  <p>
+  Markup editing is performed through the graphical Markup Editor within Citation Editing.
+  </p>
+
+  <p>
+  There are currently no plans to support markup creation through console commands.
+  </p>
+
+  <p>
+  Future file-based import and export functionality will support markup data.
+  </p>
+
+  <h3>Console Help</h3>
+
+  <p>
+  The Import Console contains its own text-driven help system.
+  Help may be invoked using either <b>help</b> or <b>?</b>.
+  </p>
+
+  <ul>
+    <li><b>? books</b> — Displays all recognized Bible books, supported three-character abbreviations, and chapter counts.</li>
+    <li><b>? book &lt;book&gt;</b> — Displays chapter and verse counts for the specified Bible book.</li>
+    <li><b>? &lt;command&gt;</b> — Displays help for a specific command.</li>
+  </ul>
+
+  <p>
+  The <b>? books</b> command is useful for finding accepted book names and abbreviations.
+  The <b>? book</b> command is useful for checking valid chapter and verse ranges before entering scripture references.
+  </p>
+
+  <h3>Future Expansion</h3>
+
+  <p>
+  Future versions of Power Scripture will support file-based import of archived Power Scripture content.
+  Export functionality will be provided through the Publish tool.
+  </p>
+`
   },
   {
     id: 'publish',

@@ -242,3 +242,40 @@ This project is actively under development.
 ## Notes
 
 This repository currently reflects an active development version and is not yet packaged for easy installation.
+
+---
+
+## Copyright and License
+
+Copyright © 2026 George R. Griffin. All rights reserved.
+
+Power Scripture is provided free of charge for personal, educational,
+ministry, and non-commercial use.
+
+You may:
+- download and use the software
+- study the source code
+- modify the software for personal use
+- share unmodified copies of the software for non-commercial purposes
+
+You may not:
+- sell Power Scripture
+- bundle Power Scripture into a commercial product
+- host Power Scripture as a paid service
+- redistribute modified versions for commercial purposes
+- use Power Scripture commercially without written permission
+
+Commercial use, resale, hosting, sublicensing, or monetization of
+Power Scripture requires a separate commercial agreement with the author.
+
+If you are interested in commercial licensing or partnership opportunities,
+please contact the author.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND.
+
+## Commercial Licensing
+
+For commercial licensing or partnership inquiries, contact:
+
+George R. Griffin  
+geogriffix@gmail.com
