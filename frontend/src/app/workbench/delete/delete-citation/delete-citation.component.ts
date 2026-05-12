@@ -15,6 +15,7 @@ export class DeleteCitationComponent {
   @Input({required: true})
     activeCitationNode!: Signal<JstreeModel | null>;
   activeThemeToCitation!: ThemeToCitationModel;
+  private successMessageTimeout?: ReturnType<typeof setTimeout>;
   static isActive: boolean;
   static isSubscribed: boolean;
   sectionWidth?: number;
@@ -69,9 +70,23 @@ export class DeleteCitationComponent {
       $("#label").val("");
       $("#description").val("").attr("title", "");
       $("div.citation.selected").addClass("missing").html(this.missingMessage);
-      $(".command-warning").text("Delete successful").show(100);
+
+      this.ShowSuccess("Delete was successful");
+      // $(".command-warning").text("Delete successful").show(100);
     })();
 
     $("command-message").text("");
   }
+
+    ShowSuccess(message: string) {
+    if (this.successMessageTimeout) {
+      clearTimeout(this.successMessageTimeout);
+    }
+
+    $(".command-message").text(message).show(100);
+    this.successMessageTimeout = setTimeout(() => {
+      $(".command-message").text("").hide(100);
+    }, 5000);
+  }
+
 }

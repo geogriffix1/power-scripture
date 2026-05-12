@@ -11,6 +11,7 @@ import { BibleThemeTreeComponent } from '../../bible-theme-tree/bible-theme-tree
   styleUrls: ['./import.component.scss']
 })
 export class ImportComponent {
+
   importTypes = [
     "Choose import type",
     "Import from Console",
@@ -30,16 +31,33 @@ export class ImportComponent {
   activeThemeId = 0;
 
   onClickSettings() {
-    console.log("settings clicked!");
-    this.settingsActive = !this.settingsActive;
     if (this.settingsActive) {
-      this.importType = this.importTypes[this.activeType];
+      $("div.settings").hide(500).removeClass("settings-active");
     }
+    else {
+      $("div.settings").show(500).addClass("settings-active");
+    }
+
+    this.settingsActive = !this.settingsActive;
   }
 
-  onRadioClickSettings(i:number) {
-    this.activeType = i;
-    this.importType = this.importTypes[this.activeType];
-    this.settingsActive = false;
+  onRadioClickSettings(index:number) {
+    // this.activeType = i;
+    // this.importType = this.importTypes[this.activeType];
+    // this.settingsActive = false;
+
+    (async() => {
+      $("div.settings").hide(500).removeClass("settings-active");
+      await this.delay(500);
+      this.settingsActive = false;
+      this.activeType = index;
+      this.importType = this.importTypes[this.activeType];
+    })();
+
   }
+  
+  delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
+  }
+
 }

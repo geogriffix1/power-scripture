@@ -21,6 +21,7 @@ export class DeleteThemeComponent {
   themeToDeleteCascade?: ThemeCascadeModel;
   subthemeCount = 0;
   citationCount = 0;
+  private successMessageTimeout?: ReturnType<typeof setTimeout>;
 
   jstreeModel!:JstreeModel;
 
@@ -58,7 +59,7 @@ export class DeleteThemeComponent {
     e?.stopPropagation();
 
     $(".command-warning").hide(100);
-    $("command-message").text("");
+    $(".command-message").text("");
 
     (async () => {
       if (!this.activeThemeNode()!.parent.startsWith("theme")) {
@@ -77,20 +78,20 @@ export class DeleteThemeComponent {
         $(".command-warning").show(100);
       }
       else if (themes.length == 1) {
-        let parentThemeId = this.activeTheme.parent;
-        let success = await this.service.deleteTheme(this.activeTheme.id);
+        let themeId = +this.activeThemeNode()!.id.replace("theme", "");
+        let success = await this.service.deleteTheme(themeId);
         if (success) {
           console.log("Delete successful");
-          $(".command-message").text(`Theme ${this.activeTheme.name} deleted successfully`);
+          this.ShowSuccess(`Theme ${this.activeThemeNode()!.data.path} deleted successfully`);
           $("div.selected.theme").addClass("missing").html(this.missingThemeText);
-          BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${parentThemeId}`);
+          BibleThemeTreeComponent.refreshDomNodeFromDb(this.activeThemeNode()!.parent);
           WorkbenchComponent.activeTheme = JstreeModel.null;
           $("#name").val("");
           $("#description").val("");
           $(".command-warning").hide();
         }
         else {
-          $(".command-message").text("Delete failed");
+          $(".command-message").text("Delete failed").show(100);
         }
       }
     })();
@@ -98,15 +99,15 @@ export class DeleteThemeComponent {
 
   DeleteAll() {
     (async() => {
-      let parentThemeId = this.activeTheme.parent;
-      console.log(`deleting theme ${this.activeTheme.id}`);
-      let success = await this.service.deleteTheme(this.activeTheme.id);
+      let themeId = +this.activeThemeNode()!.id.replace("theme", "");
+      console.log(`deleting theme ${this.activeThemeNode()!.id}`);
+      let success = await this.service.deleteTheme(themeId);
       $(".command-warning").hide(100);
       if (success) {
         console.log("Delete success");
-        $(".command-message").text(`Theme ${this.activeTheme.name} deleted successfully`);
+        this.ShowSuccess(`Theme ${this.activeThemeNode()!.data.path} deleted successfully`);
         $(".workbench-theme div.selected.theme").addClass("missing");
-        BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${parentThemeId}`);
+        BibleThemeTreeComponent.refreshDomNodeFromDb(this.activeThemeNode()!.parent);
         WorkbenchComponent.activeTheme = JstreeModel.null;
         $("#name").val("");
         $("#description").val("");
@@ -114,7 +115,7 @@ export class DeleteThemeComponent {
       }
       else {
         console.log("Delete Failed");
-        $(".command-message").text("Delete failed");
+        $(".command-message").text("Delete failed").show(100);
       }
 
       $(".command-warning").hide(100);
@@ -123,7 +124,18 @@ export class DeleteThemeComponent {
 
   Cancel() {
     $(".command-warning").hide(100);
-    $("command-message").text("");
+    $(".command-message").text("");
+  }
+
+  ShowSuccess(message: string) {
+    if (this.successMessageTimeout) {
+      clearTimeout(this.successMessageTimeout);
+    }
+
+    $(".command-message").text(message).show(100);
+    this.successMessageTimeout = setTimeout(() => {
+      $(".command-message").text("").hide(100);
+    }, 5000);
   }
 
 //   ngOnInit() {

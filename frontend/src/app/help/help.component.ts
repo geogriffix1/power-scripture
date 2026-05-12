@@ -93,10 +93,27 @@ export const HELP_TOPICS: HelpTopic[] = [
       Activating a theme or citation makes it accessible to the Workbench. Right-clicking a theme or citation
       displays a context menu with available commands.</p>
 
-      <p>Themes and citations can be copied and pasted onto another theme. Pasting a citation onto a theme
-      causes the same citation to be referenced from more than one theme. Editing that citation affects all
-      themes that reference that citation. Deleting a citation that is referenced by multiple themes only
-      removes the association between the selected theme and the citation.</p>
+      <h3>Copy and Paste</h3>
+
+      <p>Themes and citations can be copied and pasted onto another theme.</p>
+
+      <p>Themes are copied as new theme cascades. Themes are created with a single parent, so pasting a theme
+      creates a duplicated theme structure beneath the destination theme.</p>
+
+      <p>Power Scripture prevents invalid theme paste operations. A theme cannot be pasted onto itself or onto
+      any of its descendant themes.</p>
+
+      <p>Power Scripture also prevents duplicate sibling theme names. A theme cannot be pasted into a destination
+      theme that already contains a child theme with the same name. Theme names preserve case, but paste
+      validation compares names without regard to case.</p>
+
+      <p>Citation paste behavior is different. Pasting a citation creates another association between a theme and
+      the same citation. The citation itself is not copied.</p>
+
+      <p>Citations are shared entities. Editing a pasted citation affects every theme that references that citation.</p>
+
+      <p>Deleting a citation that is referenced by multiple themes only removes the association between the selected
+      theme and the citation. A citation is permanently deleted only when it is no longer referenced by any theme.</p>
 
       <p>Top-level themes cannot be renamed or deleted. The member themes and citations can be rearranged in
       the Workbench editor.</p>
@@ -170,6 +187,16 @@ export const HELP_TOPICS: HelpTopic[] = [
 
       <p>This design allows the same scripture to appear differently in different citations without modifying
       the underlying Bible text.</p>
+
+      <h3>Shared Citations</h3>
+
+      <p>Citations are shared entities. When a citation is pasted under another theme, Power Scripture creates
+      another theme-to-citation association rather than copying the citation.</p>
+
+      <p>Editing a citation affects every theme that references that citation.</p>
+
+      <p>Deleting a citation from a theme removes that theme association. The citation itself is permanently
+      deleted only when it is no longer referenced by any theme.</p>
 
       <h3>Ranges Are Not Stored Entities</h3>
 
@@ -335,15 +362,68 @@ export const HELP_TOPICS: HelpTopic[] = [
     content: `
       <h2>Delete</h2>
 
-      <p>The delete tool is used to delete the active theme or citation.</p>
+      <p>The delete tool is used to delete the active theme or active citation.</p>
 
-      <p>Deleting a theme deletes the selected theme and its contained subthemes and citation links.</p>
+      <p>Click the delete button <i class="ps-icon ps-icon-delete"></i> on the Workbench toolbar.
+      The delete tool prompts for whether to delete a theme or a citation. There is no default selection.</p>
 
-      <p>Deleting a citation from a theme removes the selected citation relationship from that theme. If the same
-      citation is referenced by multiple themes, deleting it from one theme does not remove the citation from the
-      other themes.</p>
+      <h3>Deleting a Theme</h3>
 
-      <p>Delete operations should be used carefully because theme deletion affects the entire theme cascade.</p>
+      <p>Choose <b>Theme</b> to open the theme delete action.</p>
+
+      <p>If an active theme exists, the theme name and description are displayed in the delete action fields.
+      These fields are read-only and cannot be edited from the delete tool.</p>
+
+      <p>If no theme is active, the delete tool prompts for a theme to be selected from the Bible Theme Tree.</p>
+
+      <p>A theme can also be deleted directly from the Bible Theme Tree. Right-click the theme node and select
+      <b>Delete</b> from the context menu. Power Scripture opens the Workbench directly to the
+      <b>Delete Theme</b> action.</p>
+
+      <p>To delete the displayed theme, click the delete button shown as a red X icon on a black background.</p>
+
+      <p>Top-level themes are immutable system themes and cannot be deleted.</p>
+
+      <h3>Deleting an Empty Theme</h3>
+
+      <p>If the theme has no child themes or citations, it is deleted immediately. A success notification is displayed
+      for five seconds.</p>
+
+      <h3>Deleting a Theme Cascade</h3>
+
+      <p>If the theme contains child themes or citations, deleting the theme deletes the entire cascade beneath it,
+      including all descendant themes and citation associations.</p>
+
+      <p>Power Scripture displays a summary of the number of themes and citations affected by the delete operation.</p>
+
+      <p>Choose <b>Delete</b> to confirm the cascade delete, or <b>Cancel</b> to leave the theme unchanged.</p>
+
+      <p>If the delete succeeds, a success notification is displayed for five seconds. If the delete fails, an error
+      notification is displayed.</p>
+
+      <p>If the operation is cancelled, no changes are made and the same delete fields remain populated.</p>
+
+      <p>After a successful theme delete, the parent theme refreshes automatically in the Bible Theme Tree. The deleted
+      theme and all deleted descendants are removed from the displayed tree structure.</p>
+
+      <h3>Deleting a Citation</h3>
+
+      <p>Citations can be deleted from either the Bible Theme Tree context menu or from the Workbench delete tool.</p>
+
+      <p>To delete a citation from the Workbench, click the delete button
+      <i class="ps-icon ps-icon-delete"></i> and choose <b>Citation</b>.</p>
+
+      <p>If an active citation exists, the citation information is displayed in the delete action fields.</p>
+
+      <p>Click the delete icon to remove the citation from the active theme.</p>
+
+      <p>Citations may be referenced by more than one theme. If a citation is referenced elsewhere, deleting the
+      citation removes only the association between the citation and the active theme.</p>
+
+      <p>A citation is permanently deleted only when it is no longer referenced by any theme.</p>
+
+      <p>After a successful citation delete, a brief confirmation message is displayed and the parent theme refreshes
+      automatically in the Bible Theme Tree. The deleted citation association no longer appears beneath the parent theme.</p>
     `
   },
   {

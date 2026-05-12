@@ -1,27 +1,33 @@
 <!-- <div class="import-page"> -->
     <nav class="workbench-import">
         <div class="workbench-settings">
-            <a class="settings" title="Settings" (click)=onClickSettings()>
-                <i class="settings active"></i>
-            </a>
+            <button
+                type="button"
+                class="icon-settings"
+                (click)="onClickSettings()"
+                title="Settings for editing - Theme or Citation">
+                <i class="psmenu-icon" title="Settings for editing"></i>
+            </button>
         </div>
         <div class="workbench-title">
             {{importType}}
-            @if(settingsActive) {
-            <div class="settings settings-active">
-                <h3>Import Type:</h3>
-                <div class="settings-selector">
+            <div class="settings">
+                <h3>Choose Import Type:</h3>
                     @for(item of importTypes; track $index;) {
                         @if ($index > 0) {
-                    <a class="menu-radio-{{$index === activeType ? 'checked' : 'unchecked'}}" (click)=onRadioClickSettings($index)>
-                        <i class="radio-icon"></i>
-                        <span>{{importTypes[$index]}}</span>
-                    </a><br/>
+                <div class="settings-selector">
+                    <button
+                        type="button"
+                        class="icon-circle-{{$index == activeType ? 'checked' : 'unchecked'}}"
+                        (click)="onRadioClickSettings($index)">
+                            <i class="psmenu-icon"></i>
+        
+                    </button>
+                    <span>{{item}}</span>
+                </div>
                         }
                     }
-                </div>
             </div>
-            }
         </div>
     </nav>
     <section class="scrollable">
