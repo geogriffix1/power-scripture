@@ -13,4 +13,15 @@
     <div class="field2"><input id="description" #description type="text" class="command-line" placeholder="Theme description (optional)" title="The description of the theme"></div>
     <div class="command-message"></div>
 </div>
-
+@if (createdThemeId) {
+<div class="ps-action-btn">
+    <button
+        type="button"
+        class="edit-button"
+        (click)="EditTheme()"
+        title="Click to edit new theme">
+        <i class="edit-icon"></i>
+        <span>Edit Theme</span>
+    </button>
+</div>
+}

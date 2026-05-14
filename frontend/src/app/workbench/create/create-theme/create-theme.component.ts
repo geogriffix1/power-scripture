@@ -1,6 +1,6 @@
 import { Component, ElementRef, ViewChild } from '@angular/core';
+import { Router } from '@angular/router';
 import { BibleService } from '../../../bible.service';
-import { BibleBooksService } from '../../../bible-books.service';
 import { WorkbenchComponent } from '../../workbench.component';
 import { ThemeModel } from '../../../model/theme.model';
 import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-tree.component';
@@ -14,9 +14,13 @@ export class CreateThemeComponent {
   @ViewChild('name', { static: true }) nameField!: ElementRef;
   @ViewChild('description', { static: true }) descriptionField!: ElementRef;
   activeTheme!:ThemeModel;
+  createdThemeId: number | null = null;
+
+  constructor(private router: Router) {}
 
   CreateTheme() {
     $("div.command-message").text("");
+    this.createdThemeId = null;
     if (WorkbenchComponent.activeTheme == null) {
       $("div.command-message").text("Theme not created: Parent Theme was not selected.").show(100);
       return;
@@ -45,8 +49,16 @@ export class CreateThemeComponent {
                $("div.command-message").text(theme.description);
              }
              else {
-              BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${theme.parent}`);
-              $("div.command-message").text(`Theme "${theme.name}" created successfully`); 
+              BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${theme.parent}`, parentTheme => {
+                BibleThemeTreeComponent.openDomThemeNode(parentTheme);
+                const newTheme = BibleThemeTreeComponent.getDomNode(`theme${theme.id}`);
+                if (newTheme) {
+                  const tree = $('#theme-tree-full').jstree(true);
+                  tree.select_node(newTheme.id);
+                }
+              });
+              this.createdThemeId = theme.id;
+              $("div.command-message").text(`Theme "${theme.name}" created successfully`);
              }
           });
       }
@@ -54,5 +66,11 @@ export class CreateThemeComponent {
         $(".workbench-parent-theme div.selected-theme").addClass("missing");
       }
     })(this);
+  }
+
+  EditTheme() {
+    if (this.createdThemeId) {
+      this.router.navigate(['/edit/theme']);
+    }
   }
 }

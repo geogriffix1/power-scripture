@@ -8,6 +8,7 @@ export interface ThemeModel {
     parent: number,
     sequence: number,
     childCount: number,
+    remarks: boolean,
     path: string,
     node: JstreeModel | undefined;
 }

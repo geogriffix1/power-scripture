@@ -170,7 +170,6 @@ export class BibleThemeTreeComponent implements OnInit {
       }
 
       if (node.parent == "#") {
-        delete items.createThemeItem;
         delete items.editThemeItem;
         delete items.deleteThemeItem;
       }

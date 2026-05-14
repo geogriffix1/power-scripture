@@ -32,6 +32,14 @@ export class EditThemeComponent {
   resequencingHeight!:number;
   themeListOpen = false;
   citationListOpen = false;
+  remarksOpen = false;
+  remarksLoaded = false;
+  remarksSaving = false;
+  remarksEditing = false;
+  remarksText = "";
+  remarksEditText = "";
+  renderedRemarks = "";
+  remarksMessage = "";
 
   jstreeModel!:JstreeModel;
 
@@ -69,6 +77,16 @@ export class EditThemeComponent {
             this.childthemes = themes;
             this.citations = themeToCitationLinks;
             this.isEdited = false;
+            this.remarksOpen = false;
+            this.remarksLoaded = false;
+            this.remarksSaving = false;
+            this.remarksEditing = false;
+            this.remarksText = "";
+            this.remarksEditText = "";
+            this.renderedRemarks = "";
+            this.remarksMessage = "";
+            $(".childRemarks .spin-arrow-icon").css("rotate", "0deg");
+            $(".remarks-container").hide();
 
             this.editedTheme = <ThemeExtendedModel> {
               id: this.activeTheme.id,
@@ -76,6 +94,7 @@ export class EditThemeComponent {
               description: this.activeTheme.description,
               parent: this.activeTheme.parent,
               sequence: this.activeTheme.sequence,
+              remarks: this.activeTheme.remarks,
               path: this.activeTheme.path,
               extended: this.activeTheme.extended,
               themes: themes,
@@ -86,6 +105,14 @@ export class EditThemeComponent {
       else {
         $("#name").val("").show(500);
         $("#description").val("").show(500);
+        this.remarksOpen = false;
+        this.remarksLoaded = false;
+        this.remarksSaving = false;
+        this.remarksEditing = false;
+        this.remarksText = "";
+        this.remarksEditText = "";
+        this.renderedRemarks = "";
+        this.remarksMessage = "";
         $("div.theme.selected")
           .removeClass("missing")
           .addClass("missing")
@@ -185,6 +212,7 @@ export class EditThemeComponent {
               description: obj.editedTheme!.description,
               parent: obj.editedTheme!.parent,
               sequence: obj.editedTheme!.sequence,
+              remarks: obj.editedTheme!.remarks,
               path: obj.editedTheme!.path,
               extended: obj.editedTheme!.extended,
               themes: obj.editedTheme!.themes,
@@ -230,6 +258,227 @@ export class EditThemeComponent {
     }
 
     this.citationListOpen = !this.citationListOpen;
+  }
+
+  OpenCloseRemarks() {
+    if (this.remarksEditing || !this.activeTheme?.remarks) {
+      return;
+    }
+
+    if (this.remarksOpen) {
+      $(".childRemarks .spin-arrow-icon").animate({rotate: "0deg"}, 500);
+      $(".remarks-container").slideUp(500);
+    }
+    else {
+      $(".childRemarks .spin-arrow-icon").animate({rotate: "90deg"}, 500);
+      $(".remarks-container").slideDown(500);
+      this.loadRemarks();
+    }
+
+    this.remarksOpen = !this.remarksOpen;
+  }
+
+  CreateRemarks(event: MouseEvent) {
+    event.stopPropagation();
+
+    if (!this.activeTheme || this.activeTheme.remarks) {
+      return;
+    }
+
+    this.remarksOpen = true;
+    this.remarksLoaded = true;
+    this.remarksEditing = true;
+    this.remarksText = "";
+    this.remarksEditText = "";
+    this.renderedRemarks = "";
+    this.remarksMessage = "";
+    $(".remarks-container").slideDown(500);
+  }
+
+  onRemarksInput(event: Event) {
+    this.remarksEditText = (event.target as HTMLTextAreaElement).value;
+    this.remarksMessage = "";
+  }
+
+  async loadRemarks() {
+    if (!this.activeTheme || this.remarksLoaded) {
+      return;
+    }
+
+    if (!this.activeTheme.remarks) {
+      this.remarksText = "";
+      this.remarksEditText = "";
+      this.renderedRemarks = "";
+      this.remarksLoaded = true;
+      return;
+    }
+
+    try {
+      this.remarksText = await this.service.getThemeRemarks(this.activeTheme.id);
+      this.remarksEditText = this.remarksText;
+      this.renderedRemarks = this.renderMarkdown(this.remarksText);
+      this.remarksLoaded = true;
+    }
+    catch {
+      this.remarksMessage = "Remarks could not be loaded";
+    }
+  }
+
+  async EditRemarks(event: MouseEvent) {
+    event.stopPropagation();
+
+    await this.loadRemarks();
+    this.remarksEditText = this.remarksText;
+    this.remarksEditing = true;
+    this.remarksMessage = "";
+  }
+
+  CancelRemarksEdit(event: MouseEvent) {
+    event.stopPropagation();
+
+    this.remarksEditText = this.remarksText;
+    this.remarksEditing = false;
+    this.remarksMessage = "";
+
+    if (!this.activeTheme?.remarks) {
+      this.remarksOpen = false;
+      this.remarksLoaded = false;
+      $(".remarks-container").slideUp(500);
+    }
+  }
+
+  async SaveRemarks(event: MouseEvent) {
+    event.stopPropagation();
+
+    if (!this.activeTheme || this.remarksSaving) {
+      return;
+    }
+
+    this.remarksSaving = true;
+    this.remarksMessage = "";
+
+    try {
+      const result = await this.service.saveThemeRemarks(this.activeTheme.id, this.remarksEditText);
+      if (result.message == "Success" || result.success || result.saved) {
+        this.remarksText = this.remarksEditText;
+        this.renderedRemarks = this.renderMarkdown(this.remarksText);
+        this.activeTheme.remarks = true;
+        if (this.editedTheme) {
+          this.editedTheme.remarks = true;
+        }
+        const node = <JstreeModel>BibleThemeTreeComponent.getDomNode(`theme${this.activeTheme.id}`);
+        if (node?.data) {
+          node.data.remarks = true;
+        }
+        this.remarksOpen = true;
+        this.remarksLoaded = true;
+        this.remarksEditing = false;
+        this.remarksMessage = "Remarks saved";
+      }
+      else {
+        throw "Failed";
+      }
+    }
+    catch {
+      this.remarksMessage = "Remarks save failed";
+    }
+    finally {
+      this.remarksSaving = false;
+    }
+  }
+
+  async DeleteRemarks(event: MouseEvent) {
+    event.stopPropagation();
+
+    if (!this.activeTheme) {
+      return;
+    }
+
+    try {
+      const result = await this.service.deleteThemeRemarks(this.activeTheme.id);
+      if (result.message == "Success" || result.success || result.deleted) {
+        this.remarksText = "";
+        this.remarksEditText = "";
+        this.renderedRemarks = "";
+        this.activeTheme.remarks = false;
+        if (this.editedTheme) {
+          this.editedTheme.remarks = false;
+        }
+        const node = <JstreeModel>BibleThemeTreeComponent.getDomNode(`theme${this.activeTheme.id}`);
+        if (node?.data) {
+          node.data.remarks = false;
+        }
+        this.remarksOpen = false;
+        this.remarksLoaded = true;
+        this.remarksEditing = false;
+        this.remarksMessage = "Remarks deleted";
+        $(".remarks-container").slideUp(500);
+      }
+      else {
+        throw "Failed";
+      }
+    }
+    catch {
+      this.remarksMessage = "Remarks delete failed";
+    }
+  }
+
+  private renderMarkdown(markdown: string): string {
+    const lines = markdown.replace(/\r\n/g, "\n").split("\n");
+    let html = "";
+    let inList = false;
+
+    lines.forEach(line => {
+      const heading = /^(#{1,6})\s+(.+)$/.exec(line);
+      const listItem = /^[-*]\s+(.+)$/.exec(line);
+
+      if (listItem) {
+        if (!inList) {
+          html += "<ul>";
+          inList = true;
+        }
+        html += `<li>${this.renderInlineMarkdown(listItem[1])}</li>`;
+        return;
+      }
+
+      if (inList) {
+        html += "</ul>";
+        inList = false;
+      }
+
+      if (heading) {
+        const level = heading[1].length;
+        html += `<h${level}>${this.renderInlineMarkdown(heading[2])}</h${level}>`;
+      }
+      else if (line.trim()) {
+        html += `<p>${this.renderInlineMarkdown(line)}</p>`;
+      }
+      else {
+        html += "<br>";
+      }
+    });
+
+    if (inList) {
+      html += "</ul>";
+    }
+
+    return html;
+  }
+
+  private renderInlineMarkdown(text: string): string {
+    return this.escapeHtml(text)
+      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+      .replace(/\*(.+?)\*/g, "<em>$1</em>")
+      .replace(/`(.+?)`/g, "<code>$1</code>");
+  }
+
+  private escapeHtml(text: string): string {
+    return text
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#39;");
   }
 
   async getDbTheme(id:number) : Promise<ThemeExtendedModel> {

@@ -3,7 +3,8 @@ export interface ThemeChainModel {
 }
 
 export interface ThemeChainLinkModel {
-    id: number,
+    themeId: number,
     name: string,
+    remarks: boolean,
     parent: number
 }

@@ -6,6 +6,8 @@ import { BibleService } from '../../../bible.service';
 import { ThemeModel, ThemeExtendedModel, ThemeModelReference } from '../../../model/theme.model';
 import { ThemeToCitationLinkModel } from '../../../model/themeToCitation.model';
 import { ThemeCascadeModel } from '../../../model/themeCascade.model';
+import { ThemeCascadeCitationModel } from '../../../model/themeCascade.model';
+import { ThemeChainLinkModel } from '../../../model/themeChain.model';
 @Component({
     selector: 'app-delete-theme',
     imports: [],
@@ -67,10 +69,10 @@ export class DeleteThemeComponent {
         return;
       }
 
-      const cascade = await this.service.getThemeCascade(+this.activeThemeNode()!.id.replace("theme", ""));
+      this.themeToDeleteCascade = await this.service.getThemeCascade(+this.activeThemeNode()!.id.replace("theme", ""));
 
-      const themes = cascade?.themes ?? [];
-      const links = cascade?.themeToCitations ?? [];
+      const themes = (this.themeToDeleteCascade?.themes ?? []) as ThemeChainLinkModel[];
+      const links = (this.themeToDeleteCascade?.citations ?? []) as ThemeCascadeCitationModel[]
 
       if (themes.length > 1 || links.length > 0) {
         this.subthemeCount = themes.length - 1;
@@ -79,10 +81,15 @@ export class DeleteThemeComponent {
       }
       else if (themes.length == 1) {
         let themeId = +this.activeThemeNode()!.id.replace("theme", "");
+        let remarks = this.activeThemeNode()?.data.remarks == 'Y';
         let success = await this.service.deleteTheme(themeId);
         if (success) {
           console.log("Delete successful");
+          
           this.ShowSuccess(`Theme ${this.activeThemeNode()!.data.path} deleted successfully`);
+
+          await this.service.deleteThemeRemarks(themeId);
+
           $("div.selected.theme").addClass("missing").html(this.missingThemeText);
           BibleThemeTreeComponent.refreshDomNodeFromDb(this.activeThemeNode()!.parent);
           WorkbenchComponent.activeTheme = JstreeModel.null;
@@ -105,7 +112,18 @@ export class DeleteThemeComponent {
       $(".command-warning").hide(100);
       if (success) {
         console.log("Delete success");
+        const tasks = [];
+        tasks.push(this.service.deleteThemeRemarks(themeId));
+
+        const themes = (this.themeToDeleteCascade?.themes ?? []) as ThemeChainLinkModel[];
         this.ShowSuccess(`Theme ${this.activeThemeNode()!.data.path} deleted successfully`);
+          for (const theme of themes) {
+            if (theme.remarks) {
+              tasks.push(this.service.deleteThemeRemarks(theme.themeId));
+            }
+          }
+
+        await Promise.all(tasks);
         $(".workbench-theme div.selected.theme").addClass("missing");
         BibleThemeTreeComponent.refreshDomNodeFromDb(this.activeThemeNode()!.parent);
         WorkbenchComponent.activeTheme = JstreeModel.null;

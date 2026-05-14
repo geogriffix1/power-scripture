@@ -2,7 +2,10 @@ const bibleTheme = require("../models/bibleTheme.model");
 const dbAccess = require("../db/db.access");
 const errorMessage = require("./helpers/errorMessage");
 const responseTools = require("./helpers/responseTools");
+const fs = require("fs");
+const path = require("path");
 const tools = new responseTools;
+const remarksDirectory = path.join(__dirname, "..", "remarks");
 
 exports.listOne = (req, res) => {
     var originalPath = req.path;
@@ -84,6 +87,7 @@ exports.listOne = (req, res) => {
                     theme = tools.getObjectFromResult(result, 1);
                     theme.description = theme.description ? theme.description : "";
                     theme.path = global.themePaths[theme.id].path;
+                    theme.remarks = theme.remarks == 'Y';
                     theme.extended = true;
                     theme.themes = [];
                     theme.themeToCitationLinks = [];
@@ -102,6 +106,7 @@ exports.listOne = (req, res) => {
                         activeChildTheme = newChildTheme;
                         activeChildTheme.description = activeChildTheme.description ? activeChildTheme.description : "";
                         activeChildTheme.path = global.themePaths[activeChildTheme.id].path;
+                        activeChildTheme.remarks = activeChildTheme.remarks == 'Y';
                         theme.themes.push({ theme: activeChildTheme });
                     }
                 }
@@ -200,9 +205,13 @@ exports.cascade = (req, res) => {
           // parse only if it's a string
           if (typeof payload === "string") {
             let parsed = JSON.parse(payload);
+
             // handle double-encoded case just in case
             if (typeof parsed === "string") parsed = JSON.parse(parsed);
             payload = parsed;
+            for (theme of payload.themes) {
+                theme.remarks = theme.remarks === 'Y';
+            }
           }
 
           return res.json(payload);
@@ -239,6 +248,141 @@ exports.listAll = (req, res) => {
 
     res.send({ themes: allNodes });
 };
+
+const getRemarksFile = themeId => {
+    const id = Number(themeId);
+    if (!Number.isInteger(id) || id < 0) {
+        return null;
+    }
+
+    const fileName = `Theme${String(id).padStart(6, "0")}Remarks.md`;
+    return {
+        id: id,
+        fileName: fileName,
+        filePath: path.join(remarksDirectory, fileName)
+    };
+}
+
+exports.getRemarks = async (req, res) => {
+    const remarksFile = getRemarksFile(req.params.id);
+    if (!remarksFile) {
+        res.status(400).send(errorMessage(
+            400,
+            "Invalid Parameter",
+            req.path,
+            "Theme id is missing or invalid. Must be a non-negative integer.",
+            "Usage: GET /themes/{themeId}/remarks"
+        ));
+        return;
+    }
+
+    try {
+        const remarks = await fs.promises.readFile(remarksFile.filePath, "utf8");
+        res.send({ id: remarksFile.id, remarks: remarks });
+    }
+    catch (err) {
+        if (err.code == "ENOENT") {
+            res.send({ id: remarksFile.id, remarks: "" });
+            return;
+        }
+
+        res.status(500).send(errorMessage(
+            500,
+            "Server Error",
+            req.path,
+            err.message,
+            "Usage: GET /themes/{themeId}/remarks"
+        ));
+    }
+}
+
+exports.saveRemarks = async (req, res) => {
+    const remarksFile = getRemarksFile(req.body.id);
+    if (!remarksFile) {
+        res.status(400).send(errorMessage(
+            400,
+            "Invalid Parameter",
+            req.path,
+            "Theme id is missing or invalid. Must be a non-negative integer.",
+            "Usage: In message body { \"id\": themeId, \"remarks\": markdownRemarks }"
+        ));
+        return;
+    }
+
+    const remarks = req.body.remarks === undefined || req.body.remarks === null ? "" : String(req.body.remarks);
+
+    try {
+        await fs.promises.mkdir(remarksDirectory, { recursive: true });
+        await fs.promises.writeFile(remarksFile.filePath, remarks, "utf8");
+
+        const theme = new bibleTheme;
+        theme.values = { id: req.body.id, remarks: 'Y' };
+        const updateString = theme.getUpdateString();
+        await updateThemeRemarks(updateString);
+        res.send({ message: "Success", fileName: remarksFile.fileName });
+    }
+    catch (err) {
+        res.status(500).send(errorMessage(
+            500,
+            "Server Error",
+            req.path,
+            err.message,
+            "Usage: In message body { \"id\": themeId, \"remarks\": markdownRemarks }"
+        ));
+    }
+}
+
+
+updateThemeRemarks = updateString => {
+    return new Promise((resolve, reject) => {
+        dbAccess.update(updateString, (err, results) => {
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve(results);
+            }
+        });
+    });
+}
+
+exports.deleteRemarks = async (req, res) => {
+    const remarksFile = getRemarksFile(req.params.id);
+    if (!remarksFile) {
+        res.status(400).send(errorMessage(
+            400,
+            "Invalid Parameter",
+            req.path,
+            "Theme id is missing or invalid. Must be a non-negative integer.",
+            "Usage: DELETE /themes/{themeId}/remarks"
+        ));
+        return;
+    }
+
+    try {
+        await fs.promises.unlink(remarksFile.filePath);
+        res.send({ message: "Success", deleted: remarksFile.fileName });
+        
+        const theme = new bibleTheme;
+        theme.values = { id: req.body.id, remarks: 'N' };
+        const updateString = theme.getUpdateString();
+        await updateThemeRemarks(updateString);
+    }
+    catch (err) {
+        if (err.code == "ENOENT") {
+            res.send({ message: "Success", deleted: null });
+            return;
+        }
+
+        res.status(500).send(errorMessage(
+            500,
+            "Server Error",
+            req.path,
+            err.message,
+            "Usage: DELETE /themes/{themeId}/remarks"
+        ));
+    }
+}
 
 exports.create = (req, res) => {
     var obj = req.body;
@@ -303,6 +447,7 @@ exports.create = (req, res) => {
         });
     }
 
+    obj.remarks = 'N';
     var context = { insert: obj };
 
     var tasks = [];
@@ -425,6 +570,8 @@ exports.edit = (req, res) => {
 
         return;
     }
+    
+    obj.results = obj.results === true ? 'Y' : 'N';
 
     addContext = context => {
         return new Promise(resolve => {
@@ -537,12 +684,18 @@ exports.edit = (req, res) => {
                 return;
             }
 
+            
+            const remarksFileName = getRemarksFile(req.body.id);
+            const remarks = fs.existsSync(remarksFileName) ? 'Y' : 'N';
+
+            original.remarks = remarks;
             context.edited = {
                 id: original.id,
                 parent: parentId,
                 name: name,
                 description: description,
-                sequence: sequence
+                sequence: sequence,
+                remarks: remarks
             };
 
             context.original = original;
@@ -869,29 +1022,167 @@ exports.resequenceCitations = (req, res) => {
     })();
 }
 
-exports.pasteTheme = (req, res) => {
-    var copyThemeId = req.params.copyId;
-    var pasteThemeId = req.params.pasteId;
+const escapeSqlString = value => String(value).replace(/\\/g, "\\\\").replace(/"/g, '\\"');
 
-    (async () => {
-        await dbAccess.execute(`call paste_bible_theme(${copyThemeId}, ${pasteThemeId})`, (err, results) => {
+const queryAsync = queryString => {
+    return new Promise((resolve, reject) => {
+        dbAccess.query(queryString, (err, results) => {
             if (err) {
-                res.status(500).send(errorMessage(
-                    500,
-                    "Server Error",
-                    req.path,
-                    `Error trying to paste theme node: ${err.message}`,
-                    "Usage: PUT /themes/paste-theme/1/2 copies theme id=1 to theme id=2"
-                ));
-
-                res.send();
+                reject(err);
             }
             else {
-                refreshThemePaths();
-                res.send({message: "Success"});
+                resolve(results);
             }
         });
-    })();
+    });
+}
+
+const executeAsync = queryString => {
+    return new Promise((resolve, reject) => {
+        dbAccess.execute(queryString, (err, results) => {
+            if (err) {
+                reject(err);
+            }
+            else {
+                resolve(results);
+            }
+        });
+    });
+}
+
+const copyThemeRemarks = async (sourceThemeId, targetThemeId) => {
+    const sourceRemarksFile = getRemarksFile(sourceThemeId);
+    const targetRemarksFile = getRemarksFile(targetThemeId);
+
+    if (!sourceRemarksFile || !targetRemarksFile || !fs.existsSync(sourceRemarksFile.filePath)) {
+        return false;
+    }
+
+    await fs.promises.mkdir(remarksDirectory, { recursive: true });
+    await fs.promises.copyFile(sourceRemarksFile.filePath, targetRemarksFile.filePath);
+    await executeAsync(`UPDATE bible_themes SET remarks='Y', updated_at=NOW() WHERE bible_theme_id=${targetThemeId}`);
+    return true;
+}
+
+const getThemePasteMap = async (copyThemeId, pasteThemeId, rootSequence) => {
+    const sourceThemes = await queryAsync(`
+        WITH RECURSIVE theme_cascade AS (
+            SELECT
+                bible_theme_id,
+                bible_theme_parent_id,
+                name,
+                sequence,
+                0 AS depth
+            FROM bible_themes
+            WHERE bible_theme_id = ${copyThemeId}
+
+            UNION ALL
+
+            SELECT
+                child.bible_theme_id,
+                child.bible_theme_parent_id,
+                child.name,
+                child.sequence,
+                parent.depth + 1 AS depth
+            FROM bible_themes child
+            JOIN theme_cascade parent
+                ON child.bible_theme_parent_id = parent.bible_theme_id
+        )
+        SELECT
+            bible_theme_id AS id,
+            bible_theme_parent_id AS parent,
+            name,
+            sequence,
+            depth
+        FROM theme_cascade
+        ORDER BY depth, parent, sequence, id
+    `);
+
+    const themeIdMap = new Map();
+    let rootTargetId = null;
+
+    for (const sourceTheme of sourceThemes) {
+        let targetParentId = pasteThemeId;
+        let targetSequence = rootSequence;
+
+        if (sourceTheme.depth > 0) {
+            targetParentId = themeIdMap.get(sourceTheme.parent);
+            targetSequence = sourceTheme.sequence;
+        }
+
+        if (!targetParentId) {
+            throw new Error(`Could not resolve pasted parent for theme ${sourceTheme.id}`);
+        }
+
+        const targetThemes = await queryAsync(`
+            SELECT bible_theme_id AS id
+            FROM bible_themes
+            WHERE bible_theme_parent_id=${targetParentId}
+              AND sequence=${targetSequence}
+              AND LOWER(name)=LOWER("${escapeSqlString(sourceTheme.name)}")
+            ORDER BY bible_theme_id DESC
+            LIMIT 1
+        `);
+
+        if (!targetThemes.length) {
+            throw new Error(`Could not resolve pasted theme for source theme ${sourceTheme.id}`);
+        }
+
+        const targetThemeId = targetThemes[0].id;
+        themeIdMap.set(sourceTheme.id, targetThemeId);
+
+        if (sourceTheme.depth == 0) {
+            rootTargetId = targetThemeId;
+        }
+    }
+
+    return {
+        rootTargetId: rootTargetId,
+        themeIdMap: themeIdMap
+    };
+}
+
+exports.pasteTheme = async (req, res) => {
+    var copyThemeId = +req.params.copyId;
+    var pasteThemeId = +req.params.pasteId;
+
+    try {
+        const sequenceRows = await queryAsync(`
+            SELECT COALESCE(MAX(sequence) + 1, 1) AS nextSequence
+            FROM bible_themes
+            WHERE bible_theme_parent_id=${pasteThemeId}
+        `);
+        const rootSequence = sequenceRows[0].nextSequence;
+
+        await executeAsync(`call paste_bible_theme(${copyThemeId}, ${pasteThemeId})`);
+
+        const pasteMap = await getThemePasteMap(copyThemeId, pasteThemeId, rootSequence);
+        let copiedRemarks = 0;
+
+        for (const [sourceThemeId, targetThemeId] of pasteMap.themeIdMap) {
+            if (await copyThemeRemarks(sourceThemeId, targetThemeId)) {
+                copiedRemarks++;
+            }
+        }
+
+        const refreshThemePathsAsync = require("../appHelpers/refreshThemePathsAsync");
+        await refreshThemePathsAsync();
+
+        res.send({
+            message: "Success",
+            pastedThemeId: pasteMap.rootTargetId,
+            copiedRemarks: copiedRemarks
+        });
+    }
+    catch (err) {
+        res.status(500).send(errorMessage(
+            500,
+            "Server Error",
+            req.path,
+            `Error trying to paste theme node: ${err.message}`,
+            "Usage: PUT /themes/paste-theme/1/2 copies theme id=1 to theme id=2"
+        ));
+    }
 }
 
 exports.pasteThemeToCitation = (req, res) => {

@@ -70,6 +70,76 @@
             </div>
         </div>
         } 
+        <div class="childRemarks">
+            <div class="theme-member remarks-member">
+                @if (remarksEditing || activeTheme.remarks) {
+                <i
+                    class="spin-arrow-icon remarks-toggle"
+                    [class.remarks-arrow-open]="remarksOpen || remarksEditing"
+                    [class.remarks-toggle-disabled]="remarksEditing"
+                    (click)="OpenCloseRemarks()"
+                    title="Show or hide remarks"></i>
+                }
+                @else {
+                <button
+                    type="button"
+                    class="remarks-create"
+                    (click)="CreateRemarks($event)"
+                    title="Create remarks">
+                    <i class="psmenu-icon"></i>
+                </button>
+                }
+                <span>Remarks</span>
+                @if (remarksEditing) {
+                <button
+                    type="button"
+                    class="remarks-command remarks-save"
+                    (click)="SaveRemarks($event)"
+                    title="Save remarks">
+                    <i class="psmenu-icon"></i>
+                </button>
+                <button
+                    type="button"
+                    class="remarks-command remarks-cancel"
+                    (click)="CancelRemarksEdit($event)"
+                    title="Cancel edits (undo changes)">
+                    <i class="psmenu-icon"></i>
+                </button>
+                }
+                @else if (activeTheme.remarks) {
+                <button
+                    type="button"
+                    class="remarks-command remarks-edit"
+                    (click)="EditRemarks($event)"
+                    title="Edit remarks">
+                    <i class="psmenu-icon"></i>
+                </button>
+                <button
+                    type="button"
+                    class="remarks-command remarks-delete"
+                    (click)="DeleteRemarks($event)"
+                    title="Delete remarks">
+                    <i class="psmenu-icon"></i>
+                </button>
+                }
+            </div>
+            <div class="remarks-container" style="display: none">
+                @if (remarksEditing) {
+                <textarea
+                    class="remarks-text"
+                    [value]="remarksEditText"
+                    (input)="onRemarksInput($event)"
+                    placeholder="Enter theme remarks here..."
+                    spellcheck="true"></textarea>
+                }
+                @else {
+                    <div class="remarks-rendered" [innerHTML]="renderedRemarks"></div>
+                }
+                @if (remarksMessage) {
+                    <div class="remarks-message">{{remarksMessage}}</div>
+                }
+            </div>
+        </div>
     }
     </div>
 </section>

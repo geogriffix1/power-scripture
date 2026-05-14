@@ -135,7 +135,6 @@ exports.listAll = (req, res) => {
     var selectString = themeToCitation.getSelectString();
     
     selectString += ` ORDER BY themeId, sequence LIMIT ${offset}, ${limit}`;
-    console.log(selectString);
 
     dbAccess.query(selectString, (err, results) => {
         if (err) {
@@ -190,7 +189,6 @@ exports.create = (req, res) => {
 
     confirmSequence = (themeId, citationId, sequence) => {
         return new Promise((resolve, reject) => {
-            console.log(themeId, citationId, sequence);
             var themeToCitation = new bibleThemeToCitation;
             themeToCitation.values = { themeId: themeId };
             var selectString = themeToCitation.getSelectString();
@@ -228,8 +226,6 @@ exports.create = (req, res) => {
                     reject(err);
                 }
                 else {
-                    console.log("resolving updateThemeToCitation");
-                    console.log(result[0]);
                     resolve();
                 }
             });
@@ -367,8 +363,6 @@ exports.create = (req, res) => {
                 "Error while attempting to insert new citation in database"
             ));
         }
-
-        console.log("After createThemeToCitation completion");
     }
     else {
         if (message) {
@@ -599,14 +593,12 @@ exports.update = (req, res) => {
 
             var themeToCitation = new bibleThemeToCitation;
             themeToCitation.values = context.edited;
-            console.log(themeToCitation.getUpdateString());
 
             tasks.push(updateObject(themeToCitation.getUpdateString()));
 
             if (context.changeThemes) {
                 var originalSiblings = new bibleThemeToCitation;
                 originalSiblings.values = { themeId: context.original.themeId };
-                console.log(originalSiblings.getSelectString() + " ORDER BY bible_theme_sequence");
 
                 tasks.push(queryObjects(originalSiblings.getSelectString() + " ORDER BY bible_theme_sequence"));
             }   

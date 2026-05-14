@@ -8,6 +8,7 @@ class BibleThemeModel {
         this.sequence = new attr.columnAttribute("sequence", "INT");
         this.path = null;
         this.parent = new attr.columnAttribute("bible_theme_parent_id", "INT", false, "bible_themes");
+        this.remarks = new attr.columnAttribute("remarks", "VARCHAR(1)");
         this.createdAt = new attr.columnAttribute("created_at", "DATETIME");
         this.updatedAt = new attr.columnAttribute("updated_at", "DATETIME");
         this.childCount = { function: `get_bible_theme_child_count(t1.bible_theme_id)` };
@@ -24,6 +25,7 @@ class BibleThemeModel {
             sequence: this.sequence.value,
             path: this.path,
             parent: this.parent.value,
+            remarks: this.remarks.value,
             createdAt: this.createdAt.value,
             updatedAt: this.updatedAt.value,
             childCount: this.childCount,
@@ -39,6 +41,7 @@ class BibleThemeModel {
         this.sequence.value = value.sequence ? value.sequence : null;
         this.path = value.path ? value.path : null;
         this.parent.value = value.parent || value.parent === 0 ? value.parent : null;
+        this.remarks.value = /Y|N/.test(value.remarks) ? value.remarks : null;
         this.createdAt.value = value.createdAt ? value.createdAt : null;
         this.updatedAt.value = value.updatedAt ? value.updatedAt : null;
         this.childCount = { function: `get_bible_theme_child_count(t1.bible_theme_id)` };

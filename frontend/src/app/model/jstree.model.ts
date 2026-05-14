@@ -19,6 +19,7 @@ export class JstreeModel {
         icon:string,
         sequence:number,
         path:string,
+        remarks:boolean,
         state: JstreeState | any,
         citationId?:number
     ) {
@@ -41,10 +42,10 @@ export class JstreeModel {
         };
 
         this.children = <string[]>[];
-        this.data = { path: path };
+        this.data = { path: path, remarks: remarks };
     }
     
-    static null = new JstreeModel("0", "", "", "", 0, "", {});
+    static null = new JstreeModel("0", "", "", "", 0, "", false, {});
 
     static getJstreeModel(node: any): JstreeModel {
         let pattern = /(theme|citation)(\d+)/;
@@ -56,6 +57,7 @@ export class JstreeModel {
             icon,
             node.li_attr.sequence,
             node.data.path,
+            node.data.remarks ?? false,
             new JstreeState(false, false, true),
             node.li_attr?.citationId
         );
@@ -66,7 +68,7 @@ export class JstreeModel {
 
     static getJstreeModelFromExtendedTheme(node: ThemeExtendedModel): JstreeModel {
 
-        let jstreeModel = new JstreeModel(`theme${node.id}`, node.name, node.description, "theme", node.sequence, node.path, new JstreeState(false, false, false));
+        let jstreeModel = new JstreeModel(`theme${node.id}`, node.name, node.description, "theme", node.sequence, node.path, node.remarks, new JstreeState(false, false, false));
         jstreeModel.children = <string[]>[];
         node.themes.sort((a, b) => a.theme.sequence - b.theme.sequence);
         node.themes.forEach(theme => {
@@ -93,6 +95,7 @@ export class JstreeModel {
             "citation",
             node.sequence,
             "",
+            false,
             new JstreeState(false, false, false),
             node.citationId);
         jstreeModel.children = false;

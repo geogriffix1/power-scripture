@@ -1,11 +1,13 @@
 import { Router, ActivatedRoute } from '@angular/router';
 import { Component } from '@angular/core';
 import { CommonModule, NgFor } from '@angular/common';
+import { Subscription } from 'rxjs';
 import { WorkbenchComponent } from '../workbench.component';
 import { CreateCitationComponent } from './create-citation/create-citation.component';
 import { CreateThemeComponent } from './create-theme/create-theme.component';
 import { ThemeModel } from '../../model/theme.model';
-import { BibleService } from '../../bible.service';
+import { BibleThemeTreeComponent } from '../../bible-theme-tree/bible-theme-tree.component';
+import { JstreeModel } from '../../model/jstree.model';
 import $ from 'jquery';
 
 @Component({
@@ -40,9 +42,10 @@ export class CreateComponent {
   activeType = 0;
   createType = this.createTypes[this.activeType];
   settingsActive = false;
-  activeTheme!:ThemeModel;
+  activeTheme:ThemeModel | null = null;
   sectionWidth!:number;
   sectionHeight!:number;
+  private subscriptions = new Subscription;
 
 
   // workbenchDomRect(rect:DOMRectReadOnly) {
@@ -94,37 +97,48 @@ export class CreateComponent {
     // $("app-create").width(rect.width);
     // $("#description").width(rect.width - 60);
   
-    (async (obj:CreateComponent) => {
-      let service = new BibleService();
-      if (WorkbenchComponent.activeTheme) {
-        let id = <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", "");
-        obj.activeTheme = await service.getTheme(id);
-      }
-      else {
-        $(".workbench-parent-theme div.selected-theme").addClass("missing");
-      }
+    this.setActiveTheme(WorkbenchComponent.activeTheme);
 
-  //     if (!CreateComponent.isSubscribed) {
-  //       BibleThemeTreeComponent.ActiveThemeSelector.subscribe((theme: JstreeModel|null) => {
-  //         if (theme !== null) {
-  //           let id = +theme.id.replace("theme", "");
-  //           obj.activeTheme = <ThemeModel>{
-  //             id: +theme.id.replace("theme", ""),
-  //             name: theme.text,
-  //             description: theme.li_attr.title,
-  //             parent: +theme.parent.replace("theme", ""),
-  //             sequence: theme.li_attr.sequence,
-  //             childCount: Array.isArray(theme.children) ? theme.children.length : 0,
-  //             path: theme.data.path
-  //           };
+    this.subscriptions.add(
+      BibleThemeTreeComponent.ActiveThemeSelector.subscribe((theme: JstreeModel|null) => {
+        this.setActiveTheme(theme);
+      })
+    );
+  }
 
-  //           $("div.theme.selected-theme").text(obj.activeTheme.path);
-  //           $(".workbench-parent-theme div.selected-theme").removeClass("missing");
-  //         }
-  //       });
-  //     }
-  //   })(this);
-    })(this);
+  ngOnDestroy() {
+    this.subscriptions.unsubscribe();
+    CreateComponent.isActive = false;
+  }
+
+  private setActiveTheme(theme: JstreeModel | null) {
+    if (!theme) {
+      this.activeTheme = null;
+      $(".workbench-parent-theme div.selected-theme").addClass("missing");
+      return;
+    }
+
+    let parent = theme.parent ?? "0";
+    if (parent.startsWith("theme")) {
+      parent = parent.replace("theme", "");
+    }
+    else if (parent == "#") {
+      parent = "0";
+    }
+
+    this.activeTheme = <ThemeModel>{
+      id: +theme.id.replace("theme", ""),
+      name: theme.text,
+      description: theme.li_attr.title,
+      parent: +parent,
+      sequence: theme.li_attr.sequence,
+      childCount: Array.isArray(theme.children) ? theme.children.length : 0,
+      remarks: theme.data.remarks ?? false,
+      path: theme.data.path,
+      node: theme
+    };
+
+    $(".workbench-parent-theme div.selected-theme").removeClass("missing");
   }
 
   // ngAfterViewInit() {

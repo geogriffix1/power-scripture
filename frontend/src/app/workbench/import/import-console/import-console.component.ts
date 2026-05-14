@@ -475,6 +475,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
           description: desc ?? "",
           sequence: sequence,
           childCount: 0,
+          remarks: false,
           extended: true,
           themes: [],
           themeToCitationLinks: []

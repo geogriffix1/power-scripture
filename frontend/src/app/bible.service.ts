@@ -50,6 +50,7 @@ export class BibleService {
           "theme",
           rootThemes.themes[i].sequence,
           rootThemes.themes[i].path,
+          rootThemes.themes[i].remarks ?? false,
           new JstreeState(false, false, false)
         );
 
@@ -84,6 +85,7 @@ export class BibleService {
           "theme",
           parentTheme.theme.themes[i].theme.sequence,
           parentTheme.theme.themes[i].theme.path,
+          parentTheme.theme.themes[i].theme.remarks ?? false,
           new JstreeState(false, false, false)
         );
 
@@ -99,6 +101,7 @@ export class BibleService {
           "citation",
           parentTheme.theme.themeToCitationLinks[i].themeToCitation.sequence,
           "",
+          false,
           new JstreeState(false, false, false),
           parentTheme.theme.themeToCitationLinks[i].themeToCitation.citation.id
         );
@@ -115,7 +118,7 @@ export class BibleService {
       var url = `${this.ROOT_URL}themes/${id}`;
       const data = await fetch(url);
       const theme = (await data.json() ?? null);
-      return <ThemeExtendedModel>theme.theme;
+      return theme.theme;
   }
 
   async getCitation(id:number): Promise<CitationExtendedModel> {
@@ -158,6 +161,7 @@ export class BibleService {
         extended: false,
         themes: [],
         themeToCitationLinks: [],
+        remarks: false
       }
     }
 
@@ -283,7 +287,7 @@ export class BibleService {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({parent: parentId, name: name, description: description, sequence: sequence})
+      body: JSON.stringify({parent: parentId, name: name, description: description, sequence: sequence, remarks: false})
     });
 
     let theme = await data.json();
@@ -296,6 +300,7 @@ export class BibleService {
         parent:-1,
         sequence: -1,
         childCount: -1,
+        remarks: false,
         path:"",
         extended: false,
         themes: [],
@@ -322,6 +327,76 @@ export class BibleService {
 
   let result = await data.json();
   return result;
+ }
+
+ async getThemeRemarks(themeId:number): Promise<string> {
+  var url = `${this.ROOT_URL}themes/${themeId}/remarks`;
+  const data = await fetch(url, {
+    method: "GET",
+    cache: "no-cache",
+    headers: {
+      "Accept": "application/json, text/plain"
+    }
+  });
+
+  if (data.status == 404) {
+    return "";
+  }
+
+  const contentType = data.headers.get("content-type") ?? "";
+  if (contentType.includes("application/json")) {
+    const result = await data.json() ?? {};
+    return result.remarks ?? result.text ?? "";
+  }
+
+  return await data.text();
+ }
+
+ async saveThemeRemarks(themeId:number, remarks:string): Promise<any> {
+  var url = `${this.ROOT_URL}themes/${themeId}/remarks`;
+  const data = await fetch(url, {
+    method: "POST",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({ id: themeId, remarks: remarks })
+  });
+
+  const responseText = await data.text();
+  if (!responseText) {
+    return { message: data.ok ? "Success" : "", success: data.ok };
+  }
+
+  try {
+    return { ...JSON.parse(responseText), success: data.ok };
+  }
+  catch {
+    return { message: responseText, success: data.ok };
+  }
+ }
+
+ async deleteThemeRemarks(themeId:number): Promise<any> {
+  var url = `${this.ROOT_URL}themes/${themeId}/remarks`;
+  const data = await fetch(url, {
+    method: "DELETE",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json"
+    }
+  });
+
+  const responseText = await data.text();
+  if (!responseText) {
+    return { message: data.ok ? "Success" : "", success: data.ok };
+  }
+
+  try {
+    return { ...JSON.parse(responseText), success: data.ok };
+  }
+  catch {
+    return { message: responseText, success: data.ok };
+  }
  }
 
  async editCitation(citation:CitationModel): Promise<any> {
@@ -623,8 +698,9 @@ const data = await fetch(url, {
             chapter: result.chapter_number,
             verse: result.verse_number,
             text: result.text,
-            bibleOrder: result.bible_order
+            bibleOrder: result.bible_order,
           },
+          hide: 'N',
           verseCitationLabel: result.verseCitationLabel,
           markups: []
         };
@@ -689,7 +765,6 @@ const data = await fetch(url, {
     const result = await data.json();
     return result;
   }
-
  
   async createCitationVerseMarkup(markup: CitationVerseMarkup): Promise<CitationVerseMarkup> {
     var url = `${this.ROOT_URL}markups`;

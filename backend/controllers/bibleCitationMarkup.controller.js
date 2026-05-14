@@ -53,7 +53,6 @@ exports.listAll = (req, res) => {
         else {
             var citationVerseMarkups = [];
 
-            console.log(results);
             var citationVerseMarkup = null;
             for (var i = 0; i < results.length; i++) {
                 var result = results[i];

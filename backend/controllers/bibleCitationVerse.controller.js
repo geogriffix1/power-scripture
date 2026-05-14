@@ -414,7 +414,8 @@ exports.create = (req, res) => {
 
                                 citationVerse.citation = tools.getObjectFromResult(result, 2);
                                 citationVerse.scripture = tools.getObjectFromResult(result, 3);
-                                citationVerse.verseCitationLabel = getCitationLabel(citationVerse.scripture.book, citationVerse.scripture.chapter, citationVerse.scripture.verse);
+                                citationVerse.verseCitationLabel = getCitationLabel(citationVerse.scripture.book, citationVerse.scripture.chapter, citationVerse.scripture.verse),
+                                citationVerse.hide = "N";
 
                                 res.send({ created: citationVerse });
                             });
