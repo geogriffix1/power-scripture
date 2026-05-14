@@ -93,12 +93,17 @@ export const HELP_TOPICS: HelpTopic[] = [
       Activating a theme or citation makes it accessible to the Workbench. Right-clicking a theme or citation
       displays a context menu with available commands.</p>
 
+      <p>Themes may also contain free-form remarks. Remarks provide narrative commentary, study notes, outlines,
+      or other explanatory material associated with a theme. Remarks are edited from Theme Editing.</p>
+
       <h3>Copy and Paste</h3>
 
       <p>Themes and citations can be copied and pasted onto another theme.</p>
 
       <p>Themes are copied as new theme cascades. Themes are created with a single parent, so pasting a theme
       creates a duplicated theme structure beneath the destination theme.</p>
+
+      <p>Theme remarks are copied together with copied theme cascades.</p>
 
       <p>Power Scripture prevents invalid theme paste operations. A theme cannot be pasted onto itself or onto
       any of its descendant themes.</p>
@@ -147,7 +152,7 @@ export const HELP_TOPICS: HelpTopic[] = [
 
       <h3>Edit</h3>
       <p>The edit button <i class="ps-icon ps-icon-edit"></i> opens the edit tool. The edit tool allows for editing
-      the active theme or citation. Themes can be renamed and given descriptions. Citations can have their
+      the active theme or citation. Themes can be renamed, given descriptions, and given free-form remarks. Citations can have their
       descriptions and verse ranges edited. Individual verses can be marked up by use of the markup editor.</p>
 
       <h3>Delete</h3>
@@ -160,8 +165,8 @@ export const HELP_TOPICS: HelpTopic[] = [
       <p>The import button <i class="ps-icon ps-icon-import"></i> opens the import tool. The import tool provides
       an input console for creating themes and citations by keyboard entry. The tool allows navigation along
       the Theme Tree, opening themes for the purpose of creating themes and citations as children of the opened
-      theme. There is an undo and redo feature. Changes can be saved in bulk or rolled back.
-      Future expansion will allow for the import of archived themes.</p>
+      theme. Changes are staged during the console session and can be saved in bulk or reset before saving.
+      Future file-based import will support archived themes, citations, and markups.</p>
 
       <h3>Publish</h3>
       <p>The publish button <i class="ps-icon ps-icon-publish"></i> is not yet implemented. It will allow report
@@ -342,8 +347,8 @@ export const HELP_TOPICS: HelpTopic[] = [
 
       <h3>Theme Editing</h3>
 
-      <p>Theme editing focuses on structure and organization. Themes can be renamed, described, and reorganized.
-      Child themes and citations can be reordered using drag-and-drop operations.</p>
+      <p>Theme editing focuses on structure, organization, and theme-level remarks. Themes can be renamed, described,
+      given free-form remarks, and reorganized. Child themes and citations can be reordered using drag-and-drop operations.</p>
 
       <h3>Citation Editing</h3>
 
@@ -391,10 +396,11 @@ export const HELP_TOPICS: HelpTopic[] = [
 
       <h3>Deleting a Theme Cascade</h3>
 
-      <p>If the theme contains child themes or citations, deleting the theme deletes the entire cascade beneath it,
-      including all descendant themes and citation associations.</p>
+      <p>If the theme contains child themes, citations, or remarks, deleting the theme deletes the entire cascade beneath it,
+      including all descendant themes, citation associations, and associated remarks.</p>
 
-      <p>Power Scripture displays a summary of the number of themes and citations affected by the delete operation.</p>
+      <p>Power Scripture displays a summary of the number of themes and citations affected by the delete operation.
+      Remarks belonging to deleted themes are included in the delete cascade.</p>
 
       <p>Choose <b>Delete</b> to confirm the cascade delete, or <b>Cancel</b> to leave the theme unchanged.</p>
 
@@ -604,34 +610,105 @@ content: `
     iconClass: 'ps-icon ps-icon-folder',
     group: 'editing',
     content: `
-      <h2>Theme Editing</h2>
+    <h3>Theme Remarks</h3>
 
-      <p>Theme editing is used to modify the active theme and organize its child themes and citations.
-      Theme editing is performed in the Workbench.</p>
+    <p>
+    Themes may contain free-form remarks associated with the active theme.
+    Remarks provide a place for commentary, outlines, study notes,
+    or other narrative material.
+    </p>
 
-      <p>Open Theme Editing by clicking the edit button <i class="ps-icon ps-icon-edit"></i> on the Workbench
-      toolbar and selecting <b>Edit Theme</b>. Theme editing can also be opened from the Bible Theme Tree context menu.</p>
+    <p>
+    Remarks are authored as markdown text and rendered as formatted content when viewed.
+    </p>
 
-      <h3>Active Theme</h3>
+    <p>
+    In the Theme Editor, child themes appear first when present, followed by citations when present.
+    Both child themes and citations may be expanded and resequenced using drag-and-drop operations.
+    </p>
 
-      <p>Theme editing operates on the active theme. The active theme is displayed as a full theme path with
-      theme names separated by forward slashes.</p>
+    <p>
+    The remarks section appears after child themes and citations.
+    </p>
 
-      <h3>Theme Properties</h3>
+    <p>
+    If remarks exist, the remarks section appears as an expandable section with a closed arrow.
+    Opening the section displays the remarks rendered as formatted markdown content.
+    </p>
 
-      <p>The editor can modify the theme name and optional theme description.</p>
+    <p>
+    The remarks section header includes edit and delete buttons.
+    </p>
 
-      <p>Theme descriptions are displayed as tooltips or titles in the Bible Theme Tree. Empty descriptions display no notation.</p>
+    <p>
+    Clicking the edit button opens the remarks editor.
+    While editing, the remarks section remains expanded with a downward arrow that is inactive during edit mode.
+    </p>
 
-      <h3>Child Theme and Citation Lists</h3>
+    <p>
+    Remarks are edited as markdown text.
+    The editor provides save and close/cancel buttons.
+    Saving commits the remarks changes.
+    Closing or cancelling exits edit mode without saving.
+    </p>
 
-      <p>Themes containing subthemes or citations display expandable accordion sections. Child theme counts and citation
-      counts are displayed when greater than zero.</p>
+    <p>
+    If the active theme does not contain remarks, the remarks section displays a plus icon instead of an expandable arrow.
+    Clicking the plus icon creates a remarks file and opens the remarks editor.
+    </p>
 
-      <h3>Reordering</h3>
+    <p>
+    Deleting remarks removes the remarks associated with the active theme.
+    </p>
 
-      <p>Child themes and citations belonging to the active theme can be reordered using drag-and-drop operations.
-      Changes are applied immediately both visually and within the database.</p>
+    <p>
+    Markdown-based remarks will later support richer export and publishing features when themes and citations
+    are exported together with rendered commentary.
+    </p>`
+  },
+  {
+    id: 'theme-remarks',
+    title: 'Theme Remarks',
+    iconClass: 'ps-icon ps-icon-edit',
+    group: 'editing',
+    content: `
+      <h2>Theme Remarks</h2>
+
+      <p>Theme remarks are free-form text associated with a theme. Remarks provide a place for commentary,
+      outlines, study notes, explanations, or other narrative material related to the active theme.</p>
+
+      <p>Remarks are edited from Theme Editing. They are distinct from citations: citations organize scripture references,
+      while remarks provide free-form explanatory or study text.</p>
+
+      <h3>Viewing Remarks</h3>
+
+      <p>If a theme already has remarks, the remarks section appears as an accordion after the child theme and citation lists.
+      The accordion is initially closed. Opening it displays the remarks rendered as markup.</p>
+
+      <p>The remarks accordion header includes edit and delete buttons.</p>
+
+      <h3>Creating Remarks</h3>
+
+      <p>If a theme does not have remarks, the remarks section displays a plus icon instead of an accordion arrow.
+      Clicking the plus icon creates a remarks file and opens the remarks editor.</p>
+
+      <h3>Editing Remarks</h3>
+
+      <p>Remarks are edited as plain text. In edit mode, the remarks section remains expanded with a downward arrow.
+      The arrow is inactive while editing.</p>
+
+      <p>The remarks editor provides save and close/cancel buttons. Saving commits the remarks changes. Closing or cancelling
+      exits edit mode without saving changes.</p>
+
+      <h3>Deleting Remarks</h3>
+
+      <p>The delete button removes the remarks associated with the active theme.</p>
+
+      <h3>Copy and Delete Behavior</h3>
+
+      <p>When a theme is copied and pasted, its remarks are copied with the duplicated theme cascade.</p>
+
+      <p>When a theme is deleted, remarks belonging to that theme are included in the delete cascade.</p>
     `
   },
   {
@@ -702,8 +779,7 @@ content: `
 
       <p>Scripture ranges belonging to the citation are displayed beneath the scripture range selector in Bible order.</p>
 
-      <p>Scripture ranges are displayed using accordion sections. Clicking the accordion header rotates the arrow icon
-      and reveals the scripture text contained within the range.</p>
+      <p>The remarks section header includes edit and delete buttons.</p>
 
       <h3>Range Operations</h3>
 
