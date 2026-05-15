@@ -25,9 +25,23 @@
 }
 
 #name, #description {
+    box-sizing: border-box;
     width: 100%;
     border-right: 2px solid black;
     border-radius: 6px;
+}
+
+#name[readonly],
+#description[readonly] {
+  background-color: #2a2a2a;
+  color: #ffcc66;
+  -webkit-text-fill-color: #ffcc66;
+  border: 1px solid #ffcc66;
+  border-radius: 6px;
+  padding: 4px 6px;
+  box-shadow:
+    inset 0 1px 2px rgba(0,0,0,0.6),
+    0 0 6px rgba(255,204,102,0.35);
 }
 
 .workbench-edit .command-message {
@@ -169,6 +183,12 @@
     position:relative;
     bottom: 5px;
     left: 6px;
+}
+
+.workbench-edit button.icon-save:disabled {
+  cursor: default;
+  opacity: 0.45;
+  transform: none;
 }
 
 .remarks-member {
@@ -322,9 +342,15 @@
     margin: 0 0 8px 0;
 }
 
-.remarks-rendered ul {
+.remarks-rendered ul,
+.remarks-rendered ol {
     margin: 0 0 8px 24px;
     padding: 0;
+}
+
+.remarks-rendered a {
+    color: #1d4ed8;
+    text-decoration: underline;
 }
 
 .remarks-rendered code {

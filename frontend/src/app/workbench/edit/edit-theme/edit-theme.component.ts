@@ -5,6 +5,7 @@ import { CdkDrag, CdkDropList, CdkDropListGroup, CdkDragSortEvent, CdkDragDrop, 
 import { BibleService } from '../../../bible.service';
 import { ThemeExtendedModel, ThemeModelReference } from '../../../model/theme.model';
 import { ThemeToCitationLinkModel } from '../../../model/themeToCitation.model';
+import { MarkdownService } from '../../../markdown.service';
 
 @Component({
     selector: 'app-edit-theme',
@@ -40,6 +41,7 @@ export class EditThemeComponent {
   remarksEditText = "";
   renderedRemarks = "";
   remarksMessage = "";
+  isTopLevelTheme = false;
 
   jstreeModel!:JstreeModel;
 
@@ -54,10 +56,14 @@ export class EditThemeComponent {
   draggingType?:string;
   draggingClass?:string;
 
-  constructor(private service: BibleService) {
+  constructor(
+    private service: BibleService,
+    private markdownService: MarkdownService
+  ) {
     console.log('EditThemeComponent ctor');
       effect(()=>{      
       if (this.activeThemeNode()) {
+        this.isTopLevelTheme = !this.activeThemeNode()?.parent?.startsWith("theme");
         let id = <number><unknown>this.activeThemeNode()?.id?.replace("theme", "");
         service.getTheme(id)
           .then(theme => {
@@ -103,6 +109,7 @@ export class EditThemeComponent {
           });
       }
       else {
+        this.isTopLevelTheme = false;
         $("#name").val("").show(500);
         $("#description").val("").show(500);
         this.remarksOpen = false;
@@ -173,6 +180,10 @@ export class EditThemeComponent {
 
   EditTheme() {
     $(".command-message").text("");
+    if (this.isTopLevelTheme) {
+      return;
+    }
+
     this.editedTheme!.name = (<string>$("#name").val() ?? "").trim();
     this.editedTheme!.description = (<string>$("#description").val() ?? "").trim();
 
@@ -316,7 +327,7 @@ export class EditThemeComponent {
     try {
       this.remarksText = await this.service.getThemeRemarks(this.activeTheme.id);
       this.remarksEditText = this.remarksText;
-      this.renderedRemarks = this.renderMarkdown(this.remarksText);
+      this.renderedRemarks = this.markdownService.render(this.remarksText);
       this.remarksLoaded = true;
     }
     catch {
@@ -361,7 +372,7 @@ export class EditThemeComponent {
       const result = await this.service.saveThemeRemarks(this.activeTheme.id, this.remarksEditText);
       if (result.message == "Success" || result.success || result.saved) {
         this.remarksText = this.remarksEditText;
-        this.renderedRemarks = this.renderMarkdown(this.remarksText);
+        this.renderedRemarks = this.markdownService.render(this.remarksText);
         this.activeTheme.remarks = true;
         if (this.editedTheme) {
           this.editedTheme.remarks = true;
@@ -421,64 +432,6 @@ export class EditThemeComponent {
     catch {
       this.remarksMessage = "Remarks delete failed";
     }
-  }
-
-  private renderMarkdown(markdown: string): string {
-    const lines = markdown.replace(/\r\n/g, "\n").split("\n");
-    let html = "";
-    let inList = false;
-
-    lines.forEach(line => {
-      const heading = /^(#{1,6})\s+(.+)$/.exec(line);
-      const listItem = /^[-*]\s+(.+)$/.exec(line);
-
-      if (listItem) {
-        if (!inList) {
-          html += "<ul>";
-          inList = true;
-        }
-        html += `<li>${this.renderInlineMarkdown(listItem[1])}</li>`;
-        return;
-      }
-
-      if (inList) {
-        html += "</ul>";
-        inList = false;
-      }
-
-      if (heading) {
-        const level = heading[1].length;
-        html += `<h${level}>${this.renderInlineMarkdown(heading[2])}</h${level}>`;
-      }
-      else if (line.trim()) {
-        html += `<p>${this.renderInlineMarkdown(line)}</p>`;
-      }
-      else {
-        html += "<br>";
-      }
-    });
-
-    if (inList) {
-      html += "</ul>";
-    }
-
-    return html;
-  }
-
-  private renderInlineMarkdown(text: string): string {
-    return this.escapeHtml(text)
-      .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
-      .replace(/\*(.+?)\*/g, "<em>$1</em>")
-      .replace(/`(.+?)`/g, "<code>$1</code>");
-  }
-
-  private escapeHtml(text: string): string {
-    return text
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#39;");
   }
 
   async getDbTheme(id:number) : Promise<ThemeExtendedModel> {

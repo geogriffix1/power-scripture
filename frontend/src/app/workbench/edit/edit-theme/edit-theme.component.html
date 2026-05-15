@@ -9,12 +9,13 @@
             type="button"
             class="icon-save"
             (click)="EditTheme()"
-            title="Click to save changes to Name or Description">
+            [disabled]="isTopLevelTheme"
+            [title]="isTopLevelTheme ? 'Top-level themes cannot be changed' : 'Click to save changes to Name or Description'">
             <i class="psmenu-icon"></i>
         </button>
     </div>
-    <div class="field1"><input id="name" #name type="text" placeholder="Theme Name" title="The name of the theme"></div>
-    <div class="field2"><input id="description" #description type="text" placeholder="Theme Description" title="The description of the theme"></div>
+    <div class="field1"><input id="name" #name type="text" placeholder="Theme Name" title="The name of the theme" [readonly]="isTopLevelTheme"></div>
+    <div class="field2"><input id="description" #description type="text" placeholder="Theme Description" title="The description of the theme" [readonly]="isTopLevelTheme"></div>
     <div class="command-message"></div>
 </div>
 <section class="scrollable-content">
