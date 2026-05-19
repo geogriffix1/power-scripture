@@ -429,37 +429,45 @@ export class BibleService {
   return result;
  }
 
- async resequenceThemes(parentTheme:number, themes:number[], callback:any) {
-  var url = `${this.ROOT_URL}themes/resequence/themes`;
-  let themeArray = [];
-  themes.forEach(id => themeArray.push({ themeId: id }));
-  let obj = { parentTheme: parentTheme, themes: themes };
+async resequenceThemes(parentTheme: number, themes: number[], callback: any) {
+  const url = `${this.ROOT_URL}themes/resequence/themes`;
 
-const data = await fetch(url, {
-    method: "PUT",
-    cache: "no-cache",
-    headers: {
-      "Content-Type": "application/json"
-    },
+  const obj = {
+    parentTheme,
+    themes
+  };
 
-    body: JSON.stringify(obj)
-  });
-
-  let response = await data.json();
-  if (callback) {
-    callback(response);
-  }
- }
-
- async resequenceCitations(parentTheme:number, themeToCitations:number[], callback:any) {
-  var url = `${this.ROOT_URL}themes/resequence/citations`;
   const data = await fetch(url, {
     method: "PUT",
     cache: "no-cache",
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ parentTheme: parentTheme, themeToCitations: themeToCitations })
+    body: JSON.stringify(obj)
+  });
+
+  const response = await data.json();
+
+  if (callback) {
+    callback(response);
+  }
+}
+
+ async resequenceCitations(parentTheme:number, themeToCitations:number[], callback:any) {
+  var url = `${this.ROOT_URL}themes/resequence/citations`;
+
+  const obj = {
+    parentTheme,
+    themeToCitations
+  };
+
+  const data = await fetch(url, {
+    method: "PUT",
+    cache: "no-cache",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify(obj)
   });
 
   let response = await data.json();

@@ -917,7 +917,7 @@ exports.resequenceThemes = (req, res) => {
     if (
         !message &&
         (!obj.themes || !Array.isArray(obj.themes))) {
-        message = "Error: themes is missing or invaid. Must be an array of { themeId: id } where id is a number";
+        message = "Error: themes is missing or invaid. Must be an array of [id1, id2, ...] where each id is a number";
     }
 
     var parentId = +obj.parentTheme;
@@ -926,7 +926,7 @@ exports.resequenceThemes = (req, res) => {
     if (!message) {
         for (var i = 0; i < obj.themes.length; i++) {
             if (!obj.themes[i] || typeof Number(obj.themes[i]) !== "number") {
-                message = "Error: themes array objects must contain the numeric themeId property";
+                message = "Error: themes array members must be numeric ids";
                 break;
             }
 
@@ -940,14 +940,14 @@ exports.resequenceThemes = (req, res) => {
             "Server Error",
             req.path,
             message,
-            "Usage: In message body { \"parentTheme\": themeId, \"theme\": [{\"themeId\": id1}, {\"themeId\": id2}, ...] }"
+            "Usage: In message body { \"parentTheme\": themeId, \"themes\": [id1, id2, ...] }"
         ));
 
         return;
     }
 
     var themeArray = themes.join(",");
-    var query = `CALL reorder_theme_sequence(${parentId}, '${themeArray}')`;
+    var query = `CALL reorder_theme_sequence(JSON.stringify(obj))`;
 
     (async () => {
         await dbAccess.execute(query, (err, results) => {
@@ -1031,14 +1031,14 @@ exports.resequenceCitations = (req, res) => {
             "Server Error",
             req.path,
             message,
-            "Usage: In message body { \"parentTheme\": themeId, \"citations\": [{\"themeToCitationId\": id1}, {\"themeToCitationId\": id2}, ...] }"
+            "Usage: In message body { \"parentTheme\": themeId, \"themeToCitations\": [id1, id2, ...] }"
         ));
 
         return;
     }
 
     var citationArray = citations.join(",");
-    var query = `CALL reorder_citation_sequence(${parentId}, '${citationArray}')`;
+    var query = `CALL reorder_citation_sequence(JSON.stringify(obj))`;
 
     return (async () => {
         await dbAccess.execute(query, (err, results) => {
@@ -1048,7 +1048,7 @@ exports.resequenceCitations = (req, res) => {
                     "Server Error",
                     req.path,
                     `Error attempting to resequence citations: ${err.message}`,
-                    "Usage: In message body { \"parentTheme\": themeId, \"citations\": [{\"themeToCitationId\": id1}, {\"themeToCitationId\": id2}, ...] }"
+                    "Usage: In message body { \"parentTheme\": themeId, \"citations\": [id1, id2, ...] } with theme to citation ids"
                 ));
                 res.send();
             }

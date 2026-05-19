@@ -3,6 +3,9 @@ const express = require("express");
 const bodyParser = require("body-parser");
 const cors = require("cors");
 const refreshThemePaths = require("./appHelpers/refreshThemePaths");
+const { installConsoleErrorLogger } = require("./controllers/helpers/errorLogger");
+
+installConsoleErrorLogger();
 
 process.on("unhandledRejection", err => {
     console.error("Unhandled promise rejection:", err);
