@@ -1,8 +1,9 @@
 const errorMessage = require("./errorMessage");
+const { logError } = require("./errorLogger");
 
 const sendControllerError = (req, res, err) => {
     const error = err instanceof Error ? err : new Error(String(err));
-    console.error("Controller error:", error);
+    logError("Controller error:", error);
 
     if (res.headersSent) {
         return;
