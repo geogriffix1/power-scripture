@@ -42,9 +42,10 @@ CREATE TABLE `bible_citation_markups` (
   PRIMARY KEY (`bible_citation_markup_id`)
 )
 ENGINE=InnoDB
-DEFAULT CHARSET=utf8mb4;
+DEFAULT CHARSET=utf8mb4
+COLLATE=utf8mb4_0900_ai_ci;
 
-COLLATE=utf8mb4_0900_ai_ci;CREATE TABLE `bible_citation_verses` (
+CREATE TABLE `bible_citation_verses` (
   `bible_citation_verse_id` INT NOT NULL AUTO_INCREMENT,
   `bible_citation_id` INT NOT NULL,
   `bible_scripture_niv_id` INT NOT NULL,
