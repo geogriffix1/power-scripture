@@ -4,6 +4,7 @@ const errorMessage = require("./helpers/errorMessage");
 const responseTools = require("./helpers/responseTools");
 const fs = require("fs");
 const path = require("path");
+const { sendControllerError } = require("./helpers/failSafe");
 const tools = new responseTools;
 const remarksDirectory = path.join(__dirname, "..", "remarks");
 
@@ -16,7 +17,24 @@ exports.listOne = (req, res) => {
         byId = true;
     }
     else if (req.path && req.path.startsWith("/path=")) {
-        var path = originalPath.toLowerCase().substring(6).trim();
+        var themePathInput;
+
+        try {
+            themePathInput = decodeURIComponent(originalPath.substring(6));
+        }
+        catch (err) {
+            res.status(400).send(errorMessage(
+                400,
+                "Invalid Parameter",
+                `/themes${originalPath}`,
+                `Theme path contains invalid URL encoding: ${err.message}`,
+                "Usage (e.g. /themes/2000) returns the value of the theme whose id equates to 2000. \n" +
+                "Or (e.g. /themes/path=/persons/Jesus) returns theme Jesus (path names are not case sensitve)."
+            ));
+            return;
+        }
+
+        var path = themePathInput.toLowerCase().trim();
 
         if (path.startsWith("/")) {
             path = path.substr(1).trimStart();
@@ -209,7 +227,7 @@ exports.cascade = (req, res) => {
             // handle double-encoded case just in case
             if (typeof parsed === "string") parsed = JSON.parse(parsed);
             payload = parsed;
-            for (theme of payload.themes) {
+            for (const theme of payload.themes) {
                 theme.remarks = theme.remarks === 'Y';
             }
           }
@@ -504,8 +522,28 @@ exports.create = (req, res) => {
                             getQuery(theme.getSelectString())
                                 .then(results => {
                                     results[0].description = results[0].description ?? "";
-                                    results[0].path = global.themePaths[results[0].id].path;
-                                    res.send(results[0]);
+                                    console.log(`new theme ${results[0].name} checking path`)
+                                    if (results[0].id in global.themePaths) {
+                                        results[0].path = global.themePaths[results[0].id].path;
+                                        console.log(`path found`);
+                                        res.send(results[0]);
+                                    }
+                                    else {
+                                        console.log("not found yet, trying again");
+                                        (async (theme) => {
+                                            console.log(`new theme ${theme.name} checking path again`)
+                                            await refreshThemePathsAsync();
+                                            if (theme.id in globalThemePaths) {
+                                                console.log('path found this time.');
+                                                theme.path = global.themePaths[theme.id].path;
+                                            }
+                                            else {
+                                                console.log('path still not found. giving up');
+                                            }
+
+                                            res.send(theme);
+                                        })(results[0]);
+                                    }
                                 });
                         });
                 });
@@ -514,7 +552,7 @@ exports.create = (req, res) => {
 
 exports.delete = (req, res) => {
     var themeId = req.params.id;
-    (async (themeId) => {
+    return (async (themeId) => {
         await dbAccess.execute(`call delete_bible_theme(${themeId})`, (err, results) => {
             if (err) {
                 res.send(`Error attempting to delete theme: ${err.message}`);
@@ -525,7 +563,7 @@ exports.delete = (req, res) => {
                     const refreshThemePathsAsync = require("../appHelpers/refreshThemePathsAsync");
                     await refreshThemePathsAsync();
                     res.send({ deleted: themeId });
-                 })();
+                 })().catch(err => sendControllerError(req, res, err));
            }
         });
     })(themeId);
@@ -630,7 +668,15 @@ exports.edit = (req, res) => {
 
             var message = null;
             if (!original) {
-                message = `Error: theme not found, id: ${context.edited.id}`;
+                res.status(400).send(errorMessage(
+                    400,
+                    "Invalid Parameter",
+                    req.path,
+                    `Error: theme not found, id: ${context.edited.id}`,
+                    "Usage: In message body { \"id\": themeId, \"name\": name, \"description\": description, \"parent\": parentThemeId, \"sequence\": orderWithinParentTheme }"
+                ));
+
+                return;
             }
 
             var parentId = context.edited.parent;
@@ -672,21 +718,9 @@ exports.edit = (req, res) => {
                 return;
             }
 
-            if (message) {
-                res.status(400).send(errorMessage(
-                    400,
-                    "Invalid Parameter",
-                    req.path,
-                    message,
-                    "Usage: In message body { \"id\": themeId, \"name\": name, \"description\": description, \"parent\": parentThemeId, \"sequence\": orderWithinParentTheme }"
-                ));
-
-                return;
-            }
-
             
             const remarksFileName = getRemarksFile(req.body.id);
-            const remarks = fs.existsSync(remarksFileName) ? 'Y' : 'N';
+            const remarks = remarksFileName && fs.existsSync(remarksFileName.filePath) ? 'Y' : 'N';
 
             original.remarks = remarks;
             context.edited = {
@@ -869,6 +903,7 @@ exports.edit = (req, res) => {
 }
 
 exports.resequenceThemes = (req, res) => {
+    var obj = req.body;
     var themeId = req.params.id;
     var message = null;
     if (!obj) {
@@ -926,8 +961,10 @@ exports.resequenceThemes = (req, res) => {
                 ));
             }
             else {
-                refreshThemePaths();
-                res.send({ message: "Success" });
+                const refreshThemePathsAsync = require("../appHelpers/refreshThemePathsAsync");
+                refreshThemePathsAsync()
+                    .then(() => res.send({ message: "Success" }))
+                    .catch(err => sendControllerError(req, res, err));
             }
         });
     })();
@@ -935,7 +972,7 @@ exports.resequenceThemes = (req, res) => {
 
 exports.normalizeThemes = (req, res) => {
     var parentId = req.params.id;
-    (async (parentId) => {
+    return (async (parentId) => {
         await dbAccess.execute(`call normalize_theme_sequence(${parentId})`, (err, results) => {
             if (err) {
                 res.status(500).send(errorMessage(
@@ -951,7 +988,7 @@ exports.normalizeThemes = (req, res) => {
                     const refreshThemePathsAsync = require("../appHelpers/refreshThemePathsAsync");
                     await refreshThemePathsAsync();
                     res.send({ message: "Success" });
-                })();
+                })().catch(err => sendControllerError(req, res, err));
             }
         });
     })(parentId);
@@ -975,16 +1012,16 @@ exports.resequenceCitations = (req, res) => {
     }
 
     var parentId = +obj.parentId;
-    var themes = [];
+    var citations = [];
 
     if (!message) {
         for (var i = 0; i < obj.citations.length; i++) {
-            if (!obj.citations[i].themeToCitationId || typeof Number(obj.citation[i].themeToCitationId) !== "number") {
+            if (!obj.citations[i].themeToCitationId || typeof Number(obj.citations[i].themeToCitationId) !== "number") {
                 message = "Error: citations array objects must contain the numeric themeToCitationId property";
                 break;
             }
 
-            themes.push(+obj.citations[i].themeToCitationId);
+            citations.push(+obj.citations[i].themeToCitationId);
         }
     }
 
@@ -1003,7 +1040,7 @@ exports.resequenceCitations = (req, res) => {
     var citationArray = citations.join(",");
     var query = `CALL reorder_citation_sequence(${parentId}, '${citationArray}')`;
 
-    (async () => {
+    return (async () => {
         await dbAccess.execute(query, (err, results) => {
             if (err) {
                 res.status(500).send(errorMessage(
@@ -1189,7 +1226,7 @@ exports.pasteThemeToCitation = (req, res) => {
     var copyThemeToCitationId = req.params.copyId;
     var pasteThemeId = req.params.pasteId;
 
-    (async () => {
+    return (async () => {
         await dbAccess.execute(`call paste_bible_theme_to_citation(${copyThemeToCitationId}, ${pasteThemeId})`, (err, results) => {
             if (err) {
                 res.status(500).send(errorMessage(
@@ -1211,7 +1248,7 @@ exports.pasteThemeToCitation = (req, res) => {
 
 exports.normalizeCitations = (req, res) => {
     var parentId = req.params.id;
-    (async (parentId) => {
+    return (async (parentId) => {
         await dbAccess.execute(`call normalize_citation_sequence(${parentId})`, (err, results) => {
             if (err) {
                 res.status(500).send(errorMessage(
@@ -1255,7 +1292,7 @@ exports.setSequence = (req, res) => {
 
         return;
     }
-    (async (req) => {
+    return (async (req) => {
         await dbAccess.execute(`call set_theme_sequence(${+req.params.id}, ${+req.params.sequence})`, (err, results) => {
             if (err) {
                 res.status(500).send(errorMessage(
@@ -1274,3 +1311,5 @@ exports.setSequence = (req, res) => {
 
     })(req);
 }
+
+require("./helpers/failSafe").wrapExports(exports);

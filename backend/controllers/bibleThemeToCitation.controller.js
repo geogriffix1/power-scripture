@@ -723,3 +723,5 @@ exports.setSequence = (req, res) => {
 
     })(req);
 }
+
+require("./helpers/failSafe").wrapExports(exports);

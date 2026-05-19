@@ -351,3 +351,5 @@ exports.scriptureContains = (req, res) => {
         });
     }
 }
+
+require("./helpers/failSafe").wrapExports(exports);

@@ -507,3 +507,5 @@ exports.deleteByVerseId = (req, res) => {
 
 }
 
+require("./helpers/failSafe").wrapExports(exports);
+

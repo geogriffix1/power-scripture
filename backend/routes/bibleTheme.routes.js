@@ -16,7 +16,7 @@ module.exports = app => {
     router.put("/:id/sequence/:sequence", bibleTheme.setSequence);
     router.put("/resequence-themes/:id", bibleTheme.resequenceThemes);
     router.put("/normalize-themes/:id", bibleTheme.normalizeThemes);
-    router.put("/resequence-citations/:id", bibleTheme.resequenceThemes);
+    router.put("/resequence-citations/:id", bibleTheme.resequenceCitations);
     router.put("/normalize-citations/:id", bibleTheme.normalizeCitations);
     router.delete("/:id", bibleTheme.delete);
     router.delete("/:id/remarks", bibleTheme.deleteRemarks);

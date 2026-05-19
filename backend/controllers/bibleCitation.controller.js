@@ -809,3 +809,5 @@ exports.removeVerses = async (req, res) => {
         }
     });
 };
+
+require("./helpers/failSafe").wrapExports(exports);

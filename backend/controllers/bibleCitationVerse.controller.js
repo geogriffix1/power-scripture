@@ -745,3 +745,5 @@ getCitationLabel = (book, chapter, verse) => {
     return `${book} ${chapter}:${verse}`;
 }
 
+require("./helpers/failSafe").wrapExports(exports);
+

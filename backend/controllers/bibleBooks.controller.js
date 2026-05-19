@@ -51,3 +51,5 @@ exports.findOne = (req, res) => {
         }
     });
 }
+
+require("./helpers/failSafe").wrapExports(exports);

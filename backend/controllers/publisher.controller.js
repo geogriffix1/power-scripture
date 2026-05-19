@@ -403,3 +403,5 @@ exports.listTheme = (req, res) => {
             })();
         });
 }
+
+require("./helpers/failSafe").wrapExports(exports);

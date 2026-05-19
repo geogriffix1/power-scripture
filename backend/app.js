@@ -4,6 +4,14 @@ const bodyParser = require("body-parser");
 const cors = require("cors");
 const refreshThemePaths = require("./appHelpers/refreshThemePaths");
 
+process.on("unhandledRejection", err => {
+    console.error("Unhandled promise rejection:", err);
+});
+
+process.on("uncaughtException", err => {
+    console.error("Uncaught exception:", err);
+});
+
 global.verseValidation = require("./models/validation");
 
 var app = express();
