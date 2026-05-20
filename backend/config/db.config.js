@@ -1,8 +1,11 @@
+require('dotenv').config();
+
 module.exports = {
-    HOST: "localhost",
-    USER: "power_scripture_app",
-    PASSWORD: "!3@16#joHn$foR%GOD^so&LoVed*thE-woRld",
-    DB: "power_scripture_dev",
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT,
     dialect: "mysql",
     pool: {
         max: 5,

@@ -6,7 +6,7 @@ CREATE DATABASE power_scripture_baseline
 
 USE power_scripture_baseline;
 
-CREATE USER 'power_scripture_app'@'localhost'
+CREATE USER 'power_scripture_app'@'127.0.0.1'
 IDENTIFIED WITH mysql_native_password
 BY 'change_this_password';
 
@@ -18,6 +18,6 @@ GRANT
   EXECUTE,
   CREATE TEMPORARY TABLES
 ON `power\_scripture\_%`.*
-TO 'power_scripture_app'@'localhost';
+TO 'power_scripture_app'@'127.0.0.1';
 
 FLUSH PRIVILEGES;

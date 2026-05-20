@@ -1,4 +1,4 @@
-const mysql = require("mysql");
+const mysql = require("mysql2");
 const env = require("../config/db.config");
 
 //-------------------------
@@ -6,11 +6,11 @@ const env = require("../config/db.config");
 //-------------------------
 const pool = mysql.createPool({
     connectionLimit: 10, // adjust as needed
-    host: env.HOST,
-    port: env.PORT,
-    user: env.USER,
-    password: env.PASSWORD,
-    database: env.DB,
+    host: env.host,
+    port: env.port,
+    user: env.user,
+    password: env.password,
+    database: env.db,
     multipleStatements: true
 });
 
