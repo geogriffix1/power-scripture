@@ -1,8 +1,8 @@
 module.exports = {
     HOST: "localhost",
-    USER: "root",
-    PASSWORD: "geogriffixMysql",
-    DB: "power_scripture_test",
+    USER: "power_scripture_app",
+    PASSWORD: "!3@16#joHn$foR%GOD^so&LoVed*thE-woRld",
+    DB: "power_scripture_dev",
     dialect: "mysql",
     pool: {
         max: 5,

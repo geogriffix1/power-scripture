@@ -5,3 +5,19 @@ CREATE DATABASE power_scripture_baseline
     COLLATE utf8mb4_unicode_ci;
 
 USE power_scripture_baseline;
+
+CREATE USER 'power_scripture_app'@'localhost'
+IDENTIFIED WITH mysql_native_password
+BY 'change_this_password';
+
+GRANT
+  SELECT,
+  INSERT,
+  UPDATE,
+  DELETE,
+  EXECUTE,
+  CREATE TEMPORARY TABLES
+ON `power\_scripture\_%`.*
+TO 'power_scripture_app'@'localhost';
+
+FLUSH PRIVILEGES;

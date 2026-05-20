@@ -95,16 +95,17 @@ Run the setup scripts in the following order.
 ## Setup Script Order
 
 ```text
-001_create_database.sql
-010_create_tables.sql
-020_create_indexes.sql
-030_seed_bible_books.sql
-040_seed_bible_chapters.sql
-050_seed_bible_scriptures_niv.sql
-060_seed_core_themes.sql
-080_create_stored_procedures.sql
-090_create_functions.sql
-100_verify_install.sql
+010_create_database.sql
+020_create_tables.sql
+030_create_indexes.sql
+040_table_insert_seed_scripts.zip
+  041_seed_bible_books.sql
+  042_seed_bible_chapters.sql
+  043_seed_bible_scriptures_niv.sql
+  044_seed_core_themes.sql
+050_create_stored_procedures.sql
+060_create_database_functions.sql
+070_verify_install.sql
 ```
 
 ---
@@ -120,6 +121,85 @@ For each setup script:
 3. Execute the script
 
 Scripts should be executed in numeric order.
+
+---
+
+# Application Database User
+
+The Power Scripture backend application should NOT connect to MySQL using the `root` account.
+
+The baseline setup creates a dedicated application user:
+
+```text
+power_scripture_app
+```
+
+This account is intended to be used exclusively by the Power Scripture backend API.
+
+## Default Password
+
+The baseline install scripts include a placeholder password.
+
+You SHOULD change this password immediately before using the database in any real environment.
+
+In **010_create_database.sql** file:
+
+```sql
+CREATE USER 'power_scripture_app'@'localhost'
+IDENTIFIED WITH mysql_native_password
+BY 'change_this_password';
+
+```
+
+## Recommended Password Guidelines
+
+Use a password that is:
+
+- long
+- unique
+- difficult to guess
+- not reused elsewhere
+
+Recommended characteristics:
+
+- 16+ characters
+- mixed uppercase/lowercase letters
+- numbers
+- symbols
+
+Example style:
+
+```text
+Falcon#River82Iron!Window
+```
+
+Do NOT commit real passwords into source control repositories.
+
+## Database Permissions
+
+The application user is intentionally restricted to Power Scripture databases only.
+
+The account includes permissions required by the application, including:
+
+- SELECT
+- INSERT
+- UPDATE
+- DELETE
+- EXECUTE
+- CREATE TEMPORARY TABLES
+
+The application uses stored procedures and temporary tables internally.
+
+## Backend Configuration
+
+Update the backend database configuration or `.env` file to use:
+
+```text
+DB_USER=power_scripture_app
+DB_PASSWORD=your_secure_password
+```
+
+Do not use the MySQL `root` account for normal application execution.
 
 ---
 
@@ -211,7 +291,7 @@ Indexes and uniqueness constraints are used where appropriate.
 Run:
 
 ```text
-100_verify_install.sql
+070_verify_install.sql
 ```
 
 to verify that the installation completed successfully.
