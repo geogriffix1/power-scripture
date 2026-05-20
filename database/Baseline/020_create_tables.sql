@@ -79,7 +79,7 @@ CREATE TABLE `bible_scriptures_niv` (
   `book` VARCHAR(32) NOT NULL,
   `chapter_number` INT NOT NULL,
   `verse_number` INT NOT NULL,
-  `text` VARCHAR(500) NOT NULL,
+  `text` VARCHAR(500) DEFAULT NULL,
   `bible_order` INT NOT NULL,
 
   PRIMARY KEY (`bible_scripture_niv_id`),
