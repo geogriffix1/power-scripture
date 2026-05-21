@@ -269,7 +269,9 @@ Install with:
 
 ```bash
 npm install dotenv
-```# Expected Database State
+```
+
+# Expected Database State
 
 After setup completes successfully, the database should contain:
 
