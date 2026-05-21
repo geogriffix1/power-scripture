@@ -203,7 +203,73 @@ Do not use the MySQL `root` account for normal application execution.
 
 ---
 
-# Expected Database State
+# Environment Configuration
+
+The Power Scripture backend uses a `.env` file for database configuration.
+
+The `.env` file should exist in the backend project root directory.
+
+Example:
+
+```text
+backend/.env
+```
+
+## Example .env File
+
+```env
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=power_scripture_dev
+DB_USER=power_scripture_app
+DB_PASSWORD="change_this_password"
+```
+
+Notes:
+
+- Quotes around the password are recommended if the password contains special characters such as `#`
+- The backend expects the database user to use the `mysql_native_password` authentication plugin
+- `127.0.0.1` is recommended instead of `localhost` for MySQL client compatibility
+
+## Important Security Notes
+
+The real `.env` file SHOULD NOT be committed to source control.
+
+Add the following to `.gitignore`:
+
+```text
+.env
+.env.*
+!.env.example
+```
+
+## Example Environment Template
+
+A safe template file may be committed as:
+
+```text
+.env.example
+```
+
+Example:
+
+```env
+DB_HOST=127.0.0.1
+DB_PORT=3306
+DB_NAME=power_scripture_dev
+DB_USER=power_scripture_app
+DB_PASSWORD="change_this_password"
+```
+
+## Node Dependency
+
+The backend requires the `dotenv` package.
+
+Install with:
+
+```bash
+npm install dotenv
+```# Expected Database State
 
 After setup completes successfully, the database should contain:
 
