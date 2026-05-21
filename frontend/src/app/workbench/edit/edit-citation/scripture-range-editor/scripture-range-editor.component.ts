@@ -1,12 +1,12 @@
 import { Component, Input, Output, EventEmitter, ViewChild, ElementRef } from '@angular/core';
 import { Subscription, fromEvent } from 'rxjs';
 import { Router, ActivatedRoute } from '@angular/router';
-import { BibleService } from '../../../bible.service';
-import { CiteScriptureRangeModel } from '../../../model/citeScriptureRangeModel';
-import { CitationExtendedModel } from '../../../model/citation.model';
-import { MainShellComponent } from '../../../mainshell/mainshell.component';
-import { WorkbenchComponent } from '../../workbench.component';
-import * as BibleBookList from '../../../../assets/BibleBookList.json';
+import { BibleService } from '../../../../bible.service';
+import { CiteScriptureRangeModel } from '../../../../model/citeScriptureRangeModel';
+import { CitationExtendedModel } from '../../../../model/citation.model';
+import { MainShellComponent } from '../../../../mainshell/mainshell.component';
+import { WorkbenchComponent } from '../../../workbench.component';
+import * as BibleBookList from '../../../../../assets/BibleBookList.json';
 import $ from 'jquery';
 
 @Component({

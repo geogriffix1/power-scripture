@@ -14,7 +14,7 @@ import {
 import { WorkbenchComponent } from '../../workbench.component';
 import { Router, ActivatedRoute } from '@angular/router';
 import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-tree.component';
-import { ScriptureRangeEditorComponent } from '../../tools/scripture-range-editor/scripture-range-editor.component';
+import { ScriptureRangeEditorComponent } from './scripture-range-editor/scripture-range-editor.component';
 import { JstreeModel } from '../../../model/jstree.model';
 import { CiteScriptureRangeModel, NullCiteScriptureRange } from '../../../model/citeScriptureRangeModel';
 import { BibleService } from '../../../bible.service';
