@@ -157,7 +157,17 @@ exports.listOne = (req, res) => {
 exports.chain = (req, res) => {
     var child = req.params.id;
 
-    buildChain = (theme, chain) => {
+    const buildChain = (theme, chain, visited) => {
+        if (!theme) {
+            throw new Error(`Theme ${child} was not found`);
+        }
+
+        if (visited.has(theme.id)) {
+            throw new Error(`Circular theme parent relationship detected at theme ${theme.id}`);
+        }
+
+        visited.add(theme.id);
+
         chain.push({
             id: theme.id,
             name: theme.name,
@@ -166,7 +176,7 @@ exports.chain = (req, res) => {
 
         if (+theme.parent > 0) {
             var parentTheme = global.themePaths[+theme.parent];
-            buildChain(parentTheme, chain);
+            buildChain(parentTheme, chain, visited);
         }
     }
 
@@ -183,16 +193,16 @@ exports.chain = (req, res) => {
     var chain = [];
     try {
         var theme = global.themePaths[+id];
-        buildChain(theme, chain);
+        buildChain(theme, chain, new Set());
         chain = reverseChain(chain);
         res.send({ chain: chain });
     }
-    catch {
+    catch (err) {
         res.status(400).send(errorMessage(
             400,
             "Invalid Parameter",
             child,
-            message,
+            err.message,
             "Usage: /themes/chain/{themeId}"
         ));
     }

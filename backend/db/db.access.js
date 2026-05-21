@@ -14,18 +14,23 @@ const pool = mysql.createPool({
     multipleStatements: true
 });
 
-pool.query("SELECT DATABASE() AS db, CURRENT_USER() AS user", (err, rows) => {
-  if (err) return console.error(err);
-  console.log("DB/user:", `${rows[0].db}/${rows[0].user}`);
-});
+pool.getConnection((err, conn) => {
+    if (err) {
+        console.error(`MySQL connection failed for ${env.user}@${env.host}:${env.port}/${env.database}:`, err.message);
+        return;
+    }
 
-pool.query(
-  "SHOW VARIABLES WHERE Variable_name IN ('hostname','port')",
-  (err, rows) => {
-    if (err) return console.error(err);
-    rows.forEach(row => console.log(`${row.Variable_name}: ${row.Value}`));
-  }
-);
+    conn.query("SELECT DATABASE() AS db, CURRENT_USER() AS user", (queryErr, rows) => {
+        conn.release();
+
+        if (queryErr) {
+            console.error("MySQL startup check failed:", queryErr.message);
+            return;
+        }
+
+        console.log("DB/user:", `${rows[0].db}/${rows[0].user}`);
+    });
+});
 
 //-------------------------
 // Core query executor

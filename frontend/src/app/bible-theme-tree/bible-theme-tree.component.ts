@@ -240,6 +240,16 @@ static refreshDomNodeFromDb(nodeId: string, callback?: (node: any) => void): voi
     (themeTree as any).redraw_node(node);
   }
 
+  public static setActiveTheme(node: JstreeModel) {
+    const themeTree = $('#theme-tree-full').jstree(true);
+   $('#theme-tree-full [id^=theme].jstree-clicked').removeClass('jstree-clicked').attr('aria-selected', 'false');
+    if (node.parent.startsWith("theme")) {
+      themeTree.open_node(`theme${node.parent}`);
+    }
+
+    themeTree.select_node(node.id);
+  }
+
   public static setActiveCitation(node: JstreeModel) {
     const themeTree = $('#theme-tree-full').jstree(true);
    $('#theme-tree-full [id^=citation].jstree-clicked').removeClass('jstree-clicked').attr('aria-selected', 'false');

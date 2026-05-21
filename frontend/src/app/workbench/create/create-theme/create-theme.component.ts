@@ -70,6 +70,8 @@ export class CreateThemeComponent {
 
   EditTheme() {
     if (this.createdThemeId) {
+      const node = BibleThemeTreeComponent.getDomNode(`theme${this.createdThemeId}`);
+      BibleThemeTreeComponent.setActiveTheme(node);
       this.router.navigate(['/edit/theme']);
     }
   }

@@ -355,7 +355,7 @@ export class ScriptureRangeEditorComponent {
     $("#endverselist").show(100);
     setTimeout(() => {
       this.endVerseField.nativeElement.focus();      
-      this.endVerseField.nativeElement.select();
+      // this.endVerseField.nativeElement.select();
     }, 0);
     $("#endVerse").trigger('focus');
 }
@@ -369,11 +369,12 @@ export class ScriptureRangeEditorComponent {
       this.workingText = <string>$("#endVerse").val();
     }
     else {
-      $("#endVerse").val(<string>$("#verse").val());
-      this.workingText = <string>$("#verse").val();
+      // $("#endVerse").val(<string>$("#verse").val());
+      // this.workingText = <string>$("#verse").val();
+      this.workingText = "";
     }
     
-    $("#endVerse").addClass('legal');
+    //$("#endVerse").addClass('legal');
   }
 
   onClickEndVerse(endVerse:number) {

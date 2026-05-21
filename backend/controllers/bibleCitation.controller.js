@@ -600,6 +600,8 @@ exports.update = (req, res) => {
             message,
             ""
         ));
+
+        return;
     }
 
     addContext = (context) => {
@@ -636,6 +638,7 @@ exports.update = (req, res) => {
                 else {
                     citation = new bibleCitation;
                     citation.values = result[0];
+                    resolve(citation.values);
                 }
             });
         });

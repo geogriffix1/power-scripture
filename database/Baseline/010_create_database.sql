@@ -1,6 +1,6 @@
-# The power_scripture_app user is created as part of the MySql installation
-# It can only be created one time. It can perform on all databases
-# with names beginning with power_scripture_
+# Power_scripture_app is the power scripture user created
+# to access all MySql databases beginning with power_scripture_
+# It can only be created one time.
 
 CREATE USER 'power_scripture_app'@'localhost'
 IDENTIFIED WITH mysql_native_password

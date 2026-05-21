@@ -1,9 +1,22 @@
 const errorMessage = require("./errorMessage");
 const { logError } = require("./errorLogger");
 
-const sendControllerError = (req, res, err) => {
+const controllerTimeoutMs = Number(process.env.CONTROLLER_TIMEOUT_MS) || 30000;
+
+const getRequestLabel = (req) => {
+    if (!req) {
+        return "unknown request";
+    }
+
+    const method = req.method || "UNKNOWN";
+    const url = req.originalUrl || req.url || req.path || "";
+    return `${method} ${url}`.trim();
+};
+
+const sendControllerError = (req, res, err, handlerName) => {
     const error = err instanceof Error ? err : new Error(String(err));
-    logError("Controller error:", error);
+    const controllerLabel = handlerName ? ` in ${handlerName}` : "";
+    logError(`Controller error${controllerLabel} for ${getRequestLabel(req)}:`, error);
 
     if (res.headersSent) {
         return;
@@ -18,17 +31,37 @@ const sendControllerError = (req, res, err) => {
     ));
 };
 
-const failSafe = handler => {
+const failSafe = (handler, handlerName) => {
     return (req, res, next) => {
+        let completed = false;
+        const finishRequest = () => {
+            completed = true;
+            clearTimeout(timeout);
+        };
+
+        const timeout = setTimeout(() => {
+            if (completed || res.headersSent) {
+                return;
+            }
+
+            const error = new Error(`Controller timed out after ${controllerTimeoutMs}ms`);
+            sendControllerError(req, res, error, handlerName);
+        }, controllerTimeoutMs);
+
+        res.once("finish", finishRequest);
+        res.once("close", finishRequest);
+
         try {
             const result = handler(req, res, next);
 
             if (result && typeof result.then == "function") {
-                result.catch(err => sendControllerError(req, res, err));
+                return result.catch(err => sendControllerError(req, res, err, handlerName));
             }
+
+            return result;
         }
         catch (err) {
-            sendControllerError(req, res, err);
+            return sendControllerError(req, res, err, handlerName);
         }
     };
 };
@@ -36,7 +69,7 @@ const failSafe = handler => {
 const wrapExports = controllerExports => {
     Object.keys(controllerExports).forEach(key => {
         if (typeof controllerExports[key] == "function" && !controllerExports[key].failSafeWrapped) {
-            const wrapped = failSafe(controllerExports[key]);
+            const wrapped = failSafe(controllerExports[key], key);
             wrapped.failSafeWrapped = true;
             controllerExports[key] = wrapped;
         }

@@ -1,13 +1,24 @@
-refreshThemePaths = () => {
+const refreshThemePaths = () => {
     const dbAccess = require("../db/db.access");
     const bibleTheme = require("../models/bibleTheme.model");
     const theme = new bibleTheme;
     const selectString = theme.getSelectString();
 
     dbAccess.query(selectString, (err, response) => {
-        var themeList;
-        paths = [];
-        getChildPaths = (theme) => {
+        if (err) {
+            console.error("Refresh theme paths failed:", err.message);
+            return;
+        }
+
+        let themeList;
+        const paths = [];
+        const getChildPaths = (theme, visited) => {
+            if (visited.has(theme.id)) {
+                throw new Error(`Circular theme parent relationship detected at theme ${theme.id}`);
+            }
+
+            visited.add(theme.id);
+
             var parentPath = paths[theme.id].path;
             var childThemes = [];
             themeList.map(th => {
@@ -27,17 +38,12 @@ refreshThemePaths = () => {
                     childCount: theme.childCount,
                     path: path
                 };
-                getChildPaths(childThemes[i]);
+                getChildPaths(childThemes[i], new Set(visited));
             }
         };
 
         if (response) {
             const roots = [];
-            for (var i = 0; i < roots.length; i++) {
-                paths[roots[i].id] = `/${roots[i].name}`;
-                getChildPaths(roots[i]);
-            }
-
             themeList = response;
             themeList.map(theme => {
                 if (!theme.parent) {
@@ -55,7 +61,13 @@ refreshThemePaths = () => {
                     childCount: roots[i].childCount,
                     path: `/${roots[i].name}`
                 };
-                getChildPaths(roots[i]);
+                try {
+                    getChildPaths(roots[i], new Set());
+                }
+                catch (err) {
+                    console.error("Refresh theme paths failed:", err.message);
+                    return;
+                }
             }
 
             global.themePaths = paths;

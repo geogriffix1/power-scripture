@@ -43,8 +43,7 @@ require("./routes/publisher.routes")(app);
 refreshThemePaths();
 
 const isDebug = process.execArgv.some(arg => arg.includes('--inspect'));
-
-const port = isDebug ? 9229 : 3000;
+const port = process.env.API_PORT || 3000;
 
 app.listen(port, () => {
   console.log(`Power-Scripture API running on port ${port} (${isDebug ? 'debug' : 'normal'} mode)`);
