@@ -32,6 +32,8 @@
 
 .workbench-edit .citation.selected {
     grid-column: 2;
+    display: flex;
+    align-items: center;
     color:gold;
     font-weight:500;
 }

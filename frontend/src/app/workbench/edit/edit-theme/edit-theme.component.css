@@ -1,8 +1,17 @@
+:host {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    min-height: 0;
+    overflow: hidden;
+}
+
 .workbench-edit {
     display: grid;
     grid-template-columns: auto 1fr 1fr;
     gap: 1px 5px;
     width: 100%;
+    flex: 0 0 auto;
     background-color: black;
     color:white;
 }
@@ -46,13 +55,20 @@
 
 .workbench-edit .command-message {
     grid-column: 2 / span 2;
-    background-color: rgb(172, 0, 0);
     color: white;
     font-weight: bold;
     padding: 4px;
     text-align: center;
     display: none;
 
+}
+
+.workbench-edit .command-message.error {
+    background-color: rgb(172, 0, 0);
+}
+
+.workbench-edit .command-message.success {
+    background-color: rgb(0, 104, 45);
 }
 
 .workbench-settings {
@@ -406,11 +422,20 @@ div.command-label {
 }
 
 section.scrollable-content {
-    height:calc(100vh);
+    display: flex;
+    flex-direction: column;
+    flex: 1 1 auto;
+    min-height: 0;
     width:100%;
+    overflow: hidden;
 }
 
-div.scrolling { width:100%; overflow-y: auto; }
+div.scrolling {
+    width:100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow-y: auto;
+}
 
 .search-results table {
     width: 100%;

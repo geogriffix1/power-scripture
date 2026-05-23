@@ -400,8 +400,6 @@ export class BibleService {
  }
 
  async editCitation(citation:CitationModel): Promise<any> {
-  console.log("bible.service.editCitation called");
-  console.log("editCitation", JSON.stringify(citation));
   
   var url = `${this.ROOT_URL}citations`;
   const data = await fetch(url, {
@@ -414,8 +412,6 @@ export class BibleService {
   });
 
   let result = await data.json();
-
-  console.log("result:", result);
   return result;
  }
 

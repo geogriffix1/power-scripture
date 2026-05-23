@@ -1,0 +1,7 @@
+## Conflicting Narratives?
+
+**Genesis 2:4-9, 2:19-22** Tells us the details of God's creation of mankind. But the details differ somewhat from the cosmic creation narrative of **Genesis 1**. Water covered the earth in day 1; on the second day the atmosphere and dry land appear. On the third day we have vegetation. On the fifth day we have birds and sea creatures. On day six we have land animals and mankind. The seventh day was God's Sabbath day of rest.
+
+**Genesis 2**, beginning at verse four focuses on the creation of man, but lists what appears to be a somewhat different order. God created man from the dust of the earth at a time when there were no plants. There was no rain but there were streams of water fed by springs from the earth. But God had a special garden that did have plants. God had animals that he had formed that he brought to Adam for him to name. The text is often taken to mean that the animals were created after Adam was created. As a crowning achievement, God created a woman from a rib taken from the man.
+
+These differences are quite trivial. Many people feel the need to reconcile the differences so that there are no conflicts in biblical text. There are other factual differences in the Bible, this just happens to be the first. Don't be offended if the Bible isn't perfect. Nothing in this life is totally perfect. Neither are we perfect, but God is perfect and God is faithful. *-George Griffin*

@@ -2,6 +2,7 @@ import { Component, Input, Signal, effect, ElementRef, ViewChild } from '@angula
 import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-tree.component';
 import { JstreeModel } from '../../../model/jstree.model';
 import { CdkDrag, CdkDropList, CdkDropListGroup, CdkDragSortEvent, CdkDragDrop, moveItemInArray } from '@angular/cdk/drag-drop';
+import { CdkScrollable } from '@angular/cdk/scrolling';
 import { BibleService } from '../../../bible.service';
 import { ThemeExtendedModel, ThemeModelReference } from '../../../model/theme.model';
 import { ThemeToCitationLinkModel } from '../../../model/themeToCitation.model';
@@ -12,7 +13,8 @@ import { MarkdownService } from '../../../markdown.service';
     imports: [
         CdkDropListGroup,
         CdkDropList,
-        CdkDrag
+        CdkDrag,
+        CdkScrollable
     ],
     templateUrl: './edit-theme.component.html',
     styleUrl: './edit-theme.component.css'
@@ -42,6 +44,7 @@ export class EditThemeComponent {
   renderedRemarks = "";
   remarksMessage = "";
   isTopLevelTheme = false;
+  private commandMessageTimeout?: ReturnType<typeof setTimeout>;
 
   jstreeModel!:JstreeModel;
 
@@ -136,8 +139,6 @@ export class EditThemeComponent {
   }
 
   onThemeDrop(event: CdkDragDrop<ThemeModelReference[]>) {
-    this.service = new BibleService;
-
     // angular system function
     moveItemInArray(event.container.data, event.previousIndex, event.currentIndex);
 
@@ -179,11 +180,12 @@ export class EditThemeComponent {
   }
 
   EditTheme() {
-    $(".command-message").text("");
+    this.ClearCommandMessage();
     if (this.isTopLevelTheme) {
       return;
     }
 
+    console.log("EditTheme");
     this.editedTheme!.name = (<string>$("#name").val() ?? "").trim();
     this.editedTheme!.description = (<string>$("#description").val() ?? "").trim();
 
@@ -192,25 +194,23 @@ export class EditThemeComponent {
 
     if (this.isEdited) {
       if (!this.editedTheme!.name) {
-        $(".command-message").text("Name is required");
+        this.ShowCommandMessage("File name is required", "error");
         return;
       }
 
       (async (obj:EditThemeComponent) => {
-        let service = new BibleService;
         var parentTheme:ThemeExtendedModel;
         if (obj.editedTheme!.name != obj.activeTheme.name) {
-          parentTheme = await service.getTheme(obj.editedTheme!.id);
-          parentTheme.themes.map(child => {
-            if (child.theme.name == obj.editedTheme!.name) {
-              $(".command-message").text("Error: There is already a theme with that name here");
+          parentTheme = await this.service.getTheme(obj.editedTheme!.parent);
+          console.log("parent themes:", parentTheme.themes);
+          if (parentTheme.themes.some(child => child.theme.name.toLowerCase() == obj.editedTheme!.name.toLowerCase())) {
+              obj.ShowCommandMessage("Error: There is already a theme with that name here", "error");
               return;
-            }
-          });
+          }
         }
 
         try {
-          let response = await service.editTheme(obj.editedTheme!);
+          let response = await this.service.editTheme(obj.editedTheme!);
           if (response.message == "Success") {
             let node = <JstreeModel>BibleThemeTreeComponent.getDomNode(`theme${obj.activeTheme.id}`);
             node.text = obj.editedTheme!.name;
@@ -231,17 +231,48 @@ export class EditThemeComponent {
             };
 
             BibleThemeTreeComponent.refreshDomNodeFromDb(`theme${obj.activeTheme.id}`);
+            obj.ShowCommandMessage(`Theme "${obj.editedTheme!.name}" edited successfully`, "success");
           }
           else {
             throw "Failed";
           }
         }
         catch {
-          $(".command-message").text("Theme Edit failed")
+          obj.ShowCommandMessage("Theme Edit failed", "error")
         }
   
       })(this);
     }
+  }
+
+  ClearCommandMessage() {
+    if (this.commandMessageTimeout) {
+      clearTimeout(this.commandMessageTimeout);
+      this.commandMessageTimeout = undefined;
+    }
+
+    $(".command-message").removeClass("success error").text("").hide(100);
+  }
+
+  ShowCommandMessage(message: string, type: "success" | "error") {
+    if (this.commandMessageTimeout) {
+      clearTimeout(this.commandMessageTimeout);
+    }
+
+    $(".command-message")
+      .removeClass("success error")
+      .addClass(type)
+      .text(message)
+      .show(100);
+
+    this.commandMessageTimeout = setTimeout(() => {
+      $(".command-message").removeClass("success error").text("").hide(100);
+      this.commandMessageTimeout = undefined;
+    }, 5000);
+  }
+
+  delay(ms: number) {
+    return new Promise(resolve => setTimeout(resolve, ms));
   }
 
   OpenCloseThemeList() {
@@ -435,7 +466,6 @@ export class EditThemeComponent {
   }
 
   async getDbTheme(id:number) : Promise<ThemeExtendedModel> {
-    const service = new BibleService;
-    return await service.getTheme(id);
+    return await this.service.getTheme(id);
   }
 }
