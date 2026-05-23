@@ -36,8 +36,8 @@ class BibleCitationMarkupModel {
         this.id.value = value.id ? value.id : null;
         this.citationVerseId.value = value.citationVerseId ? value.citationVerseId : null,
         this.citationId.value = value.citationId ? value.citationId : null;
-        this.startIndex.value = value.startIndex ? value.startIndex : null;
-        this.endIndex.value = value.endIndex ? value.endIndex : null;
+        this.startIndex.value = value.startIndex || value.startIndex === 0 ? value.startIndex : null;
+        this.endIndex.value = value.endIndex || value.endIndex === 0 ? value.endIndex : null;
         this.replacementText.value = value.replacementText ? value.replacementText : null;
         this.kind.value = value.kind ? value.kind : null;
         this.createdAt.value = value.createdAt ? value.createdAt : null;

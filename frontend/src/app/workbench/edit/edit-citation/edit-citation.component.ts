@@ -208,7 +208,10 @@ export class EditCitationComponent {
       const activeRange = this.scriptureRanges()[index];
       const scriptureIds = activeRange.scriptures.map(scripture => scripture.id);
 
-      this.activeVerses.set(await this.service.getVersesByCitationAndScriptures(this.activeCitation.id, scriptureIds));
+      this.activeVerses.set(
+        (await this.service
+          .getVersesByCitationAndScriptures(this.activeCitation.id, scriptureIds))
+          .sort((a, b) => (a.scripture.bibleOrder - b.scripture.bibleOrder)));
       this.activeScriptureRange.set(activeRange);
       this.markupService.activeVerse.set(new NullCitationVerse);
       $("div.await").hide(100);
