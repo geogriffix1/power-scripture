@@ -24,7 +24,6 @@ export class SearchComponent {
   settingsActive = false;
 
   public onClickSettings():void {
-    console.log("onClickSettings");
     if (this.settingsActive) {
       $("div.settings.settings-active").hide(500).removeClass("settings-active");
     }

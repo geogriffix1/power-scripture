@@ -99,7 +99,6 @@ export class EditComponent {
 
       this.subscriptions.add(
         BibleThemeTreeComponent.ActiveThemeSelector.subscribe((themeNode:JstreeModel | null) => {
-          console.log("active theme changed");
           this.activeThemeNode.set(themeNode);
         })
       );

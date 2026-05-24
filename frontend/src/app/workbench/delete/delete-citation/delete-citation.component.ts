@@ -23,14 +23,10 @@ export class DeleteCitationComponent {
 
   constructor(private service: BibleService)
   {
-    console.log("DeleteCitationComponent ctor");
      effect(() => {      
       $(".command-message, .command-warning").text("").hide(100);
       if (this.activeCitationNode()) {
-        console.log("activeCitationNode changed");
-        console.log(this.activeCitationNode());
         let path = BibleThemeTreeComponent.getDomNode(this.activeCitationNode()!.parent).data.path;
-        console.log("path: ", path);
         let id = <number><unknown>this.activeCitationNode()?.id?.replace("citation", "");
         let description = this.activeCitationNode()!.li_attr.title;
 
@@ -60,7 +56,6 @@ export class DeleteCitationComponent {
     $(".command-warning").hide(100);
     $(".command-message").text("");
 
-    console.log("DeleteCitationLink clicked");
     (async() => {
       const themeId = +this.activeCitationNode()!.parent.replace("theme", "");
       const themeToCitationId = +this.activeCitationNode()!.id.replace("citation", "");

@@ -31,7 +31,6 @@ export class CitationVerseMarkupWorkareaComponent {
   @Input({ required: true }) activeVerses!: Signal<CitationVerseExtendedModel[]>;
 
   constructor() {
-    console.log("in CitationVerseMarkupWorkarea Constructor");
     effect(() => {
       const verse = this.activeVerse();
       if (this.originalVerse === null) {
@@ -42,7 +41,6 @@ export class CitationVerseMarkupWorkareaComponent {
       }
 
       this.isDirty = this.markup.activeVerseIsDirty();
-      console.log("activeverse isDirty: ", this.isDirty);
       this.verseSessionChanged.emit({ verseId: this.activeVerse().id, isDirty: this.isDirty });
     });
   }

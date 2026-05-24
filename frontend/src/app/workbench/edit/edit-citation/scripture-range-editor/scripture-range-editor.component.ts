@@ -25,7 +25,6 @@ export class ScriptureRangeEditorComponent {
     this._citation = value;
   }
   get citation(): CitationExtendedModel | undefined {
-    console.log("returning this._citation from scripture-range-editor");
     return this._citation;
   }
 
@@ -176,7 +175,6 @@ export class ScriptureRangeEditorComponent {
       delete this.activeScriptureRange;
     }
     else {
-      console.log("no activeScriptureRange");
       $("app-scripture-range-editor .command-message").text("Add a scripture range after entering the Book, Chapter, and range of Verses.").show(500);
     }
   }
@@ -341,7 +339,6 @@ export class ScriptureRangeEditorComponent {
 
   onClickVerse(verse:number) {
     $("div.command-message").text('').hide(100);
-    console.log(`onClickVerse verse: ${verse}`);
     let tempList:number[] = [];
     for (let i = verse; i <= this.verseList.length; i++) {
       tempList.push(i);
@@ -350,7 +347,6 @@ export class ScriptureRangeEditorComponent {
     this.endVerseList = tempList;
     this.isEndVerseDisabled = false;
 
-    console.log("show endverselist");
     $("#booklist,#chapterlist,#verselist").hide(100);
     $("#endverselist").show(100);
     setTimeout(() => {
@@ -579,7 +575,6 @@ export class ScriptureRangeEditorComponent {
             (async () => {
               let provider = new BibleService;
               let max = await provider.getScripturesChapterMaxVerse(this.activeBook.book, this.activeChapter);
-              console.log(`max: ${max}`);
         
               let tempList:number[] = [];
               for (let i = 1; i <= max; i++) {
@@ -685,7 +680,6 @@ export class ScriptureRangeEditorComponent {
             this.endVerseList = tempList;
             this.isEndVerseDisabled = false;
             setTimeout(() => {
-              console.log("triggering focus and select")
               this.endVerseField.nativeElement.focus();
               this.endVerseField.nativeElement.select();
             }, 0);

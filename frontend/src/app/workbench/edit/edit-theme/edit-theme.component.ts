@@ -63,7 +63,6 @@ export class EditThemeComponent {
     private service: BibleService,
     private markdownService: MarkdownService
   ) {
-    console.log('EditThemeComponent ctor');
       effect(()=>{      
       if (this.activeThemeNode()) {
         this.isTopLevelTheme = !this.activeThemeNode()?.parent?.startsWith("theme");
@@ -185,7 +184,6 @@ export class EditThemeComponent {
       return;
     }
 
-    console.log("EditTheme");
     this.editedTheme!.name = (<string>$("#name").val() ?? "").trim();
     this.editedTheme!.description = (<string>$("#description").val() ?? "").trim();
 
@@ -202,7 +200,6 @@ export class EditThemeComponent {
         var parentTheme:ThemeExtendedModel;
         if (obj.editedTheme!.name != obj.activeTheme.name) {
           parentTheme = await this.service.getTheme(obj.editedTheme!.parent);
-          console.log("parent themes:", parentTheme.themes);
           if (parentTheme.themes.some(child => child.theme.name.toLowerCase() == obj.editedTheme!.name.toLowerCase())) {
               obj.ShowCommandMessage("Error: There is already a theme with that name here", "error");
               return;
@@ -281,7 +278,6 @@ export class EditThemeComponent {
       $(".themes-container").slideUp(500);
     }
     else {
-      console.log("opening themelist");
       $(".childThemes .spin-arrow-icon").animate({rotate: "90deg"}, 500);
       $(".themes-container").slideDown(500);
     }

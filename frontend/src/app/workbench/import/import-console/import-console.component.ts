@@ -118,7 +118,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
   }
 
   private onWorkbenchClipboardChanged(node: JstreeModel): void {
-    console.log("Workbench clipboard changed:", node);
     this.clipboard = node;
 
     const themeId = this.getClipboardThemeId(node);
@@ -148,7 +147,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
     const ro = new ResizeObserver(entries => {
       const h = Math.round(entries[0].contentRect.height);
       if (h !== last) {
-        //console.log(`[${label}] height=${h}px (changed from ${last}px)`);
         last = h;
       }
     });
@@ -327,8 +325,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
             else {
               this.writeLine("[Citations]", "info");
               let citations = this.childCitations.get(this.openTheme.id);
-              console.log("in show citations, citations:");
-              console.log(citations);
               citations?.forEach(citation => {
                 let description = `"${citation.description ?? ""}"`;
                 this.writeLine(`${description ?? '""'} ${citation.citationLabel ?? ""}`, "info");
@@ -461,10 +457,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
         }
 
         let childThemes = this.childThemes.get(this.openTheme.id) ?? [];
-        console.log("create childThemes:");
-        console.log(childThemes);
         let sequence = childThemes.length > 0 ? Math.max(...childThemes.map(t => t.sequence)) + 1 : 1;
-        console.log(`sequence: ${sequence}`);
 
         let newTheme = {
           id: this.nextThemeId--,
@@ -482,8 +475,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
         } as ThemeExtendedModel;
 
         this.childThemes.set(this.openTheme.id, [...(this.childThemes.get(this.openTheme.id) ?? []), newTheme]);
-        console.log("added Child Theme:");
-        console.log(this.childThemes.get(this.openTheme.id));
         this.pendingSave = true;
         this.writeLine(`theme ${newTheme.name} entered ("save" to complete)`, "info");
       }
@@ -724,17 +715,12 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
               citations: CitationExtendedModel[]
             }];
 
-            console.log("after save - citations:");
-            console.log(citations);
-
             let themesWithNewCitations = new Set<number>;
             citations.forEach(cite => themesWithNewCitations.add(cite.themeId));
 
             themesWithNewCitations.forEach(themeId => {
 
-              console.log("theme citations BEFORE");
               let themeCitations = this.childCitations.get(themeId) ?? [];
-              console.log(themeCitations);
 
               let previouslySavedCitations = (this.childCitations.get(themeId) ?? []).filter(cite => cite.id > 0);
 
@@ -747,10 +733,7 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
               ];
 
               this.childCitations.set(themeId, savedCitations);
-
-              console.log("theme citations AFTER");
               themeCitations = this.childCitations.get(themeId) ?? [];
-              console.log(themeCitations);
             });
           
           themesToRefresh.forEach(themeId => {
@@ -986,14 +969,9 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
   private async createThemeLayer(themes: ThemeExtendedModel[]): Promise<ThemeExtendedModel[]> {
     let tasks = <any>[];
 
-    console.log("CREATE THEME LAYER");
-
     // Accumulate the parent themes of the themes to be saved
     let parentThemes = new Set<number>;
     themes.forEach(theme => parentThemes.add(theme.parent));
-
-    console.log("parent themes:");
-    console.log(parentThemes);
 
     // For each unique parent theme, assemble the child themes that are to be saved and assign them a the next sequence number.
     parentThemes.forEach(parentTheme => {
@@ -1002,7 +980,6 @@ export class ImportConsoleComponent implements AfterViewInit, OnDestroy {
       themes
         .filter(theme => theme.parent == parentTheme)
         .forEach(theme => {
-          console.log(`creating a theme parent: ${theme.parent}, name: ${theme.name}, description: ${theme.description}, sequence: ${lastSequence + sequence}`);
           tasks.push(this.service.createTheme(theme.parent, theme.name, theme.description, lastSequence + sequence++))});
     });
 

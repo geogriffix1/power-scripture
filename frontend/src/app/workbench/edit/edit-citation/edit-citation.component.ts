@@ -186,7 +186,6 @@ export class EditCitationComponent {
 
   EditCitationDescription() {
     this.editedCitation.description = <string>$("#description").val() ?? "";
-    console.log("citation description:", this.editedCitation.description);
     (async () => {
       let edited = await this.service.editCitation(<CitationModel> {
         id: this.editedCitation.id,

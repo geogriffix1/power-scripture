@@ -61,7 +61,6 @@ export class SearchScriptureComponent implements OnInit{
 
     canCreateCitation():boolean { return true; },
     createCitation(searchResults:WritableSignal<ScriptureSearchResultModel[]>, context:any):void {
-      console.log("create citation context menu action");
       $(".command-message").removeClass('warning').text('').hide(100);
       let activeTheme = WorkbenchComponent.activeTheme;
       if (!activeTheme) {
@@ -353,15 +352,14 @@ export class SearchScriptureComponent implements OnInit{
 
         if (event.target.localName === "body") {
           if (event.key === "Delete") {
-            console.log("Delete selected items");
             this.deleteSelectedItems();
           }
-          else if (event.key === "z" && event.ctrlKey) {
-            console.log("Undo");
-          }
-          else if (event.key === "y" && event.ctrlKey) {
-            console.log("Redo");
-          }
+          // else if (event.key === "z" && event.ctrlKey) {
+          //   console.log("Undo");
+          // }
+          // else if (event.key === "y" && event.ctrlKey) {
+          //   console.log("Redo");
+          // }
         }
       });
     }

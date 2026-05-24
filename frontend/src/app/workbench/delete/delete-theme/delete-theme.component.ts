@@ -35,7 +35,6 @@ export class DeleteThemeComponent {
 
   constructor(private service: BibleService)
   {
-    console.log("DeleteThemeComponent ctor");
      effect(() => {      
       if (this.activeThemeNode()) {
         $(".command-message").text("").hide(100);
@@ -84,8 +83,6 @@ export class DeleteThemeComponent {
         let remarks = this.activeThemeNode()?.data.remarks == 'Y';
         let success = await this.service.deleteTheme(themeId);
         if (success) {
-          console.log("Delete successful");
-          
           this.ShowSuccess(`Theme ${this.activeThemeNode()!.data.path} deleted successfully`);
 
           await this.service.deleteThemeRemarks(themeId);
@@ -107,11 +104,9 @@ export class DeleteThemeComponent {
   DeleteAll() {
     (async() => {
       let themeId = +this.activeThemeNode()!.id.replace("theme", "");
-      console.log(`deleting theme ${this.activeThemeNode()!.id}`);
       let success = await this.service.deleteTheme(themeId);
       $(".command-warning").hide(100);
       if (success) {
-        console.log("Delete success");
         const tasks = [];
         tasks.push(this.service.deleteThemeRemarks(themeId));
 
@@ -132,7 +127,6 @@ export class DeleteThemeComponent {
         $(".command-warning").hide();
       }
       else {
-        console.log("Delete Failed");
         $(".command-message").text("Delete failed").show(100);
       }
 
@@ -155,76 +149,4 @@ export class DeleteThemeComponent {
       $(".command-message").text("").hide(100);
     }, 5000);
   }
-
-//   ngOnInit() {
-//     DeleteThemeComponent.isActive = true;
-//   }
-
-//   ngAfterViewInit() {
-//     console.log("ngAfterViewInit");
-//     if (!DeleteThemeComponent.isSubscribed) {
-//       (async (obj:DeleteThemeComponent) => {
-//         console.log("subscribing to active theme selector");
-//         BibleThemeTreeComponent.ActiveThemeSelector
-//           .subscribe((node:any) => {
-//             if (WorkbenchComponent.activeTheme) {
-//               console.log("WorkbenchComponent.activeTheme");
-//               let parent = WorkbenchComponent.activeTheme.parent;
-//               if (parent.startsWith("theme")) {
-//                 parent = parent.replace("theme", "");
-//               }
-//               else {
-//                 parent = "0";
-//               }
-
-//               this.activeTheme = {
-//                 id: <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", ""),
-//                 name: WorkbenchComponent.activeTheme.text,
-//                 description: WorkbenchComponent.activeTheme.li_attr.title,
-//                 parent: +parent,
-//                 sequence: WorkbenchComponent.activeTheme.li_attr.sequence,
-//                 childCount: 0,
-//                 path: WorkbenchComponent.activeTheme.data.path,
-//                 node: WorkbenchComponent.activeTheme
-//               };
-
-//               $("#name").val(obj.activeTheme.name);
-//               $("#description").val(obj.activeTheme.description);
-//               $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
-//               $(".command-warning").hide();
-//               $(".command-message").text("");
-//             }
-//             else {
-//               $(".workbench-theme div.selected.theme").addClass("missing");
-//             }
-//           });
-//       })(this);
-
-//       DeleteThemeComponent.isSubscribed = true;
-//     }
-
-//     (async (obj:DeleteThemeComponent) => {
-//       if (WorkbenchComponent.activeTheme) {
-//         console.log("WorkbenchComponent has an active theme");
-//         obj.activeTheme = {
-//           id: <number><unknown>WorkbenchComponent.activeTheme.id.replace("theme", ""),
-//           name: WorkbenchComponent.activeTheme.text,
-//           description: WorkbenchComponent.activeTheme.li_attr.title,
-//           parent: <number><unknown>WorkbenchComponent.activeTheme.parent.replace("theme", ""),
-//           sequence: WorkbenchComponent.activeTheme.li_attr.sequence,
-//           childCount: 0,
-//           path: WorkbenchComponent.activeTheme.data.path,
-//           node: WorkbenchComponent.activeTheme
-//         };
-
-//         $("#name").val(obj.activeTheme.name);
-//         $("#description").val(obj.activeTheme.description);
-//         $("div.theme.selected").removeClass("missing").text(obj.activeTheme.path).show(500);
-//       }
-//       else {
-//         console.log("No WorkbenchComponent.activeTheme");
-//         $(".workbench-theme div.selected.theme").addClass("missing");
-//       }
-//     })(this);
-//   }
- }
+}
