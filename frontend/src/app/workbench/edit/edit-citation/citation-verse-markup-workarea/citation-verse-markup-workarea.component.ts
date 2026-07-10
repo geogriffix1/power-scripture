@@ -1,4 +1,4 @@
-import { Component, Input, output, Signal, computed, inject, effect } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, Input, output, Signal, computed, inject, effect } from '@angular/core';
 import { AddEventListenerOptions } from 'rxjs/internal/observable/fromEvent';
 
 import { CitationVerseExtendedModel } from '../../../../model/citationVerse.model';
@@ -22,8 +22,9 @@ export interface VerseSessionChangedEvent {
   templateUrl: './citation-verse-markup-workarea.component.html',
   styleUrls: ['./citation-verse-markup-workarea.component.css']
 })
-export class CitationVerseMarkupWorkareaComponent {
+export class CitationVerseMarkupWorkareaComponent implements AfterViewInit {
   private markup = inject(CitationMarkupService);
+  private host = inject(ElementRef<HTMLElement>);
   private originalVerse: CitationVerseExtendedModel | null = null;
   private isDirty = false;
 
@@ -42,6 +43,13 @@ export class CitationVerseMarkupWorkareaComponent {
 
       this.isDirty = this.markup.activeVerseIsDirty();
       this.verseSessionChanged.emit({ verseId: this.activeVerse().id, isDirty: this.isDirty });
+    });
+  }
+
+  ngAfterViewInit() {
+    requestAnimationFrame(() => {
+      const scrollContainer = this.host.nativeElement.closest('.scrolling');
+      scrollContainer?.scrollTo({ top: 0, left: 0 });
     });
   }
 

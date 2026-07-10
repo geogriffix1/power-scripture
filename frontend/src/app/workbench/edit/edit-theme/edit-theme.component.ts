@@ -187,6 +187,14 @@ export class EditThemeComponent {
     this.editedTheme!.name = (<string>$("#name").val() ?? "").trim();
     this.editedTheme!.description = (<string>$("#description").val() ?? "").trim();
 
+    if (this.editedTheme!.name.length > 45) {
+      this.editedTheme!.name = this.editedTheme!.name.substring(0, 44);
+    }
+
+    if (this.editedTheme!.description.length > 200) {
+      this.editedTheme!.description = this.editedTheme!.description.substring(0, 199);
+    }
+
     this.isEdited = this.editedTheme!.name != this.activeTheme.name;
     this.isEdited ||= this.editedTheme!.description != this.activeTheme.description;
 

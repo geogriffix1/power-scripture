@@ -1,5 +1,6 @@
 import { Component, input, output } from '@angular/core';
 import { CitationVerseExtendedModel, NullCitationVerse } from '../../../../model/citationVerse.model';
+import { CitationVerseMarkup, CitationVerseMarkupKind } from '../../../../model/citationVerseMarkup.model';
 import { CitationMarkupService } from '../../../../citation-markup.service';
 import { CitationVerseMarkupWorkareaComponent } from '../citation-verse-markup-workarea/citation-verse-markup-workarea.component';
 import { BibleService } from '../../../../bible.service';
@@ -28,6 +29,37 @@ export class CitationVerseSelectComponent {
   onHideChanged(v: CitationVerseExtendedModel, checked: boolean) {
     v.hide = checked ? "Y" : "N";
     this.hideChanged.emit({ id: v.id, hidden: checked });
+  }
+
+  isFirstVerse(v: CitationVerseExtendedModel): boolean {
+    return this.sortedVerses()[0]?.id === v.id;
+  }
+
+  isNewParagraph(v: CitationVerseExtendedModel): boolean {
+    if (this.isFirstVerse(v)) {
+      return true;
+    }
+
+    const previousVerse = this.previousConsecutiveVerse(v);
+    return !!previousVerse && !!this.findTrailingParagraphMarkup(previousVerse);
+  }
+
+  onNewParagraphChanged(v: CitationVerseExtendedModel, checked: boolean) {
+    if (this.isFirstVerse(v)) {
+      return;
+    }
+
+    const previousVerse = this.previousConsecutiveVerse(v);
+    if (!previousVerse) {
+      return;
+    }
+
+    if (checked) {
+      this.addTrailingParagraphMarkup(previousVerse);
+    }
+    else {
+      this.removeTrailingParagraphMarkup(previousVerse);
+    }
   }
 
   onMarkupClicked(v: CitationVerseExtendedModel) {
@@ -81,5 +113,79 @@ export class CitationVerseSelectComponent {
   renderVerse(verse:CitationVerseExtendedModel) {
     const text = this.markupService.renderVerse(verse);
     return text;
+  }
+
+  private sortedVerses(): CitationVerseExtendedModel[] {
+    return this.verses().slice().sort((a, b) => a.scripture.bibleOrder - b.scripture.bibleOrder);
+  }
+
+  private previousConsecutiveVerse(v: CitationVerseExtendedModel): CitationVerseExtendedModel | null {
+    const verses = this.sortedVerses();
+    const index = verses.findIndex(verse => verse.id === v.id);
+    if (index <= 0) {
+      return null;
+    }
+
+    const previousVerse = verses[index - 1];
+    return previousVerse.scripture.bibleOrder + 1 === v.scripture.bibleOrder
+      ? previousVerse
+      : null;
+  }
+
+  private findTrailingParagraphMarkup(v: CitationVerseExtendedModel): CitationVerseMarkup | undefined {
+    const trailingStart = this.trailingParagraphStart(v.scripture.text ?? "");
+
+    return v.markups.find(markup =>
+      markup.kind === CitationVerseMarkupKind.Paragraph &&
+      markup.startIndex === markup.endIndex &&
+      markup.startIndex >= trailingStart &&
+      markup.startIndex <= (v.scripture.text ?? "").length
+    );
+  }
+
+  private trailingParagraphStart(text: string): number {
+    const lastContentIndex = text.search(/\s*$/) - 1;
+    return Math.max(0, lastContentIndex);
+  }
+
+  private addTrailingParagraphMarkup(v: CitationVerseExtendedModel) {
+    if (this.findTrailingParagraphMarkup(v)) {
+      return;
+    }
+
+    const markup: CitationVerseMarkup = {
+      id: -Date.now(),
+      citationId: v.citationId,
+      citationVerseId: v.id,
+      startIndex: (v.scripture.text ?? "").length,
+      endIndex: (v.scripture.text ?? "").length,
+      kind: CitationVerseMarkupKind.Paragraph
+    };
+
+    v.markups = [...v.markups, markup];
+    this.saveVerseMarkups(v);
+  }
+
+  private removeTrailingParagraphMarkup(v: CitationVerseExtendedModel) {
+    const trailingMarkup = this.findTrailingParagraphMarkup(v);
+    if (!trailingMarkup) {
+      return;
+    }
+
+    v.markups = v.markups.filter(markup => markup !== trailingMarkup);
+    this.saveVerseMarkups(v);
+  }
+
+  private async saveVerseMarkups(v: CitationVerseExtendedModel) {
+    const markupsToSave = v.markups.map(markup => ({ ...markup }));
+    await this.bibleService.deleteCitationVerseMarkups(v.id);
+
+    for (let i = 0; i < markupsToSave.length; i++) {
+      const markup = markupsToSave[i];
+      await this.bibleService.createCitationVerseMarkup({
+        ...markup,
+        id: -Date.now() - i
+      });
+    }
   }
 }

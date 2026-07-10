@@ -30,6 +30,20 @@
             </label>
           </div>
 
+          <div class="form-check">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              [checked]="isNewParagraph(v)"
+              [disabled]="isFirstVerse(v)"
+              (change)="onNewParagraphChanged(v, $any($event.target).checked)"
+              id="new-paragraph-{{v.id}}"
+            >
+            <label class="form-check-label" for="new-paragraph-{{v.id}}">
+              New Paragraph
+            </label>
+          </div>
+
           <button class="ps-btn ps-btn-blue" (click)="onMarkupClicked(v)" [disabled]="v.hide && v.hide == 'Y'">
             Markup
           </button>

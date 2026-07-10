@@ -435,7 +435,18 @@ export class CitationMarkupService {
   private renderTextWithMarkups(text: string, markups: CitationVerseMarkup[]): string {
     if (!markups.length) return this.escapeHtml(text);
 
-    const sorted = this.sortMarkups(markups);
+    const validMarkups = markups.filter(m =>
+      Number.isInteger(m.startIndex) &&
+      Number.isInteger(m.endIndex) &&
+      m.startIndex >= 0 &&
+      m.endIndex >= m.startIndex &&
+      m.startIndex <= text.length &&
+      m.endIndex <= text.length
+    );
+
+    if (!validMarkups.length) return this.escapeHtml(text);
+
+    const sorted = this.sortMarkups(validMarkups);
     let html = '';
     let idx = 0;
 
@@ -462,9 +473,13 @@ export class CitationMarkupService {
           idx = m.endIndex;
           break;
         }
-        case CitationVerseMarkupKind.Highlight:
-        default: {
+        case CitationVerseMarkupKind.Highlight: {
           html += `<mark>${this.escapeHtml(text.slice(m.startIndex, m.endIndex))}</mark>`;
+          idx = m.endIndex;
+          break;
+        }
+        default: {
+          html += this.escapeHtml(text.slice(m.startIndex, m.endIndex));
           idx = m.endIndex;
           break;
         }

@@ -31,7 +31,7 @@ export class CreateThemeComponent {
       return;
     }
 
-    if (this.nameField.nativeElement.value.length > 30) {
+    if (this.nameField.nativeElement.value.length > 45) {
       this.nameField.nativeElement.value = this.nameField.nativeElement.value.substring(0, 30);
     }
 

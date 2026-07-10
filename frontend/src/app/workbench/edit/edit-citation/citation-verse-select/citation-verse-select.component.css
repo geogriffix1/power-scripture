@@ -10,8 +10,8 @@
 }
 
 .ps-left {
-  width: 100px;
-  min-width: 100px;
+  width: 140px;
+  min-width: 140px;
   margin-right: 10px;
   display: flex;
   flex-direction: column;
