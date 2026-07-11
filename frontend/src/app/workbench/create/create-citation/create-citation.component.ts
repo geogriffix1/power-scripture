@@ -1,4 +1,4 @@
-import { Component, ElementRef, ViewChild } from '@angular/core';
+import { AfterViewInit, Component, ElementRef, ViewChild } from '@angular/core';
 import { Router } from '@angular/router';
 import { BibleService } from '../../../bible.service';
 import { WorkbenchComponent } from '../../workbench.component';
@@ -13,12 +13,16 @@ import { BibleThemeTreeComponent } from '../../../bible-theme-tree/bible-theme-t
     templateUrl: './create-citation.component.html',
     styleUrl: './create-citation.component.css'
 })
-export class CreateCitationComponent {
+export class CreateCitationComponent implements AfterViewInit {
   @ViewChild('description', { static: true}) descriptionField!: ElementRef;
   activeTheme!: ThemeModel;
   selectedFolder!:string;
 
   constructor(private router: Router) {}
+
+  ngAfterViewInit(): void {
+    this.CreateCitation();
+  }
 
   CreateCitation() {
     $("div.command-message").text("");
@@ -42,7 +46,8 @@ export class CreateCitationComponent {
               BibleThemeTreeComponent.openDomThemeNode(parent);
               let newCitation = BibleThemeTreeComponent.getDomNode(`citation${themeToCitation.id}`);
               BibleThemeTreeComponent.setActiveCitation(newCitation);
-              this.showOptions();
+              //this.showOptions();
+              this.EditCitation();
             });
           });
       }
