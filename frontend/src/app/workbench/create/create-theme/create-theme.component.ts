@@ -32,7 +32,7 @@ export class CreateThemeComponent {
     }
 
     if (this.nameField.nativeElement.value.length > 45) {
-      this.nameField.nativeElement.value = this.nameField.nativeElement.value.substring(0, 30);
+      this.nameField.nativeElement.value = this.nameField.nativeElement.value.substring(0, 45);
     }
 
     if (this.descriptionField.nativeElement.value.length > 200) {
@@ -59,6 +59,9 @@ export class CreateThemeComponent {
               });
               this.createdThemeId = theme.id;
               $("div.command-message").text(`Theme "${theme.name}" created successfully`);
+
+              this.nameField.nativeElement.value = "";
+              this.descriptionField.nativeElement.value = "";
              }
           });
       }
